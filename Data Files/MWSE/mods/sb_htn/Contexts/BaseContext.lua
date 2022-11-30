@@ -1,5 +1,6 @@
 local IContext = require("Contexts.IContext")
 local EEffectType = require("Effects.EEffectType")
+local Stack = require("Utils.Stack")
 
 ---@class BaseContext : IContext
 local BaseContext = {}
@@ -39,74 +40,74 @@ BaseContext.WorldState = { }
     ---@type Stack<table<EEffectType, number>>[]
     BaseContext.WorldStateChangeStack = {}
 
-    function BaseContext.Init()
-        BaseContext.IsInitialized = true
+    function BaseContext:Init()
+        self.IsInitialized = true
     end
 
-    function BaseContext.HasState(state, value)
-        return BaseContext.GetState(state) == value
+    function BaseContext:HasState(state, value)
+        return self:GetState(state) == value
     end
 
-    function BaseContext.GetState(state)
-        if (BaseContext.ContextState == IContext.EContextState.Executing) then return BaseContext.WorldState[state] end
+    function BaseContext:GetState(state)
+        if (self.ContextState == IContext.EContextState.Executing) then return self.WorldState[state] end
 
-        if (#BaseContext.WorldStateChangeStack[state] == 0) then return BaseContext.WorldState[state] end
+        if (#self.WorldStateChangeStack[state] == 0) then return self.WorldState[state] end
 
-        return BaseContext.WorldStateChangeStack[state][2]
+        return self.WorldStateChangeStack[state][2]
     end
 
-    function BaseContext.SetState(state, value, setAsDirty, e)
-        if (BaseContext.ContextState == IContext.EContextState.Executing) then
+    function BaseContext:SetState(state, value, setAsDirty, e)
+        if (self.ContextState == IContext.EContextState.Executing) then
             -- Prevent setting the world state dirty if we're not changing anything.
-            if (BaseContext.WorldState[state] == value) then
+            if (self.WorldState[state] == value) then
                 return
             end
 
-            BaseContext.WorldState[state] = value
+            self.WorldState[state] = value
             if (setAsDirty) then
-                BaseContext.IsDirty = true -- When a state change during execution, we need to mark the context dirty for replanning!
+                self.IsDirty = true -- When a state change during execution, we need to mark the context dirty for replanning!
             end
         else
-            BaseContext.WorldStateChangeStack[state]:push({e, value})
+            Stack.push(self.WorldStateChangeStack[state], {e, value})
         end
     end
 
-    function BaseContext.GetWorldStateChangeDepth(factory)
-        local stackDepth = factory.CreateArray(#BaseContext.WorldStateChangeStack)
-        for i = 0, #BaseContext.WorldStateChangeStack, 1 do stackDepth[i] = #BaseContext.WorldStateChangeStack[i] or 0 end
+    function BaseContext:GetWorldStateChangeDepth(factory)
+        local stackDepth = factory.CreateArray(#self.WorldStateChangeStack)
+        for i = 0, #self.WorldStateChangeStack, 1 do stackDepth[i] = #self.WorldStateChangeStack[i] or 0 end
 
         return stackDepth
     end
 
-    function BaseContext.TrimForExecution()
-        assert(BaseContext.ContextState == IContext.EContextState.Executing, "Can not trim a context when in execution mode")
+    function BaseContext:TrimForExecution()
+        assert(self.ContextState == IContext.EContextState.Executing, "Can not trim a context when in execution mode")
 
-        for _, stack in ipairs(BaseContext.WorldStateChangeStack) do
+        for _, stack in ipairs(self.WorldStateChangeStack) do
             while (#stack ~= 0 and stack[1] ~= EEffectType.Permanent) do
-                stack:pop()
+                Stack.pop(stack)
             end
         end
     end
 
-    function BaseContext.TrimToStackDepth(stackDepth)
-        assert(BaseContext.ContextState == BaseContext.EContextState.Executing, "Can not trim a context when in execution mode")
+    function BaseContext:TrimToStackDepth(stackDepth)
+        assert(self.ContextState == self.EContextState.Executing, "Can not trim a context when in execution mode")
 
         for i = 0, #stackDepth, 1 do
-            local stack = BaseContext.WorldStateChangeStack[i]
-            while (#stack > stackDepth[i]) do stack:pop() end
+            local stack = self.WorldStateChangeStack[i]
+            while (#stack > stackDepth[i]) do Stack.pop(stack) end
         end
     end
 
-    function BaseContext.Reset()
-        BaseContext.MethodTraversalRecord = {}
-        BaseContext.LastMTR = {}
+    function BaseContext:Reset()
+        self.MethodTraversalRecord = {}
+        self.LastMTR = {}
 
-        if (BaseContext.DebugMTR) then
-            BaseContext.MTRDebug = {}
-            BaseContext.LastMTRDebug = {}
+        if (self.DebugMTR) then
+            self.MTRDebug = {}
+            self.LastMTRDebug = {}
         end
 
-        BaseContext.IsInitialized = false
+        self.IsInitialized = false
     end
 
 return BaseContext

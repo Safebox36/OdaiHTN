@@ -1,13 +1,12 @@
-local EDecompositionStatus = require("Tasks.CompoundTasks.EDecompositionStatus")
+local EDecompositionStatus = require("CompoundTasks.EDecompositionStatus")
 local ETaskStatus = require("Tasks.ETaskStatus")
 local EEffectType = require("Effects.EEffectType")
+local Queue = require("Utils.Queue")
+local PrimitiveTask = require("PrimitiveTasks.PrimitiveTask")
 
---- <summary>
----     A planner is a responsible for handling the management of finding plans in a domain, replan when the state of the
----     running plan
----     demands it, or look for a new potential plan if the world state gets dirty.
---- </summary>
---- <typeparam name="T"></typeparam>
+--- A planner is a responsible for handling the management of finding plans in a domain, replan when the state of the
+--- running plan
+--- demands it, or look for a new potential plan if the world state gets dirty.
 ---@class Planner : IContext
 local Planner = {}
 
@@ -19,88 +18,60 @@ Planner._plan = {};
 ---@type ETaskStatus
 Planner.LastStatus = 0
 
--- ========================================================= CALLBACKS
-
---- <summary>
 ---		OnNewPlan(newPlan) is called when we found a new plan, and there is no
 ---		old plan to replace.
---- </summary>
 ---@type function<Queue<ITask>>
 Planner.OnNewPlan = {};
 
---- <summary>
 ---		OnReplacePlan(oldPlan, currentTask, newPlan) is called when we're about to replace the
 ---		current plan with a new plan.
---- </summary>
 ---@type function<Queue<ITask>, ITask, Queue<ITask>>
 Planner.OnReplacePlan = {};
 
---- <summary>
 ---		OnNewTask(task) is called after we popped a new task off the current plan.
---- </summary>
 ---@type function<ITask>
 Planner.OnNewTask = {};
 
---- <summary>
 ---		OnNewTaskConditionFailed(task, failedCondition) is called when we failed to
 ---		validate a condition on a new task.
---- </summary>
 ---@type function<ITask, ICondition>
 Planner.OnNewTaskConditionFailed = {};
 
---- <summary>
 ---		OnStopCurrentTask(task) is called when the currently running task was stopped
 ---		forcefully.
---- </summary>
 ---@type function<IPrimitiveTask>
 Planner.OnStopCurrentTask = {};
 
---- <summary>
 ---		OnCurrentTaskCompletedSuccessfully(task) is called when the currently running task
 ---		completes successfully, and before its effects are applied.
---- </summary>
 ---@type function<IPrimitiveTask>
 Planner.OnCurrentTaskCompletedSuccessfully = {};
 
---- <summary>
 ---		OnApplyEffect(effect) is called for each effect of the type PlanAndExecute on a
 ---		completed task.
---- </summary>
 ---@type function<IEffect>
 Planner.OnApplyEffect = {};
 
---- <summary>
 ---		OnCurrentTaskFailed(task) is called when the currently running task fails to complete.
---- </summary>
 ---@type function<IPrimitiveTask>
 Planner.OnCurrentTaskFailed = {};
 
---- <summary>
 ---		OnCurrentTaskContinues(task) is called every tick that a currently running task
 ---		needs to continue.
---- </summary>
 ---@type function<IPrimitiveTask>
 Planner.OnCurrentTaskContinues = {};
 
---- <summary>
 ---		OnCurrentTaskExecutingConditionFailed(task, condition) is called if an Executing Condition
 ---		fails. The Executing Conditions are checked before every call to task.Operator.Update(...).
---- </summary>
 ---@type function<IPrimitiveTask, ICondition>
 Planner.OnCurrentTaskExecutingConditionFailed = {};
 
--- ========================================================= TICK PLAN
-
---- <summary>
----     Call this with a domain and context instance to have the planner manage plan and task handling for the domain at
----     runtime.
----     If the plan completes or fails, the planner will find a new plan, or if the context is marked dirty, the planner
----     will attempt
----     a replan to see whether we can find a better plan now that the state of the world has changed.
----     This planner can also be used as a blueprint for writing a custom planner.
---- </summary>
---- <param name="domain"></param>
---- <param name="ctx"></param>
+--- Call this with a domain and context instance to have the planner manage plan and task handling for the domain at
+--- runtime.
+--- If the plan completes or fails, the planner will find a new plan, or if the context is marked dirty, the planner
+--- will attempt
+--- a replan to see whether we can find a better plan now that the state of the world has changed.
+--- This planner can also be used as a blueprint for writing a custom planner.
 ---@param domain Domain
 ---@param ctx IContext
 ---@param allowImmediateReplan boolean
@@ -127,7 +98,7 @@ function Planner:Tick(domain, ctx, allowImmediateReplan)
                 ctx.HasPausedPartialPlan = false;
                 lastPartialPlanQueue = ctx.Factory.CreateQueue();
                 while (#ctx.PartialPlanQueue > 0) do
-                    lastPartialPlanQueue:pushFirst(ctx.PartialPlanQueue:popLast());
+                    Queue.pushFirst(lastPartialPlanQueue, Queue.popLast(ctx.PartialPlanQueue));
                 end
 
                 -- We also need to ensure that the last mtr is up to date with the on-going MTR of the partial plan,
@@ -155,11 +126,11 @@ function Planner:Tick(domain, ctx, allowImmediateReplan)
             end
 
             self._plan = {};
-            while (#newPlan > 0) do self._plan:pushFirst(newPlan:popLast()); end
+            while (#newPlan > 0) do Queue.pushFirst(self._plan, Queue.popLast(newPlan)); end
 
-            if (self._currentTask ~= {} and self._currentTask.ExecutingConditions ~= nil) then
+            if (self._currentTask ~= {} and self._currentTask["ExecutingConditions"] ~= nil) then
                 self.OnStopCurrentTask(self._currentTask);
-                self._currentTask.Stop(ctx);
+                PrimitiveTask.Stop(self._currentTask, ctx);
                 self._currentTask = {};
             end
 
@@ -178,7 +149,7 @@ function Planner:Tick(domain, ctx, allowImmediateReplan)
             ctx.HasPausedPartialPlan = true;
             ctx.PartialPlanQueue = {};
             while (#lastPartialPlanQueue > 0) do
-                ctx.PartialPlanQueue:pushFirst(lastPartialPlanQueue:popLast());
+                Queue.pushFirst(ctx.PartialPlanQueue, Queue.popLast(lastPartialPlanQueue));
             end
             ctx.Factory.FreeQueue(lastPartialPlanQueue);
 
@@ -197,7 +168,7 @@ function Planner:Tick(domain, ctx, allowImmediateReplan)
     end
 
     if (self._currentTask == {} and #self._plan > 0) then
-        self._currentTask = self._plan:popLast();
+        self._currentTask = Queue.popLast(self._plan);
         if (self._currentTask ~= {}) then
             self.OnNewTask(self._currentTask);
             for _, condition in ipairs(self._currentTask.Conditions) do
@@ -222,9 +193,9 @@ function Planner:Tick(domain, ctx, allowImmediateReplan)
     end
 
     if (self._currentTask ~= {}) then
-        if (self._currentTask.ExecutingConditions ~= nil) then
-            if (self._currentTask.Operator ~= {}) then
-                for _, condition in ipairs(self._currentTask.ExecutingConditions) do
+        if (self._currentTask["ExecutingConditions"] ~= nil) then
+            if (self._currentTask["Operator"] ~= {}) then
+                for _, condition in ipairs(self._currentTask["ExecutingConditions"]) do
                     -- If a condition failed, then the plan failed to progress! A replan is required.
                     if (condition.IsValid(ctx) == false) then
                         self.OnCurrentTaskExecutingConditionFailed(self._currentTask, condition);
@@ -243,14 +214,14 @@ function Planner:Tick(domain, ctx, allowImmediateReplan)
                     end
                 end
 
-                self.LastStatus = self._currentTask.Operator.Update(ctx);
+                self.LastStatus = self._currentTask["Operator"].Update(ctx);
 
                 -- If the operation finished successfully, we set task to {} so that we dequeue the next task in the plan the following tick.
                 if (self.LastStatus == ETaskStatus.Success) then
                     self.OnCurrentTaskCompletedSuccessfully(self._currentTask);
 
                     -- All effects that is a result of running this task should be applied when the task is a success.
-                    for _, effect in ipairs(self._currentTask.Effects) do
+                    for _, effect in ipairs(self._currentTask["Effects"]) do
                         if (effect.Type == EEffectType.PlanAndExecute) then
                             self.OnApplyEffect(effect);
                             effect.Apply(ctx);
@@ -301,33 +272,23 @@ function Planner:Tick(domain, ctx, allowImmediateReplan)
     end
 end
 
--- ========================================================= RESET
-
 ---@param ctx IContext
 function Planner:Reset(ctx)
     self._plan = {};
 
-    if (self._currentTask ~= {} and self._currentTask.ExecutingConditions ~= nil) then
-        self._currentTask.Stop(ctx);
+    if (self._currentTask ~= {} and self._currentTask["ExecutingConditions"] ~= nil) then
+        PrimitiveTask.Stop(self._currentTask, ctx);
     end
     self._currentTask = {};
 end
 
--- ========================================================= GETTERS
-
---- <summary>
----     Get the current plan. This is not a copy of the running plan, so treat it as read-only.
---- </summary>
---- <returns></returns>
+--- Get the current plan. This is not a copy of the running plan, so treat it as read-only.
 ---@return Queue<ITask>
 function Planner:GetPlan()
     return self._plan;
 end
 
---- <summary>
----		Get the current task.
---- </summary>
---- <returns></returns>
+--- Get the current task.
 ---@return ITask
 function Planner:GetCurrentTask()
     return self._currentTask;

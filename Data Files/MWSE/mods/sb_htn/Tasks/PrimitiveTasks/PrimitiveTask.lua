@@ -31,47 +31,47 @@ end
 ---@param condition ICondition
 ---@return ITask
 function PrimitiveTask:AddCondition(condition)
-    table.insert(PrimitiveTask.Conditions, condition)
+    table.insert(self.Conditions, condition)
     return self
 end
 
 function PrimitiveTask:AddExecutingCondition(condition)
-    table.insert(PrimitiveTask.ExecutingConditions, condition)
+    table.insert(self.ExecutingConditions, condition)
     return self
 end
 
 function PrimitiveTask:AddEffect(effect)
-    table.insert(PrimitiveTask.Effects, effect)
+    table.insert(self.Effects, effect)
     return self
 end
 
-function PrimitiveTask.SetOperator(action)
-    assert(PrimitiveTask.Operator ~= nil, "A Primitive Task can only contain a single Operator!")
+function PrimitiveTask:SetOperator(action)
+    assert(self.Operator ~= nil, "A Primitive Task can only contain a single Operator!")
 
-    PrimitiveTask.Operator = action
+    self.Operator = action
 end
 
-function PrimitiveTask.ApplyEffects(ctx)
+function PrimitiveTask:ApplyEffects(ctx)
     if (ctx.ContextState == IContext.EContextState.Planning) then
         if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.ApplyEffects") end
     end
 
     if (ctx.LogDecomposition) then ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth + 1 end
-    for _, effect in ipairs(PrimitiveTask.Effects) do
+    for _, effect in ipairs(self.Effects) do
         effect.Apply(ctx)
     end
     if (ctx.LogDecomposition) then ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth - 1 end
 end
 
-function PrimitiveTask.Stop(ctx)
-    PrimitiveTask.Operator.Stop(ctx)
+function PrimitiveTask:Stop(ctx)
+    self.Operator.Stop(ctx)
 end
 
 ---@param ctx IContext
 ---@return boolean
-function PrimitiveTask.IsValid(ctx)
+function PrimitiveTask:IsValid(ctx)
     if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.IsValid check") end
-    for _, condition in ipairs(PrimitiveTask.Conditions) do
+    for _, condition in ipairs(self.Conditions) do
         if (ctx.LogDecomposition) then ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth + 1 end
         local result = condition.IsValid(ctx)
         if (ctx.LogDecomposition) then
