@@ -1,18 +1,15 @@
-local ITask = require("Tasks.ITask")
+local mc = require("sb_htn.Utils.middleclass")
+local ITask = require("sb_htn.Tasks.ITask")
 
 ---@class IPrimitiveTask : ITask
-local IPrimitiveTask = {}
-
-function IPrimitiveTask.new()
-    return ITask.new()
-end
+local IPrimitiveTask = mc.class("IPrimitiveTask", ITask)
 
 --- Executing conditions are validated before every call to Operator.Update(...)
 ---@type table<ICondition>
 IPrimitiveTask.ExecutingConditions = {}
 
 --- Add a new executing condition to the primitive task. This will be checked before
----		every call to Operator.Update(...)
+--- every call to Operator.Update(...)
 ---@param condition ICondition
 ---@return ITask
 function IPrimitiveTask.AddExecutingCondition(condition) return {} end

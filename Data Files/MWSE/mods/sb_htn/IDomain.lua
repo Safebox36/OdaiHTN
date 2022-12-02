@@ -1,9 +1,7 @@
----@class IDomain
-local IDomain = {}
+local mc = require("sb_htn.Utils.middleclass")
 
-function IDomain.new()
-    return setmetatable({}, IDomain)
-end
+---@class IDomain
+local IDomain = mc.class("IDomain")
 
 ---@type TaskRoot
 IDomain.Root = {}

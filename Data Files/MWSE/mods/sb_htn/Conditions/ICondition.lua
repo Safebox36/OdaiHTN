@@ -1,9 +1,7 @@
----@class ICondition
-local ICondition = {}
+local mc = require("sb_htn.Utils.middleclass")
 
-function ICondition.new()
-	return setmetatable({}, ICondition)
-end
+---@class ICondition
+local ICondition = mc.class("ICondition")
 
 ---@type string
 ICondition.Name = ""

@@ -1,12 +1,9 @@
-local ITask = require("Tasks.ITask")
-local EDecompositionStatus = require("CompoundTasks.EDecompositionStatus")
+local mc = require("sb_htn.Utils.middleclass")
+local ITask = require("sb_htn.Tasks.ITask")
+local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 
 ---@class PausePlanTask : ITask
-local PausePlanTask = {}
-
-function PausePlanTask.new()
-    return ITask.new()
-end
+local PausePlanTask = mc.class("PausePlanTask", ITask)
 
 ---@type string
 PausePlanTask.Name = ""

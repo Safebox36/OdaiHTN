@@ -1,23 +1,13 @@
-local CompoundTask = require("CompoundTasks.CompoundTask")
-local IDecomposeAll = require("CompoundTasks.IDecomposeAll")
-local EDecompositionStatus = require("CompoundTasks.EDecompositionStatus")
+local mc = require("sb_htn.Utils.middleclass")
+local CompoundTask = require("sb_htn.Tasks.CompoundTasks.CompoundTask")
+local IDecomposeAll = require("sb_htn.Tasks.CompoundTasks.IDecomposeAll")
+local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 
 ---@class Sequence : CompoundTask, IDecomposeAll
-local Sequence = {}
+local Sequence = mc.class("Sequence", CompoundTask)
+Sequence:include(IDecomposeAll)
 
-function Sequence.new()
-    local compoundTask = CompoundTask.new()
-    local iDecomposeAll = IDecomposeAll.new()
-
-    for key, value in pairs(iDecomposeAll) do
-        if (key ~= "new") then
-            compoundTask[key] = value
-        end
-    end
-    return compoundTask
-end
-
----@type Queue<ITask>
+---@type Queue ITask
 Sequence.Plan = {}
 
 function Sequence:IsValid(ctx)
@@ -66,7 +56,8 @@ end
 function Sequence:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
     if (task.IsValid(ctx) == false) then
         if (ctx.LogDecomposition) then mwse.log("Sequence.OnDecomposeTask:Failed:Task %s.IsValid returned false!",
-            task.Name) end
+                task.Name)
+        end
         self.Plan = {}
         ctx.TrimToStackDepth(oldStackDepth)
         result = self.Plan
@@ -106,7 +97,8 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     -- If result is null, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then mwse.log("Sequence.OnDecomposeCompoundTask:%s: Decomposing %s was rejected.",
-            status, task.Name) end
+                status, task.Name)
+        end
 
         self.Plan = {}
         ctx.TrimToStackDepth(oldStackDepth)
@@ -118,7 +110,8 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     -- If the decomposition failed
     if (status == EDecompositionStatus.Failed) then
         if (ctx.LogDecomposition) then mwse.log("Sequence.OnDecomposeCompoundTask:%s: Decomposing %s failed.", status,
-            task.Name) end
+                task.Name)
+        end
 
         self.Plan = {}
         ctx.TrimToStackDepth(oldStackDepth)
@@ -129,13 +122,15 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     while (#subPlan > 0) do
         local p = subPlan:popLast()
         if (ctx.LogDecomposition) then mwse.log("Sequence.OnDecomposeCompoundTask:Decomposing %s:Pushed %s to plan!",
-            task.Name, p.Name) end
+                task.Name, p.Name)
+        end
         self.Plan:pushFirst(p)
     end
 
     if (ctx.HasPausedPartialPlan) then
         if (ctx.LogDecomposition) then mwse.log("Sequence.OnDecomposeCompoundTask:Return partial plan at index %i!",
-            taskIndex) end
+                taskIndex)
+        end
         if (taskIndex < #self.Subtasks) then
             ctx.PartialPlanQueue:pushFirst({
                 Task = self,
@@ -159,7 +154,8 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     -- If result is null, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then mwse.log("Sequence.OnDecomposeSlot:%s: Decomposing %s was rejected.", status,
-            task.Name) end
+                task.Name)
+        end
 
         self.Plan = {}
         ctx.TrimToStackDepth(oldStackDepth)
@@ -181,7 +177,8 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     while (#subPlan > 0) do
         local p = subPlan:popLast()
         if (ctx.LogDecomposition) then mwse.log("Sequence.OnDecomposeSlot:Decomposing %s:Pushed %s to plan!", task.Name,
-            p.Name) end
+                p.Name)
+        end
         self.Plan:pushFirst(p)
     end
 

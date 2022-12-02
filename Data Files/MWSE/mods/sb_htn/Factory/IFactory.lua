@@ -1,9 +1,7 @@
----@class IFactory
-local IFactory = {}
+local mc = require("sb_htn.Utils.middleclass")
 
-function IFactory.new()
-	return setmetatable({}, IFactory)
-end
+---@class IFactory
+local IFactory = mc.class("IFactory")
 
 ---@param length integer
 ---@return any[]
@@ -16,7 +14,7 @@ function IFactory.FreeArray(array) return false end
 ---@return Queue<any>
 function IFactory.CreateQueue() return {} end
 
----@param queue Queue<any>
+---@param queue Queue any
 ---@return boolean
 function IFactory.FreeQueue(queue) return false end
 

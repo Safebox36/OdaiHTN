@@ -1,9 +1,10 @@
----@class Stack<any>
-local Stack = {}
+local mc = require("sb_htn.Utils.middleclass")
 
-function Stack.new()
-    return { first = 0, last = -1 }
-end
+---@class Stack<any>
+local Stack = mc.class("Stack")
+
+Stack.first = 0
+Stack.last = -1
 
 function Stack:push(value)
     local first = self.first - 1

@@ -1,9 +1,7 @@
----@class IEffect
-local IEffect = {}
+local mc = require("sb_htn.Utils.middleclass")
 
-function IEffect.new()
-    return setmetatable({}, IEffect)
-end
+---@class IEffect
+local IEffect = mc.class("IEffect")
 
 ---@type string
 IEffect.Name = ""

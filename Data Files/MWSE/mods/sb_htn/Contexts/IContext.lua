@@ -1,9 +1,7 @@
----@class IContext
-local IContext = {}
+local mc = require("sb_htn.Utils.middleclass")
 
-function IContext.new()
-    return setmetatable({}, IContext)
-end
+---@class IContext
+local IContext = mc.class("IContext")
 
 --- The state our context can be in. This is essentially planning or execution state.
 ---@enum EContextState
@@ -37,9 +35,12 @@ IContext.Factory = {}
 --- The Method Traversal Record is used while decomposing a domain and
 --- records the valid decomposition indices as we go through our
 --- decomposition process.
+---
 --- It "should" be enough to only record decomposition traversal in Selectors.
+---
 --- This can be used to compare LastMTR with the MTR, and reject
 --- a new plan early if it is of lower priority than the last plan.
+---
 --- It is the user's responsibility to set the instance of the MTR, so that
 --- the user is free to use pooled instances, or whatever optimization they
 --- see fit.
@@ -51,7 +52,9 @@ IContext.MTRDebug = {}
 
 --- The Method Traversal Record that was recorded for the currently
 --- running plan.
+---
 --- If a plan completes successfully, this should be cleared.
+---
 --- It is the user's responsibility to set the instance of the MTR, so that
 --- the user is free to use pooled instances, or whatever optimization they
 --- see fit.
@@ -69,7 +72,7 @@ IContext.DebugMTR = false
 ---@type boolean
 IContext.LogDecomposition = false
 
----@type Queue<PartialPlanEntry>
+---@type Queue PartialPlanEntry
 IContext.PartialPlanQueue = {}
 
 ---@type boolean
@@ -79,8 +82,10 @@ IContext.HasPausedPartialPlan = false
 IContext.WorldState = {}
 
 --- A stack of changes applied to each world state entry during planning.
+---
 --- This is necessary if one wants to support planner-only and plan&execute effects.
----@type Stack<table<EEffectType, number>>[]
+---
+---@type Stack[] table<EEffectType, number>
 IContext.WorldStateChangeStack = {}
 
 --- Reset the context state to default values.

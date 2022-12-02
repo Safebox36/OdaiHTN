@@ -1,9 +1,10 @@
----@class Queue<any>
-local Queue = {}
+local mc = require("sb_htn.Utils.middleclass")
 
-function Queue.new()
-    return { first = 0, last = -1 }
-end
+---@class Queue<any>
+local Queue = mc.class("Queue")
+
+Queue.first = 0
+Queue.last = -1
 
 function Queue:pushFirst(value)
     local first = self.first - 1

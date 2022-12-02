@@ -1,9 +1,7 @@
----@class ITask
-local ITask = {}
+local mc = require("sb_htn.Utils.middleclass")
 
-function ITask.new()
-	return setmetatable({}, ITask)
-end
+---@class ITask
+local ITask = mc.class("ITask")
 
 --- Used for debugging and identification purposes
 ---@type string

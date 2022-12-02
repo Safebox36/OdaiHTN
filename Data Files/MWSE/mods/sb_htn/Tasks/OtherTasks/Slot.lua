@@ -1,12 +1,9 @@
-local ITask = require("Tasks.ITask")
-local EDecompositionStatus = require("CompoundTasks.EDecompositionStatus")
+local mc = require("sb_htn.Utils.middleclass")
+local ITask = require("sb_htn.Tasks.ITask")
+local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 
 ---@class Slot : ITask
-local Slot = {}
-
-function Slot.new()
-    return ITask.new()
-end
+local Slot = mc.class("Slot", ITask)
 
 ---@type integer
 Slot.SlotId = 0
@@ -30,12 +27,11 @@ end
 ---@param subtask ICompoundTask
 ---@return boolean
 function Slot:Set(subtask)
-
-    if (Slot.Subtask ~= {}) then
+    if (self.Subtask ~= {}) then
         return false
     end
 
-    Slot.Subtask = subtask
+    self.Subtask = subtask
     return true
 end
 
@@ -45,19 +41,19 @@ end
 
 ---@param ctx IContext
 ---@param startIndex integer
----@param result Queue<ITask> -- out?
----@return EDecompositionStatus, Queue<ITask>
+---@param result Queue ITask - out
+---@return EDecompositionStatus
 function Slot:Decompose(ctx, startIndex, result)
     if (Subtask ~= {}) then
         return Subtask.Decompose(ctx, startIndex, result)
     end
 
     result = {}
-    return EDecompositionStatus.Failed, {}
+    return EDecompositionStatus.Failed
 end
 
 function Slot:IsValid(ctx)
-    local result = Slot.Subtask ~= {}
+    local result = self.Subtask ~= {}
     if (ctx.LogDecomposition) then mwse.log("Slot.IsValid:%s!", (result and "Success" or "Failed")) end
     return result
 end

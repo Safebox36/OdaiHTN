@@ -1,10 +1,7 @@
-local Selector = require("CompoundTasks.Selector")
+local mc = require("sb_htn.Utils.middleclass")
+local Selector = require("sb_htn.Tasks.CompoundTasks.Selector")
 
 ---@class TaskRoot : Selector
-local TaskRoot = {}
-
-function TaskRoot.new()
-    return Selector.new()
-end
+local TaskRoot = mc.class("TaskRoot", Selector)
 
 return TaskRoot

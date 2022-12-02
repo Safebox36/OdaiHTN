@@ -1,15 +1,9 @@
-local CompoundTask = require("CompoundTasks.CompoundTask")
-local EDecompositionStatus = require("CompoundTasks.EDecompositionStatus")
+local mc = require("sb_htn.Utils.middleclass")
+local CompoundTask = require("sb_htn.Tasks.CompoundTasks.CompoundTask")
+local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 
 ---@class Selector : CompoundTask
-local Selector = {}
-
-function Selector.new()
-  return CompoundTask.new()
-end
-
----@type Queue<ITask>
-Selector.Plan = {}
+local Selector = mc.class("Selector", CompoundTask)
 
 function Selector:IsValid(ctx)
   -- Check that our preconditions are valid first.
@@ -62,7 +56,7 @@ end
 function Selector:OnDecompose(ctx, startIndex, result)
   self.Plan = {}
 
-  for taskIndex = startIndex, #Selector.Subtasks, 1 do
+  for taskIndex = startIndex, #self.Subtasks, 1 do
     if (ctx.LogDecomposition) then mwse.log("Selector.OnDecompose:Task index: %i: %s", taskIndex,
         self.Subtasks[taskIndex].Name)
     end
@@ -103,7 +97,7 @@ end
 function Selector:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
   if (task.IsValid(ctx) == false) then
     if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeTask:Failed:Task %s.IsValid returned false!", task.Name) end
-    result = Selector.Plan
+    result = self.Plan
     return task.OnIsValidFailed(ctx)
   end
 

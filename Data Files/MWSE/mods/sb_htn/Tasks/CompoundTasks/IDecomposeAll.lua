@@ -1,10 +1,7 @@
-local ICompoundTask = require("CompoundTasks.ICompoundTask")
+local mc = require("sb_htn.Utils.middleclass")
+local ICompoundTask = require("sb_htn.Tasks.CompoundTasks.ICompoundTask")
 
 ---@class IDecomposeAll : ICompoundTask
-local IDecomposeAll = {}
-
-function IDecomposeAll.new()
-    return ICompoundTask.new()
-end
+local IDecomposeAll = mc.class("IDecomposeAll", ICompoundTask)
 
 return IDecomposeAll

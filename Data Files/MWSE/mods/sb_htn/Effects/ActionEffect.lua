@@ -1,30 +1,27 @@
-local IEffect = require("Effects.IEffect")
+local mc = require("sb_htn.Utils.middleclass")
+local IEffect = require("sb_htn.Effects.IEffect")
 
 ---@class ActionEffect<any> : IEffect
-local ActionEffect = {}
+local ActionEffect = mc.class("ActionEffect", IEffect)
 
 ---@type function<any>
 ---@return EEffectType
-ActionEffect.Func = {}
+ActionEffect.Func = function() return 0 end
 
 ---@param name string
 ---@param type EEffectType
 ---@param func function<any>
----@return ActionEffect<any>
-function ActionEffect.new(name, type, func)
-    local self = IEffect.new()
-
+function ActionEffect:init(name, type, func)
     self.Name = name
     self.Type = type
     self.Func = func
-
-    return self
 end
 
 function ActionEffect:Apply(ctx)
     if (ctx.LogDecomposition) then
         mwse.log("ActionEffect.Apply:%i\n\t- %i", self.Type, ctx.CurrentDecompositionDepth + 1)
     end
+    self.Func(ctx)
 end
 
 return ActionEffect

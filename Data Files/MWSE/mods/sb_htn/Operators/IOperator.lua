@@ -1,13 +1,11 @@
----@class IOperator
-local IOperator = {}
+local mc = require("sb_htn.Utils.middleclass")
 
-function IOperator.new()
-	return setmetatable({}, IOperator)
-end
+---@class IOperator
+local IOperator = mc.class("IOperator")
 
 ---@param ctx IContext
 ---@return ETaskStatus
-function IOperator.Update(ctx) return {} end
+function IOperator.Update(ctx) return 0 end
 
 ---@param ctx IContext
 function IOperator.Stop(ctx) end

@@ -1,24 +1,20 @@
-local IOperator = require("Operators.IOperator")
+local mc = require("sb_htn.Utils.middleclass")
+local IOperator = require("sb_htn.Operators.IOperator")
 
 ---@class FuncOperator<any> : IOperator
-local FuncOperator = {}
+local FuncOperator = mc.class("FuncOperator", IOperator)
 
 ---@type function<any>
 ---@return ETaskStatus
-FuncOperator.Func = {}
+FuncOperator.Func = function() return 0 end
 ---@type function<any>
-FuncOperator.FuncStop = {}
+FuncOperator.FuncStop = function() end
 
 ---@param func function<any>
 ---@param funcStop function<any>
----@return FuncOperator<any>
-function FuncOperator.new(func, funcStop)
-    local self = IOperator.new()
-
+function FuncOperator:init(func, funcStop)
     self.Func = func
     self.FuncStop = funcStop
-
-    return self
 end
 
 function FuncOperator:Update(ctx)

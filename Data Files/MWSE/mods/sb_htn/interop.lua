@@ -1,61 +1,61 @@
 return {
     Conditions = {
-        ICondition = require("Conditions.ICondition"),
-        FuncCondition = require("Conditions.FuncCondition")
+        ICondition = require("sb_htn.Conditions.ICondition"),
+        FuncCondition = require("sb_htn.Conditions.FuncCondition")
     },
 
     Contexts = {
-        IContext = require("Contexts.IContext"),
-        BaseContext = require("Contexts.BaseContext"),
+        IContext = require("sb_htn.Contexts.IContext"),
+        BaseContext = require("sb_htn.Contexts.BaseContext"),
     },
 
     Effects = {
-        IEffect = require("Effects.IEffect"),
-        EEffectType = require("Effects.EEffectType"),
-        ActionEffect = require("Effects.ActionEffect"),
+        IEffect = require("sb_htn.Effects.IEffect"),
+        EEffectType = require("sb_htn.Effects.EEffectType"),
+        ActionEffect = require("sb_htn.Effects.ActionEffect"),
     },
 
     Factory = {
-        IFactory = require("Factory.IFactory"),
-        DefaultFactory = require("Factory.DefaultFactory"),
+        IFactory = require("sb_htn.Factory.IFactory"),
+        DefaultFactory = require("sb_htn.Factory.DefaultFactory"),
     },
 
     Operators = {
-        IOperator = require("Operators.IOperator"),
-        FuncOperator = require("Operators.FuncOperator"),
+        IOperator = require("sb_htn.Operators.IOperator"),
+        FuncOperator = require("sb_htn.Operators.FuncOperator"),
     },
 
     Planners = {
-        Planner = require("Planners.Planner"),
+        Planner = require("sb_htn.Planners.Planner"),
     },
 
     Tasks = {
-        ITask = require("Tasks.ITask"),
-        ETaskStatus = require("Tasks.ETaskStatus"),
+        ITask = require("sb_htn.Tasks.ITask"),
+        ETaskStatus = require("sb_htn.Tasks.ETaskStatus"),
 
         CompoundTasks = {
-            ICompoundTask = require("Tasks.CompoundTasks.ICompoundTask"),
-            IDecomposeAll = require("Tasks.CompoundTasks.IDecomposeAll"),
-            EDecompositionStatus = require("Tasks.CompoundTasks.EDecompositionStatus"),
-            CompoundTask = require("Tasks.CompoundTasks.CompoundTask"),
-            PausePlanTask = require("Tasks.CompoundTasks.PausePlanTask"),
-            Selector = require("Tasks.CompoundTasks.Selector"),
-            Sequence = require("Tasks.CompoundTasks.Sequence"),
-            TaskRoot = require("Tasks.CompoundTasks.TaskRoot"),
+            ICompoundTask = require("sb_htn.Tasks.CompoundTasks.ICompoundTask"),
+            IDecomposeAll = require("sb_htn.Tasks.CompoundTasks.IDecomposeAll"),
+            EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus"),
+            CompoundTask = require("sb_htn.Tasks.CompoundTasks.CompoundTask"),
+            PausePlanTask = require("sb_htn.Tasks.CompoundTasks.PausePlanTask"),
+            Selector = require("sb_htn.Tasks.CompoundTasks.Selector"),
+            Sequence = require("sb_htn.Tasks.CompoundTasks.Sequence"),
+            TaskRoot = require("sb_htn.Tasks.CompoundTasks.TaskRoot"),
         },
 
         OtherTasks = {
-            Slot = require("Tasks.OtherTasks.Slot"),
+            Slot = require("sb_htn.Tasks.OtherTasks.Slot"),
         },
 
         PrimitiveTasks = {
-            IPrimitiveTask = require("Tasks.PrimitiveTasks.IPrimitiveTask"),
-            PrimitiveTask = require("Tasks.PrimitiveTasks.PrimitiveTask")
+            IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask"),
+            PrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.PrimitiveTask")
         }
     },
 
-    IDomain = require("IDomain"),
-    BaseDomainBuilder = require("BaseDomainBuilder"),
-    Domain = require("Domain"),
-    DomainBuilder = require("DomainBuilder")
+    IDomain = require("sb_htn.IDomain"),
+    BaseDomainBuilder = require("sb_htn.BaseDomainBuilder"),
+    Domain = require("sb_htn.Domain"),
+    DomainBuilder = require("sb_htn.DomainBuilder")
 }

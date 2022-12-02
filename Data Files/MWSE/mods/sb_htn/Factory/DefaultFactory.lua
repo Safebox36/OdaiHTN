@@ -1,12 +1,9 @@
-local IFactory = require("Factory.IFactory")
-local Queue = require("Utils.Queue")
+local mc = require("sb_htn.Utils.middleclass")
+local IFactory = require("sb_htn.Factory.IFactory")
+local Queue = require("sb_htn.Utils.Queue")
 
 ---@class DefaultFactory : IFactory
-local DefaultFactory = {}
-
-function DefaultFactory.new()
-    return IFactory.new()
-end
+local DefaultFactory = mc.class("DefaultFactory", IFactory)
 
 function DefaultFactory.CreateArray(length)
     return table.new(length, length)
@@ -17,7 +14,7 @@ function DefaultFactory.CreateList()
 end
 
 function DefaultFactory.CreateQueue()
-    return Queue.new()
+    return Queue:new()
 end
 
 function DefaultFactory.FreeArray(array)
@@ -31,8 +28,8 @@ function DefaultFactory.FreeList(list)
 end
 
 function DefaultFactory.FreeQueue(queue)
-    queue = {}
-    return queue == {}
+    queue = Queue:new()
+    return queue:isInstanceOf(Queue)
 end
 
 function DefaultFactory.Free(obj)

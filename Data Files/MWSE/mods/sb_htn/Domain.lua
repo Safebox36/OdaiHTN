@@ -1,26 +1,26 @@
-local IDomain = require("IDomain")
-local IContext = require("Contexts.IContext")
-local EDecompositionStatus = require("Tasks.CompoundTasks.EDecompositionStatus")
+local mc = require("sb_htn.Utils.middleclass")
+local IDomain = require("sb_htn.IDomain")
+local TaskRoot = require("sb_htn.Tasks.CompoundTasks.TaskRoot")
+local IContext = require("sb_htn.Contexts.IContext")
+local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 
 ---@class Domain<IContext> : IDomain
-local Domain = {}
+local Domain = mc.class("Domain", IDomain)
 
 ---@type table<integer, Slot>
 Domain._slots = {}
 
 ---@param name string
----@return self
-function Domain.new(name)
-    local self = IDomain.new()
-    self.Root = { Name = name, Parent = {} }
-
-    return self
+function Domain:init(name)
+    self.Root = TaskRoot:new()
+    self.Name = name
+    self.Parent = {}
 end
 
 ---@param parent ICompoundTask
 ---@param subtask ITask
 function Domain.AddTask(parent, subtask)
-    assert(parent == subtask, "Parent-task and Sub-task can't be the same instance!")
+    assert(parent ~= subtask, "Parent-task and Sub-task can't be the same instance!")
 
     parent.AddSubtask(subtask)
     subtask.Parent = parent
@@ -29,10 +29,10 @@ end
 ---@param parent ICompoundTask
 ---@param slot Slot
 function Domain:AddSlot(parent, slot)
-    assert(parent == slot, "Parent-task and Sub-task can't be the same instance!")
+    assert(parent ~= slot, "Parent-task and Sub-task can't be the same instance!")
 
     if (self._slots ~= {}) then
-        assert(_slots[slot.SlotId] ~= nil, "This slot id already exist in the domain definition!")
+        assert(self._slots[slot.SlotId] ~= nil, "This slot id already exist in the domain definition!")
     end
 
     parent.AddSubtask(slot)
@@ -42,7 +42,7 @@ function Domain:AddSlot(parent, slot)
 end
 
 ---@param ctx IContext
----@param plan Queue<ITask>
+---@param plan Queue ITask
 ---@return EDecompositionStatus
 function Domain:FindPlan(ctx, plan)
     assert(ctx.IsInitialized == false, "Context was not initialized!")
@@ -170,6 +170,7 @@ function Domain:FindPlan(ctx, plan)
 end
 
 --- At runtime, set a sub-domain to the slot with the given id.
+---
 --- This can be used with Smart Objects, to extend the behavior
 --- of an agent at runtime.
 ---@param slotId integer
@@ -185,6 +186,7 @@ function Domain:TrySetSlotDomain(slotId, subDomain)
 end
 
 --- At runtime, clear the sub-domain from the slot with the given id.
+---
 --- This can be used with Smart Objects, to extend the behavior
 --- of an agent at runtime.
 ---@param slotId integer

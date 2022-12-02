@@ -1,12 +1,9 @@
-local ICompoundTask = require("CompoundTasks.ICompoundTask")
-local EDecompositionStatus = require("CompoundTasks.EDecompositionStatus")
+local mc = require("sb_htn.Utils.middleclass")
+local ICompoundTask = require("sb_htn.Tasks.CompoundTasks.ICompoundTask")
+local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 
 ---@class CompoundTask : ICompoundTask
-local CompoundTask = {}
-
-function CompoundTask.new()
-    return ICompoundTask.new()
-end
+local CompoundTask = mc.class("CompoundTask", ICompoundTask)
 
 ---@type string
 CompoundTask.Name = ""
@@ -40,7 +37,7 @@ end
 
 ---@param ctx IContext
 ---@param startIndex integer
----@param result Queue<ITask> -- out?
+---@param result Queue ITask - out
 ---@return EDecompositionStatus
 function CompoundTask.OnDecompose(ctx, startIndex, result) return 0 end
 
@@ -48,7 +45,7 @@ function CompoundTask.OnDecompose(ctx, startIndex, result) return 0 end
 ---@param task ITask
 ---@param taskIndex integer
 ---@param oldStackDepth integer[]
----@param result Queue<ITask> -- out?
+---@param result Queue ITask - out
 ---@return EDecompositionStatus
 function CompoundTask.OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result) return 0 end
 
@@ -56,7 +53,7 @@ function CompoundTask.OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, resul
 ---@param task ICompoundTask
 ---@param taskIndex integer
 ---@param oldStackDepth integer[]
----@param result Queue<ITask> -- out?
+---@param result Queue ITask - out
 ---@return EDecompositionStatus
 function CompoundTask.OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, result) return 0 end
 
@@ -64,7 +61,7 @@ function CompoundTask.OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDept
 ---@param task Slot
 ---@param taskIndex integer
 ---@param oldStackDepth integer[]
----@param result Queue<ITask> -- out?
+---@param result Queue ITask - out
 ---@return EDecompositionStatus
 function CompoundTask.OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result) return 0 end
 
@@ -72,7 +69,8 @@ function CompoundTask:IsValid(ctx)
     for _, condition in ipairs(self.Conditions) do
         local result = condition.IsValid(ctx)
         if (ctx.LogDecomposition) then mwse.log("CompoundTask.IsValid:%s:%s is%s valid!",
-            result and "Success" or "Failed", condition.Name, result and "" or " not") end
+                result and "Success" or "Failed", condition.Name, result and "" or " not")
+        end
         if (result == false) then
             return false
         end

@@ -1,13 +1,10 @@
-local IPrimitiveTask = require("PrimitiveTasks.IPrimitiveTask")
-local IContext = require("Contexts.IContext")
-local EDecompositionStatus = require("CompoundTasks.EDecompositionStatus")
+local mc = require("sb_htn.Utils.middleclass")
+local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
+local IContext = require("sb_htn.Contexts.IContext")
+local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 
 ---@class PrimitiveTask : IPrimitiveTask
-local PrimitiveTask = {}
-
-function PrimitiveTask.new()
-    return IPrimitiveTask.new()
-end
+local PrimitiveTask = mc.class("PrimitiveTask", IPrimitiveTask)
 
 ---@type string
 PrimitiveTask.Name = ""
