@@ -6,22 +6,26 @@ local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionS
 ---@class PrimitiveTask : IPrimitiveTask
 local PrimitiveTask = mc.class("PrimitiveTask", IPrimitiveTask)
 
----@type string
-PrimitiveTask.Name = ""
----@type ICompoundTask
-PrimitiveTask.Parent = {}
----@type table<ICondition>
-PrimitiveTask.Conditions = {}
----@type table<ICondition>
-PrimitiveTask.ExecutingConditions = {}
----@type IOperator
-PrimitiveTask.Operator = {}
----@type table<IEffect>
-PrimitiveTask.Effects = {}
+function PrimitiveTask:initialize()
+    IPrimitiveTask.initialize(self)
+
+    ---@type string
+    self.Name = ""
+    ---@type ICompoundTask
+    self.Parent = nil
+    ---@type table<ICondition>
+    self.Conditions = {}
+    ---@type table<ICondition>
+    self.ExecutingConditions = {}
+    ---@type IOperator
+    self.Operator = nil
+    ---@type table<IEffect>
+    self.Effects = {}
+end
 
 ---@param ctx IContext
----@return EDecompositionStatus
-function PrimitiveTask.OnIsValidFailed(ctx)
+---@return EDecompositionStatus | 0
+function PrimitiveTask:OnIsValidFailed(ctx)
     return EDecompositionStatus.Failed
 end
 
@@ -43,46 +47,54 @@ function PrimitiveTask:AddEffect(effect)
 end
 
 function PrimitiveTask:SetOperator(action)
-    assert(self.Operator ~= nil, "A Primitive Task can only contain a single Operator!")
+    assert(self.Operator == nil, "A Primitive Task can only contain a single Operator!")
 
     self.Operator = action
 end
 
 function PrimitiveTask:ApplyEffects(ctx)
-    if (ctx.ContextState == IContext.EContextState.Planning) then
-        if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.ApplyEffects") end
+    if (ctx.LogDecomposition) then
+        ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth + 1
+        if (ctx.ContextState == IContext.EContextState.Planning) then mwse.log("PrimitiveTask.ApplyEffects\n\t- %i",
+                ctx.CurrentDecompositionDepth)
+        end
     end
-
-    if (ctx.LogDecomposition) then ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth + 1 end
     for _, effect in ipairs(self.Effects) do
-        effect.Apply(ctx)
+        effect:Apply(ctx)
     end
     if (ctx.LogDecomposition) then ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth - 1 end
 end
 
 function PrimitiveTask:Stop(ctx)
-    self.Operator.Stop(ctx)
+    self.Operator:Stop(ctx)
 end
 
 ---@param ctx IContext
 ---@return boolean
 function PrimitiveTask:IsValid(ctx)
-    if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.IsValid check") end
+    if (ctx.LogDecomposition) then mwse.log(table.size(self.Conditions) > 0 and "PrimitiveTask.IsValid check" or
+            "PrimitiveTask.IsValid check\n\t- %i", ctx.CurrentDecompositionDepth + 1)
+    end
     for _, condition in ipairs(self.Conditions) do
-        if (ctx.LogDecomposition) then ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth + 1 end
-        local result = condition.IsValid(ctx)
         if (ctx.LogDecomposition) then
+            ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth + 1
+            mwse.log("\t- %i", ctx.CurrentDecompositionDepth)
+        end
+        local result = condition:IsValid(ctx)
+        if (ctx.LogDecomposition) then
+            mwse.log("PrimitiveTask.IsValid:%s:%s is%s valid!\n\t- %i", result and "Success" or "Failed", condition.Name
+                , result and "" or " not", ctx.CurrentDecompositionDepth)
             ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth - 1
-            mwse.log("PrimitiveTask.IsValid:%s:%s is%s valid!", result and "Success" or "Failed", condition.Name,
-                result and "" or " not")
         end
         if (result == false) then
-            if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.IsValid:Failed:Preconditions not met!") end
+            if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.IsValid:Failed:Preconditions not met!\n\t- %i",
+                    ctx.CurrentDecompositionDepth + 1)
+            end
             return false
         end
     end
 
-    if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.IsValid:Success!") end
+    if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth + 1) end
     return true
 end
 

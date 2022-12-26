@@ -4,30 +4,36 @@ local mc = require("sb_htn.Utils.middleclass")
 local IFactory = mc.class("IFactory")
 
 ---@param length integer
+---@param T any
 ---@return any[]
-function IFactory.CreateArray(length) return {} end
+function IFactory:CreateArray(length, T) return {} end
 
 ---@param array any[]
+---@param T any
 ---@return boolean
-function IFactory.FreeArray(array) return false end
+function IFactory:FreeArray(array, T) return false end
 
+---@param T any
 ---@return Queue<any>
-function IFactory.CreateQueue() return {} end
+function IFactory:CreateQueue(T) return {} end
 
 ---@param queue Queue any
+---@param T any
 ---@return boolean
-function IFactory.FreeQueue(queue) return false end
+function IFactory:FreeQueue(queue, T) return false end
 
+---@param T any
 ---@return table<any>
-function IFactory.CreateList() return {} end
+function IFactory:CreateList(T) return {} end
 
 ---@param list table<any>
+---@param T any
 ---@return table<any>
-function IFactory.FreeList(list) return {} end
+function IFactory:FreeList(list, T) return {} end
 
----@generic any : table
 ---@param obj any
+---@param T any
 ---@return boolean
-function IFactory.Free(obj) return false end
+function IFactory:Free(obj, T) return false end
 
 return IFactory

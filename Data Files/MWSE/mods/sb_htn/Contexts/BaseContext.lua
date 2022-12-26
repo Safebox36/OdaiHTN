@@ -1,43 +1,60 @@
 local mc = require("sb_htn.Utils.middleclass")
 local IContext = require("sb_htn.Contexts.IContext")
+local Queue = require("sb_htn.Utils.Queue")
 local EEffectType = require("sb_htn.Effects.EEffectType")
 local Stack = require("sb_htn.Utils.Stack")
 
 ---@class BaseContext : IContext
 local BaseContext = mc.class("BaseContext", IContext)
 
----@type boolean
-BaseContext.IsInitialized = false
----@type boolean
-BaseContext.IsDirty = false
----@type EContextState
-BaseContext.ContextState = IContext.EContextState.Executing
----@type integer
-BaseContext.CurrentDecompositionDepth = 0
----@type IFactory
-BaseContext.Factory = {}
----@type table<integer>
-BaseContext.MethodTraversalRecord = {}
----@type table<integer>
-BaseContext.LastMTR = {}
----@type table<integer>
-BaseContext.MTRDebug = {}
----@type table<integer>
-BaseContext.LastMTRDebug = {}
----@type boolean
-BaseContext.DebugMTR = false
----@type Queue PartialPlanEntry
-BaseContext.PartialPlanQueue = {}
----@type boolean
-BaseContext.HasPausedPartialPlan = false
+function BaseContext:initialize()
+    IContext.initialize(self)
 
----@type number[]
-BaseContext.WorldState = {}
+    ---@type boolean
+    self.IsInitialized = false
+    ---@type boolean
+    self.IsDirty = nil
+    ---@type EContextState
+    self.ContextState = IContext.EContextState.Executing
+    ---@type integer
+    self.CurrentDecompositionDepth = 0
+    ---@type IFactory
+    self.Factory = nil
+    ---@type table<integer>
+    self.MethodTraversalRecord = {}
+    ---@type table<integer>
+    self.LastMTR = {}
+    ---@type table<integer>
+    self.MTRDebug = nil
+    ---@type table<integer>
+    self.LastMTRDebug = nil
+    ---@type boolean
+    self.DebugMTR = false
+    ---@type Queue PartialPlanEntry
+    self.PartialPlanQueue = Queue:new()
+    ---@type boolean
+    self.HasPausedPartialPlan = false
 
----@type Stack[] table<EEffectType, number>>
-BaseContext.WorldStateChangeStack = {}
+    ---@type number[]
+    self.WorldState = nil
 
-function BaseContext:Init()
+    ---@type Stack[] table<EEffectType, number>
+    self.WorldStateChangeStack = nil
+end
+
+function BaseContext:init()
+    if (self.WorldStateChangeStack == nil) then
+        self.WorldStateChangeStack = {}
+        for i = 1, table.size(self.WorldState) do
+            self.WorldStateChangeStack[i] = Stack:new()
+        end
+    end
+
+    if (self.DebugMTR) then
+        if (self.MTRDebug == nil) then self.MTRDebug = {} end
+        if (self.LastMTRDebug == nil) then self.LastMTRDebug = {} end
+    end
+
     self.IsInitialized = true
 end
 
@@ -48,9 +65,9 @@ end
 function BaseContext:GetState(state)
     if (self.ContextState == IContext.EContextState.Executing) then return self.WorldState[state] end
 
-    if (#self.WorldStateChangeStack[state] == 0) then return self.WorldState[state] end
+    if (table.size(self.WorldStateChangeStack[state].list) == 0) then return self.WorldState[state] end
 
-    return self.WorldStateChangeStack[state][2]
+    return self.WorldStateChangeStack[state]:peek()[2]
 end
 
 function BaseContext:SetState(state, value, setAsDirty, e)
@@ -65,43 +82,45 @@ function BaseContext:SetState(state, value, setAsDirty, e)
             self.IsDirty = true -- When a state change during execution, we need to mark the context dirty for replanning!
         end
     else
-        Stack.push(self.WorldStateChangeStack[state], { e, value })
+        self.WorldStateChangeStack[state]:push({ e or EEffectType.Permanent, value })
     end
 end
 
 function BaseContext:GetWorldStateChangeDepth(factory)
-    local stackDepth = factory.CreateArray(#self.WorldStateChangeStack)
-    for i = 0, #self.WorldStateChangeStack, 1 do stackDepth[i] = #self.WorldStateChangeStack[i] or 0 end
+    local stackDepth = factory:CreateArray(table.size(self.WorldStateChangeStack), Stack)
+    for i = 1, table.size(self.WorldStateChangeStack) do stackDepth[i] = table.size(self.WorldStateChangeStack[i].list)
+            or 1
+    end
 
     return stackDepth
 end
 
 function BaseContext:TrimForExecution()
-    assert(self.ContextState == IContext.EContextState.Executing, "Can not trim a context when in execution mode")
+    assert(self.ContextState ~= IContext.EContextState.Executing, "Can not trim a context when in execution mode")
 
     for _, stack in ipairs(self.WorldStateChangeStack) do
-        while (#stack ~= 0 and stack[1] ~= EEffectType.Permanent) do
-            Stack.pop(stack)
+        while (table.size(stack.list) ~= 0 and stack:peek()[1] ~= EEffectType.Permanent) do
+            stack:pop()
         end
     end
 end
 
 function BaseContext:TrimToStackDepth(stackDepth)
-    assert(self.ContextState == self.EContextState.Executing, "Can not trim a context when in execution mode")
+    assert(self.ContextState ~= IContext.EContextState.Executing, "Can not trim a context when in execution mode")
 
-    for i = 0, #stackDepth, 1 do
+    for i = 1, table.size(stackDepth) do
         local stack = self.WorldStateChangeStack[i]
-        while (#stack > stackDepth[i]) do Stack.pop(stack) end
+        while (table.size(stack.list) > stackDepth[i]) do stack:pop() end
     end
 end
 
 function BaseContext:Reset()
-    self.MethodTraversalRecord = {}
-    self.LastMTR = {}
+    self.MethodTraversalRecord = self.MethodTraversalRecord and {} or nil
+    self.LastMTR = self.LastMTR and {} or nil
 
     if (self.DebugMTR) then
-        self.MTRDebug = {}
-        self.LastMTRDebug = {}
+        self.MTRDebug = self.MTRDebug and {} or nil
+        self.LastMTRDebug = self.LastMTRDebug and {} or nil
     end
 
     self.IsInitialized = false

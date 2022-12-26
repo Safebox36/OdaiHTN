@@ -1,6 +1,6 @@
 ---@enum EEffectType
 return {
-    PlanAndExecute = 0,
-    PlanOnly = 1,
-    Permanent = 2
+    PlanAndExecute = 1,
+    PlanOnly = 2,
+    Permanent = 3
 }

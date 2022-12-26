@@ -1,6 +1,10 @@
 local mc = require("sb_htn.Utils.middleclass")
 local Domain = require("sb_htn.Domain")
 local ICompoundTask = require("sb_htn.Tasks.CompoundTasks.ICompoundTask")
+local IDecomposeAll = require("sb_htn.Tasks.CompoundTasks.IDecomposeAll")
+local Sequence = require("sb_htn.Tasks.CompoundTasks.Sequence")
+local Selector = require("sb_htn.Tasks.CompoundTasks.Selector")
+local PrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.PrimitiveTask")
 local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
 local PausePlanTask = require("sb_htn.Tasks.CompoundTasks.PausePlanTask")
 local FuncCondition = require("sb_htn.Conditions.FuncCondition")
@@ -11,27 +15,26 @@ local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
 ---@class BaseDomainBuilder<BaseDomainBuilder, IContext>
 local BaseDomainBuilder = mc.class("BaseDomainBuilder")
 
----@type Domain
-BaseDomainBuilder._domain = {}
----@type table<ITask>
-BaseDomainBuilder._pointers = {}
----@type IFactory
-BaseDomainBuilder._factory = {}
-
 ---@param domainName string
 ---@param factory IFactory
-function BaseDomainBuilder:init(domainName, factory)
+---@param DB BaseDomainBuilder
+---@param T IContext
+function BaseDomainBuilder:initialize(domainName, factory, DB, T)
+    ---@type IFactory
     self._factory = factory
-    self._domain = Domain:new()
-    Domain:init(domainName)
-    self._pointers = self._factory.CreateList()
+    ---@type Domain
+    self._domain = Domain:new(domainName)
+    ---@type table<ITask>
+    self._pointers = self._factory:CreateList()
     table.insert(self._pointers, self._domain.Root)
+    self.DB = DB
+    self.T = T
 end
 
 ---@return ITask
 function BaseDomainBuilder:Pointer()
-    if (#self._pointers == 0) then return {} end
-    return self._pointers[#self._pointers]
+    if (table.size(self._pointers) == 0) then return nil end
+    return self._pointers[table.size(self._pointers)]
 end
 
 --- Compound tasks are where HTN get their “hierarchical” nature. You can think of a compound task as
@@ -45,9 +48,10 @@ end
 ---
 --- http:--www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
 ---@param name string
+---@param P ICompoundTask
 ---@return BaseDomainBuilder
-function BaseDomainBuilder:Compound(name)
-    local parent = ICompoundTask:new()
+function BaseDomainBuilder:Compound(name, P)
+    local parent = P:new()
     return self:CompoundTask(name, parent)
 end
 
@@ -66,7 +70,7 @@ end
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:CompoundTask(name, task)
     assert(task ~= nil, "task")
-    assert(self:Pointer():isSubclassOf(ICompoundTask),
+    assert(self:Pointer():isInstanceOf(ICompoundTask),
         "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?")
     task.Name = name
     self._domain.AddTask(self:Pointer(), task)
@@ -80,11 +84,12 @@ end
 ---
 --- http:--www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
 ---@param name string
+---@param P IPrimitiveTask
 ---@return BaseDomainBuilder
-function BaseDomainBuilder:PrimitiveTask(name)
-    assert(self:Pointer():isSubclassOf(ICompoundTask),
+function BaseDomainBuilder:PrimitiveTask(name, P)
+    assert(self:Pointer():isInstanceOf(ICompoundTask),
         "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?")
-    local parent = IPrimitiveTask:new()
+    local parent = P:new()
     parent.Name = name
     self._domain.AddTask(self:Pointer(), parent)
     table.insert(self._pointers, parent)
@@ -101,7 +106,7 @@ end
 --- http:--www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:PausePlanTask()
-    assert(self:Pointer():isSubclassOf(IDecomposeAll),
+    assert(self:Pointer().IDecomposeAll,
         "Pointer is not a decompose-all compound task type, like a Sequence. Maybe you tried to Pause Plan a Selector, or forget an End() after a Primitive Task Action was defined?")
     local parent = PausePlanTask:new()
     parent.Name = "Pause Plan"
@@ -116,36 +121,34 @@ end
 ---@param name string
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Sequence(name)
-    return self:Compound(name)
+    return self:Compound(name, Sequence)
 end
 
 --- A compound task that requires a single sub-task to be valid.
----
 ---
 --- Sub-tasks can be sequences, selectors or actions.
 ---@param name string
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Select(name)
-    return self:Compound(name)
+    return self:Compound(name, Selector)
 end
 
 --- A primitive task that can contain conditions, an operator and effects.
 ---@param name string
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Action(name)
-    return self:PrimitiveTask(name)
+    return self:PrimitiveTask(name, PrimitiveTask)
 end
 
 --- A precondition is a boolean statement required for the parent task to validate.
 ---
 --- <param name="name"></param>
 ---@param name string
----@param condition function<any>
+---@param condition function<IContext>
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Condition(name, condition)
-    local cond = FuncCondition:new()
-    FuncCondition:init(name, condition)
-    self:Pointer().AddCondition(cond)
+    local cond = FuncCondition:new(name, condition)
+    self:Pointer():AddCondition(cond)
 
     return self
 end
@@ -156,27 +159,25 @@ end
 ---
 --- Note that this condition is never validated during planning, only during execution.
 ---@param name string
----@param condition function<any>
+---@param condition function<IContext>
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:ExecutingCondition(name, condition)
-    assert(self:Pointer():isSubclassOf(IPrimitiveTask),
+    assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Executing Condition, but the Pointer is not a Primitive Task!")
-    local cond = FuncCondition:new()
-    FuncCondition:init(name, condition)
+    local cond = FuncCondition:new(name, condition)
     self:Pointer():AddExecutingCondition(cond)
 
     return self
 end
 
 --- The operator of an Action / primitive task.
----@param action function<any>
----@param forceStopAction function<any>
+---@param action function<IContext>
+---@param forceStopAction function<IContext>
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Do(action, forceStopAction)
-    assert(self:Pointer():isSubclassOf(IPrimitiveTask),
+    assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Operator, but the Pointer is not a Primitive Task!")
-    local op = FuncOperator:new()
-    FuncOperator:init(action, forceStopAction)
+    local op = FuncOperator:new(action, forceStopAction or nil)
     self:Pointer():SetOperator(op)
 
     return self
@@ -185,13 +186,12 @@ end
 --- Effects can be added to an Action / primitive task.
 ---@param name string
 ---@param effectType EEffectType
----@param action function<any>
+---@param action function<IContext>
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Effect(name, effectType, action)
-    assert(self:Pointer():isSubclassOf(IPrimitiveTask),
+    assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Effect, but the Pointer is not a Primitive Task!")
-    local effect = ActionEffect:new()
-    ActionEffect:init(name, effectType, action)
+    local effect = ActionEffect:new(name, effectType, action)
     self:Pointer():AddEffect(effect)
 
     return self
@@ -200,7 +200,7 @@ end
 --- Every task encapsulation must end with a call to End(), otherwise subsequent calls will be applied wrong.
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:End()
-    table.remove(self._pointers, #self._pointers)
+    self._pointers[table.size(self._pointers)] = nil
     return self
 end
 
@@ -208,7 +208,7 @@ end
 ---@param domain Domain
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Splice(domain)
-    assert(self:Pointer():isSubclassOf(ICompoundTask), "Pointer is not a compound task type. Did you forget an End()?")
+    assert(self:Pointer():isInstanceOf(ICompoundTask), "Pointer is not a compound task type. Did you forget an End()?")
     self._domain.AddTask(self:Pointer(), domain.Root)
 
     return self
@@ -223,7 +223,7 @@ end
 ---@param slotId integer
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Slot(slotId)
-    assert(self:Pointer():isSubclassOf(ICompoundTask), "Pointer is not a compound task type. Did you forget an End()?")
+    assert(self:Pointer():isInstanceOf(ICompoundTask), "Pointer is not a compound task type. Did you forget an End()?")
     local slot = Slot:new()
     slot.SlotId = slotId
     slot.Name = string.format("Slot %i", slotId)
@@ -253,11 +253,11 @@ end
 --- Build the designed domain and return a domain instance.
 ---@return Domain
 function BaseDomainBuilder:Build()
-    assert(self:Pointer() ~= self._domain.Root,
+    assert(self:Pointer() == self._domain.Root,
         string.format("The domain definition lacks one or more End() statements. Pointer is '%s', but expected '%s'.",
             self:Pointer().Name, self._domain.Root.Name))
 
-    self._factory.FreeList(self._pointers)
+    self._factory:FreeList(self._pointers)
     return self._domain
 end
 

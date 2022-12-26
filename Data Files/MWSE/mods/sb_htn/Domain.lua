@@ -3,18 +3,23 @@ local IDomain = require("sb_htn.IDomain")
 local TaskRoot = require("sb_htn.Tasks.CompoundTasks.TaskRoot")
 local IContext = require("sb_htn.Contexts.IContext")
 local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
+local Queue = require("sb_htn.Utils.Queue")
 
 ---@class Domain<IContext> : IDomain
 local Domain = mc.class("Domain", IDomain)
 
----@type table<integer, Slot>
-Domain._slots = {}
-
 ---@param name string
-function Domain:init(name)
+---@param T IContext
+function Domain:initialize(name, T)
+    IDomain.initialize(self)
+
+    ---@type table<integer, Slot>
+    self._slots = nil
+
     self.Root = TaskRoot:new()
-    self.Name = name
-    self.Parent = {}
+    self.Root.Name = name
+    self.Root.Parent = nil
+    self.T = T
 end
 
 ---@param parent ICompoundTask
@@ -22,7 +27,7 @@ end
 function Domain.AddTask(parent, subtask)
     assert(parent ~= subtask, "Parent-task and Sub-task can't be the same instance!")
 
-    parent.AddSubtask(subtask)
+    parent:AddSubtask(subtask)
     subtask.Parent = parent
 end
 
@@ -31,27 +36,31 @@ end
 function Domain:AddSlot(parent, slot)
     assert(parent ~= slot, "Parent-task and Sub-task can't be the same instance!")
 
-    if (self._slots ~= {}) then
-        assert(self._slots[slot.SlotId] ~= nil, "This slot id already exist in the domain definition!")
+    if (self._slots ~= nil) then
+        assert(self._slots[slot.SlotId] == nil, "This slot id already exist in the domain definition!")
     end
 
-    parent.AddSubtask(slot)
+    parent:AddSubtask(slot)
     slot.Parent = parent
 
-    table.insert(self._slots, { slot.SlotId, slot })
+    if (self._slots == nil) then
+        self._slots = {};
+    end
+
+    self._slots[slot.SlotId] = slot
 end
 
 ---@param ctx IContext
 ---@param plan Queue ITask
----@return EDecompositionStatus
+---@return EDecompositionStatus | 0
 function Domain:FindPlan(ctx, plan)
-    assert(ctx.IsInitialized == false, "Context was not initialized!")
+    assert(ctx.IsInitialized, "Context was not initialized!")
 
-    assert(ctx.MethodTraversalRecord == {}, "We require the Method Traversal Record to have a valid instance.")
+    assert(ctx.MethodTraversalRecord ~= nil, "We require the Method Traversal Record to have a valid instance.")
 
     ctx.ContextState = IContext.EContextState.Planning
 
-    plan = {}
+    plan:clear()
     local status = EDecompositionStatus.Rejected
 
     -- We first check whether we have a stored start task. This is true
@@ -63,18 +72,18 @@ function Domain:FindPlan(ctx, plan)
     -- When this happens, we have to plan from the domain root (we're not
     -- continuing the current plan), so that we're open for other plans to replace
     -- the running partial plan.
-    if (ctx.HasPausedPartialPlan and #ctx.LastMTR == 0) then
+    if (ctx.HasPausedPartialPlan and table.size(ctx.LastMTR) == 0) then
         ctx.HasPausedPartialPlan = false
-        while (#ctx.PartialPlanQueue > 0) do
-            local kvp = ctx.PartialPlanQueue:popLast()
-            if (plan == {}) then
-                status = kvp.Task.Decompose(ctx, kvp.TaskIndex, plan)
+        while (table.size(ctx.PartialPlanQueue.list) > 0) do
+            local kvp = ctx.PartialPlanQueue:pop()
+            if (table.size(plan.list) == 0) then
+                status = kvp.Task:Decompose(ctx, kvp.TaskIndex, plan)
             else
-                local p = {}
-                status = kvp.Task.Decompose(ctx, kvp.TaskIndex, p)
+                local p = Queue:new()
+                status = kvp.Task:Decompose(ctx, kvp.TaskIndex, p)
                 if (status == EDecompositionStatus.Succeeded or status == EDecompositionStatus.Partial) then
-                    while (p.Count > 0) do
-                        plan:pushFirst(p:popLast())
+                    while (table.size(p.list) > 0) do
+                        plan:push(p:pop())
                     end
                 end
             end
@@ -92,16 +101,15 @@ function Domain:FindPlan(ctx, plan)
             ctx.MethodTraversalRecord = {}
             if (ctx.DebugMTR) then ctx.MTRDebug = {} end
 
-            status = self.Root.Decompose(ctx, 0, plan)
+            status = self.Root:Decompose(ctx, 1, plan)
         end
     else
-
-        local lastPartialPlanQueue = {}
+        local lastPartialPlanQueue = nil
         if (ctx.HasPausedPartialPlan) then
             ctx.HasPausedPartialPlan = false
-            lastPartialPlanQueue = ctx.Factory.CreateQueue()
-            while (#ctx.PartialPlanQueue > 0) do
-                lastPartialPlanQueue:pushFirst(ctx.PartialPlanQueue:popLast())
+            lastPartialPlanQueue = ctx.Factory:CreateQueue()
+            while (table.size(ctx.PartialPlanQueue.list) > 0) do
+                lastPartialPlanQueue:push(ctx.PartialPlanQueue:pop())
             end
         end
 
@@ -109,18 +117,18 @@ function Domain:FindPlan(ctx, plan)
         ctx.MethodTraversalRecord = {}
         if (ctx.DebugMTR) then ctx.MTRDebug = {} end
 
-        status = self.Root.Decompose(ctx, 0, plan)
+        status = self.Root:Decompose(ctx, 1, plan)
 
         -- If we failed to find a new plan, we have to restore the old plan,
         -- if it was a partial plan.
-        if (lastPartialPlanQueue ~= {}) then
+        if (lastPartialPlanQueue ~= nil) then
             if (status == EDecompositionStatus.Rejected or status == EDecompositionStatus.Failed) then
                 ctx.HasPausedPartialPlan = true
-                ctx.PartialPlanQueue = {}
-                while (#lastPartialPlanQueue > 0) do
-                    ctx.PartialPlanQueue:pushFirst(lastPartialPlanQueue:popLast())
+                ctx.PartialPlanQueue:clear()
+                while (table.size(lastPartialPlanQueue.list) > 0) do
+                    ctx.PartialPlanQueue:push(lastPartialPlanQueue:pop())
                 end
-                ctx.Factory.FreeQueue(lastPartialPlanQueue)
+                ctx.Factory:FreeQueue(lastPartialPlanQueue)
             end
         end
     end
@@ -128,9 +136,9 @@ function Domain:FindPlan(ctx, plan)
     -- If this MTR equals the last MTR, then we need to double check whether we ended up
     -- just finding the exact same plan. During decomposition each compound task can't check
     -- for equality, only for less than, so this case needs to be treated after the fact.
-    local isMTRsEqual = #ctx.MethodTraversalRecord == #ctx.LastMTR
+    local isMTRsEqual = table.size(ctx.MethodTraversalRecord) == table.size(ctx.LastMTR)
     if (isMTRsEqual) then
-        for i = 0, i < #ctx.MethodTraversalRecord, 1 do
+        for i = 1, table.size(ctx.MethodTraversalRecord) do
             if (ctx.MethodTraversalRecord[i] < ctx.LastMTR[i]) then
                 isMTRsEqual = false
                 break
@@ -138,7 +146,7 @@ function Domain:FindPlan(ctx, plan)
         end
 
         if (isMTRsEqual) then
-            plan = {}
+            plan:clear()
             status = EDecompositionStatus.Rejected
         end
     end
@@ -146,22 +154,22 @@ function Domain:FindPlan(ctx, plan)
     if (status == EDecompositionStatus.Succeeded or status == EDecompositionStatus.Partial) then
         -- Trim away any plan-only or plan&execute effects from the world state change stack, that only
         -- permanent effects on the world state remains now that the planning is done.
-        ctx.TrimForExecution()
+        ctx:TrimForExecution()
 
         -- Apply permanent world state changes to the actual world state used during plan execution.
-        for i = 0, #ctx.WorldStateChangeStack, 1 do
+        for i = 1, table.size(ctx.WorldStateChangeStack) do
             local stack = ctx.WorldStateChangeStack[i]
-            if (stack ~= {} and #stack > 0) then
-                ctx.WorldState[i] = stack[2]
-                stack = {}
+            if (stack and table.size(stack.list) > 0) then
+                ctx.WorldState[i] = stack:peek()[2]
+                stack:clear()
             end
         end
     else
         -- Clear away any changes that might have been applied to the stack
         -- No changes should be made or tracked further when the plan failed.
-        for i = 0, #ctx.WorldStateChangeStack, 1 do
+        for i = 1, table.size(ctx.WorldStateChangeStack) do
             local stack = ctx.WorldStateChangeStack[i]
-            if (stack ~= {} and #stack > 0) then stack = {} end
+            if (stack and table.size(stack.list) > 0) then stack:clear() end
         end
     end
 
@@ -177,9 +185,8 @@ end
 ---@param subDomain Domain<IContext>
 ---@return boolean
 function Domain:TrySetSlotDomain(slotId, subDomain)
-    if (self._slots ~= {} and self._slots[slotId]) then
-        self._slots[slotId] = subDomain.Root
-        return true
+    if (table.size(self._slots) > 0 and self._slots[slotId]) then
+        return self._slots[slotId]:Set(subDomain.Root)
     end
 
     return false
@@ -191,8 +198,8 @@ end
 --- of an agent at runtime.
 ---@param slotId integer
 function Domain:ClearSlot(slotId)
-    if (self._slots ~= {} and self._slots[slotId]) then
-        self._slots[slotId] = nil
+    if (table.size(self._slots) > 0 and self._slots[slotId]) then
+        self._slots[slotId]:Clear()
     end
 end
 

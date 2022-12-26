@@ -3,37 +3,40 @@ local mc = require("sb_htn.Utils.middleclass")
 ---@class Queue<any>
 local Queue = mc.class("Queue")
 
-Queue.first = 0
-Queue.last = -1
-
-function Queue:pushFirst(value)
-    local first = self.first - 1
-    self.first = first
-    self[first] = value
+function Queue:initialize()
+    self.list = {}
+    self.first = 1
+    self.last = 0
 end
 
-function Queue:pushLast(value)
-    local last = self.last + 1
-    self.last = last
-    self[last] = value
+function Queue:push(item)
+    self.last = self.last + 1
+    self.list[self.last] = item
 end
 
-function Queue:popFirst()
-    local first = self.first
-    if first > self.last then error("ERROR - QUEUE IS EMPTY") end
-    local value = self[first]
-    self[first] = nil
-    self.first = first + 1
-    return value
+function Queue:pop()
+    if self.first <= self.last then
+        local value = self.list[self.first]
+        self.list[self.first] = nil
+        self.first = self.first + 1
+        return value
+    end
 end
 
-function Queue:popLast()
-    local last = self.last
-    if self.first > last then error("ERROR - QUEUE IS EMPTY") end
-    local value = self[last]
-    self[last] = nil
-    self.last = last - 1
-    return value
+function Queue:peek()
+    return self.list[self.first]
+end
+
+function Queue:clear()
+    self.list = {}
+    self.first = 1
+    self.last = 0
+end
+
+function Queue:copy(q)
+    self.list = q.list
+    self.first = q.first
+    self.last = q.last
 end
 
 return Queue

@@ -3,22 +3,30 @@ local mc = require("sb_htn.Utils.middleclass")
 ---@class Stack<any>
 local Stack = mc.class("Stack")
 
-Stack.first = 0
-Stack.last = -1
+function Stack:initialize()
+    self.list = {}
+end
 
-function Stack:push(value)
-    local first = self.first - 1
-    self.first = first
-    self[first] = value
+function Stack:push(item)
+    self.list[table.size(self.list) + 1] = item
 end
 
 function Stack:pop()
-    local last = self.last
-    if self.first > last then error("ERROR - STACK IS EMPTY") end
-    local value = self[last]
-    self[last] = nil
-    self.last = last - 1
-    return value
+    if table.size(self.list) > 0 then
+        return table.remove(self.list, table.size(self.list))
+    end
+end
+
+function Stack:peek()
+    return self.list[table.size(self.list)]
+end
+
+function Stack:clear()
+    self.list = {}
+end
+
+function Stack:copy(s)
+    self.list = s.list
 end
 
 return Stack

@@ -1,7 +1,7 @@
 ---@enum EDecompositionStatus
 return {
-    Succeeded = 0,
-    Partial = 1,
-    Failed = 2,
-    Rejected = 3
+    Succeeded = 1,
+    Partial = 2,
+    Failed = 3,
+    Rejected = 4
 }

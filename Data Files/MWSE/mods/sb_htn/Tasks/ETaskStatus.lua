@@ -1,6 +1,6 @@
 ---@enum ETaskStatus
 return {
-    Continue = 0,
-    Success = 1,
-    Failure = 2
+    Continue = 1,
+    Success = 2,
+    Failure = 3
 }

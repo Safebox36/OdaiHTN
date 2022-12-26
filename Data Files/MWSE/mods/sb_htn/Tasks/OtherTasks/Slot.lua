@@ -5,29 +5,33 @@ local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionS
 ---@class Slot : ITask
 local Slot = mc.class("Slot", ITask)
 
----@type integer
-Slot.SlotId = 0
----@type string
-Slot.Name = ""
----@type ICompoundTask
-Slot.Parent = {}
----@type table<ICondition>
-Slot.Conditions = {}
----@type ICompoundTask
-Slot.Subtask = {}
+function Slot:initialize()
+    ITask.initialize(self)
 
-function Slot.OnIsValidFailed(ctx)
+    ---@type integer
+    self.SlotId = nil
+    ---@type string
+    self.Name = nil
+    ---@type ICompoundTask
+    self.Parent = nil
+    ---@type table<ICondition>
+    self.Conditions = nil
+    ---@type ICompoundTask
+    self.Subtask = nil
+end
+
+function Slot:OnIsValidFailed(ctx)
     return EDecompositionStatus.Failed
 end
 
-function AddCondition(condition)
+function Slot:AddCondition(condition)
     assert(condition == nil, "Slot tasks does not support conditions.")
 end
 
 ---@param subtask ICompoundTask
 ---@return boolean
 function Slot:Set(subtask)
-    if (self.Subtask ~= {}) then
+    if (self.Subtask) then
         return false
     end
 
@@ -36,25 +40,25 @@ function Slot:Set(subtask)
 end
 
 function Slot:Clear()
-    Subtask = {}
+    self.Subtask = nil
 end
 
 ---@param ctx IContext
 ---@param startIndex integer
 ---@param result Queue ITask - out
----@return EDecompositionStatus
+---@return EDecompositionStatus | 0
 function Slot:Decompose(ctx, startIndex, result)
-    if (Subtask ~= {}) then
-        return Subtask.Decompose(ctx, startIndex, result)
+    if (self.Subtask) then
+        return self.Subtask:Decompose(ctx, startIndex, result)
     end
 
-    result = {}
+    result:clear()
     return EDecompositionStatus.Failed
 end
 
 function Slot:IsValid(ctx)
-    local result = self.Subtask ~= {}
-    if (ctx.LogDecomposition) then mwse.log("Slot.IsValid:%s!", (result and "Success" or "Failed")) end
+    local result = self.Subtask and true or false
+    if (ctx.LogDecomposition) then mwse.log("Slot.IsValid:%s!\n\t- %i", (result and "Success" or "Failed"), ctx.CurrentDecompositionDepth) end
     return result
 end
 
