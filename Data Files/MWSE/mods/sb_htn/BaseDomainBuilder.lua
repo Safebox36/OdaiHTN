@@ -23,7 +23,7 @@ function BaseDomainBuilder:initialize(domainName, factory, DB, T)
     ---@type IFactory
     self._factory = factory
     ---@type Domain
-    self._domain = Domain:new(domainName)
+    self._domain = Domain:new(domainName, T)
     ---@type table<ITask>
     self._pointers = self._factory:CreateList()
     table.insert(self._pointers, self._domain.Root)
@@ -147,7 +147,7 @@ end
 ---@param condition function<IContext>
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Condition(name, condition)
-    local cond = FuncCondition:new(name, condition)
+    local cond = FuncCondition:new(name, condition, self.T)
     self:Pointer():AddCondition(cond)
 
     return self
@@ -164,7 +164,7 @@ end
 function BaseDomainBuilder:ExecutingCondition(name, condition)
     assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Executing Condition, but the Pointer is not a Primitive Task!")
-    local cond = FuncCondition:new(name, condition)
+    local cond = FuncCondition:new(name, condition, self.T)
     self:Pointer():AddExecutingCondition(cond)
 
     return self
@@ -177,7 +177,7 @@ end
 function BaseDomainBuilder:Do(action, forceStopAction)
     assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Operator, but the Pointer is not a Primitive Task!")
-    local op = FuncOperator:new(action, forceStopAction or nil)
+    local op = FuncOperator:new(action, forceStopAction or nil, self.T)
     self:Pointer():SetOperator(op)
 
     return self
@@ -191,7 +191,7 @@ end
 function BaseDomainBuilder:Effect(name, effectType, action)
     assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Effect, but the Pointer is not a Primitive Task!")
-    local effect = ActionEffect:new(name, effectType, action)
+    local effect = ActionEffect:new(name, effectType, action, self.T)
     self:Pointer():AddEffect(effect)
 
     return self
