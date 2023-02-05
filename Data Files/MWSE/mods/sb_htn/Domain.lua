@@ -4,6 +4,7 @@ local TaskRoot = require("sb_htn.Tasks.CompoundTasks.TaskRoot")
 local IContext = require("sb_htn.Contexts.IContext")
 local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 local Queue = require("sb_htn.Utils.Queue")
+require("sb_htn.Utils.TableExt")
 
 ---@class Domain<IContext> : IDomain
 local Domain = mc.class("Domain", IDomain)

@@ -9,6 +9,7 @@ local PausePlanTask = require("sb_htn.Tasks.CompoundTasks.PausePlanTask")
 local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
 local IContext = require("sb_htn.Contexts.IContext")
 local GetKey = require("sb_htn.Utils.GetKey")
+require("sb_htn.Utils.TableExt")
 
 ---@class Sequence : CompoundTask, IDecomposeAll
 local Sequence = mc.class("Sequence", CompoundTask)
@@ -38,7 +39,7 @@ function Sequence:IsValid(ctx)
         return false
     end
 
-    if (ctx.LogDecomposition) then mwse.log("Sequence.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth) end
+    if (ctx.LogDecomposition) then print(string.format("Sequence.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth)) end
     return true
 end
 
@@ -105,7 +106,7 @@ function Sequence:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
 
     result:copy(self.Plan)
     local s = table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
-    if (ctx.LogDecomposition) then mwse.log("Sequence.OnDecomposeTask:%s!\n\t- %i", GetKey(s, EDecompositionStatus),
+    if (ctx.LogDecomposition) then print(string.format("Sequence.OnDecomposeTask:%s!\n\t- %i", GetKey(s, EDecompositionStatus)),
             ctx.CurrentDecompositionDepth)
     end
     return s
@@ -240,7 +241,7 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     end
 
     result:copy(self.Plan)
-    if (ctx.LogDecomposition) then mwse.log("Sequence.OnDecomposeSlot:Succeeded!\n\t- %i", ctx.CurrentDecompositionDepth) end
+    if (ctx.LogDecomposition) then print(string.format("Sequence.OnDecomposeSlot:Succeeded!\n\t- %i", ctx.CurrentDecompositionDepth)) end
     return EDecompositionStatus.Succeeded
 end
 

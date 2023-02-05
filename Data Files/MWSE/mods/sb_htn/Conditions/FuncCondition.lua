@@ -21,7 +21,7 @@ function FuncCondition:IsValid(ctx)
     assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
     local result = self.Func and self.Func(ctx) or false
     if (ctx.LogDecomposition) then
-        mwse.log("FuncCondition.IsValid:%s\n\t- %i", result and "True" or "False", ctx.CurrentDecompositionDepth + 1)
+        print(string.format("FuncCondition.IsValid:%s\n\t- %i", result and "True" or "False", ctx.CurrentDecompositionDepth + 1))
     end
     return result
 end

@@ -23,7 +23,7 @@ end
 function ActionEffect:Apply(ctx)
     assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
     if (ctx.LogDecomposition) then
-        mwse.log("ActionEffect.Apply:%s\n\t- %i", GetKey(self.Type, EEffectType), ctx.CurrentDecompositionDepth)
+        print(string.format("ActionEffect.Apply:%s\n\t- %i", GetKey(self.Type, EEffectType)), ctx.CurrentDecompositionDepth)
     end
     if (self.Func) then self.Func(ctx, self.Type) end
 end

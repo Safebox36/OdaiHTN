@@ -2,6 +2,7 @@ local mc = require("sb_htn.Utils.middleclass")
 local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
 local IContext = require("sb_htn.Contexts.IContext")
 local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
+require("sb_htn.Utils.TableExt")
 
 ---@class PrimitiveTask : IPrimitiveTask
 local PrimitiveTask = mc.class("PrimitiveTask", IPrimitiveTask)
@@ -72,13 +73,13 @@ end
 ---@param ctx IContext
 ---@return boolean
 function PrimitiveTask:IsValid(ctx)
-    if (ctx.LogDecomposition) then mwse.log(table.size(self.Conditions) > 0 and "PrimitiveTask.IsValid check" or
+    if (ctx.LogDecomposition) then print(string.format(table.size(self.Conditions)) > 0 and "PrimitiveTask.IsValid check" or
             "PrimitiveTask.IsValid check\n\t- %i", ctx.CurrentDecompositionDepth + 1)
     end
     for _, condition in ipairs(self.Conditions) do
         if (ctx.LogDecomposition) then
             ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth + 1
-            mwse.log("\t- %i", ctx.CurrentDecompositionDepth)
+            print(string.format("\t- %i", ctx.CurrentDecompositionDepth))
         end
         local result = condition:IsValid(ctx)
         if (ctx.LogDecomposition) then
@@ -94,7 +95,7 @@ function PrimitiveTask:IsValid(ctx)
         end
     end
 
-    if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth + 1) end
+    if (ctx.LogDecomposition) then print(string.format("PrimitiveTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth + 1)) end
     return true
 end
 

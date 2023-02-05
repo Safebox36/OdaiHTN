@@ -34,7 +34,7 @@ end
 function PausePlanTask.ApplyEffects(ctx) end
 
 function PausePlanTask:IsValid(ctx)
-    if (ctx.LogDecomposition) then mwse.log("PausePlanTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth) end
+    if (ctx.LogDecomposition) then print(string.format("PausePlanTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth)) end
     return true
 end
 

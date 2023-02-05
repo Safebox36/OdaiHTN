@@ -6,6 +6,7 @@ local ICompoundTask = require("sb_htn.Tasks.CompoundTasks.ICompoundTask")
 local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
 local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
 local GetKey = require("sb_htn.Utils.GetKey")
+require("sb_htn.Utils.TableExt")
 
 ---@class Selector : CompoundTask
 local Selector = mc.class("Selector", CompoundTask)
@@ -34,7 +35,7 @@ function Selector:IsValid(ctx)
     return false
   end
 
-  if (ctx.LogDecomposition) then mwse.log("Selector.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth) end
+  if (ctx.LogDecomposition) then print(string.format("Selector.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth)) end
   return true
 end
 
@@ -134,7 +135,7 @@ function Selector:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
   result:copy(self.Plan)
   local status = table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
 
-  if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeTask:%s!\n\t- %i", GetKey(status, EDecompositionStatus),
+  if (ctx.LogDecomposition) then print(string.format("Selector.OnDecomposeTask:%s!\n\t- %i", GetKey(status, EDecompositionStatus)),
       ctx.CurrentDecompositionDepth)
   end
   return status
@@ -205,7 +206,7 @@ function Selector:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
 
   result:copy(self.Plan)
   local s = table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
-  if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeCompoundTask:%s!\n\t- %i", GetKey(s, EDecompositionStatus)
+  if (ctx.LogDecomposition) then print(string.format("Selector.OnDecomposeCompoundTask:%s!\n\t- %i", GetKey(s, EDecompositionStatus))
       , ctx.CurrentDecompositionDepth)
   end
   return s
@@ -262,7 +263,7 @@ function Selector:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
 
   result:copy(self.Plan)
   local s = table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
-  if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeSlot:%s!\n\t- %i", s, ctx.CurrentDecompositionDepth) end
+  if (ctx.LogDecomposition) then print(string.format("Selector.OnDecomposeSlot:%s!\n\t- %i", s, ctx.CurrentDecompositionDepth)) end
   return s
 end
 

@@ -3,6 +3,7 @@ local IContext = require("sb_htn.Contexts.IContext")
 local Queue = require("sb_htn.Utils.Queue")
 local EEffectType = require("sb_htn.Effects.EEffectType")
 local Stack = require("sb_htn.Utils.Stack")
+require("sb_htn.Utils.TableExt")
 
 ---@class BaseContext : IContext
 local BaseContext = mc.class("BaseContext", IContext)

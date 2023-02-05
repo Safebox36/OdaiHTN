@@ -4,6 +4,7 @@ local ETaskStatus = require("sb_htn.Tasks.ETaskStatus")
 local EEffectType = require("sb_htn.Effects.EEffectType")
 local Queue = require("sb_htn.Utils.Queue")
 local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
+require("sb_htn.Utils.TableExt")
 
 --- A planner is a responsible for handling the management of finding plans in a domain, replan when the state of the
 --- running plan

@@ -1,4 +1,5 @@
 local mc = require("sb_htn.Utils.middleclass")
+require("sb_htn.Utils.TableExt")
 
 ---@class Stack<any>
 local Stack = mc.class("Stack")

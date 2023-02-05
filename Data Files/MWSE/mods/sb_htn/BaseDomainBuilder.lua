@@ -11,6 +11,7 @@ local FuncCondition = require("sb_htn.Conditions.FuncCondition")
 local FuncOperator = require("sb_htn.Operators.FuncOperator")
 local ActionEffect = require("sb_htn.Effects.ActionEffect")
 local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
+require("sb_htn.Utils.TableExt")
 
 ---@class BaseDomainBuilder<BaseDomainBuilder, IContext>
 local BaseDomainBuilder = mc.class("BaseDomainBuilder")

@@ -58,7 +58,7 @@ end
 
 function Slot:IsValid(ctx)
     local result = self.Subtask and true or false
-    if (ctx.LogDecomposition) then mwse.log("Slot.IsValid:%s!\n\t- %i", (result and "Success" or "Failed"), ctx.CurrentDecompositionDepth) end
+    if (ctx.LogDecomposition) then print(string.format("Slot.IsValid:%s!\n\t- %i", (result and "Success" or "Failed")), ctx.CurrentDecompositionDepth) end
     return result
 end
 

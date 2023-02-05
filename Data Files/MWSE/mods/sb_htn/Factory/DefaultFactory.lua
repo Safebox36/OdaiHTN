@@ -1,6 +1,7 @@
 local mc = require("sb_htn.Utils.middleclass")
 local IFactory = require("sb_htn.Factory.IFactory")
 local Queue = require("sb_htn.Utils.Queue")
+require("sb_htn.Utils.TableExt")
 
 ---@class DefaultFactory : IFactory
 local DefaultFactory = mc.class("DefaultFactory", IFactory)
