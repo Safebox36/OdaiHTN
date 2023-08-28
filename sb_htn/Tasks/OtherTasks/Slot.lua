@@ -20,10 +20,13 @@ function Slot:initialize()
     self.Subtask = nil
 end
 
+---@param ctx IContext
+---@return EDecompositionStatus
 function Slot:OnIsValidFailed(ctx)
     return EDecompositionStatus.Failed
 end
 
+---@param condition ICondition
 function Slot:AddCondition(condition)
     assert(condition == nil, "Slot tasks does not support conditions.")
 end
@@ -46,7 +49,7 @@ end
 ---@param ctx IContext
 ---@param startIndex integer
 ---@param result Queue ITask - out
----@return EDecompositionStatus | 0
+---@return EDecompositionStatus
 function Slot:Decompose(ctx, startIndex, result)
     if (self.Subtask) then
         return self.Subtask:Decompose(ctx, startIndex, result)
@@ -56,9 +59,14 @@ function Slot:Decompose(ctx, startIndex, result)
     return EDecompositionStatus.Failed
 end
 
+---@param ctx IContext
+---@return boolean
 function Slot:IsValid(ctx)
     local result = self.Subtask and true or false
-    if (ctx.LogDecomposition) then print(string.format("Slot.IsValid:%s!\n\t- %i", (result and "Success" or "Failed")), ctx.CurrentDecompositionDepth) end
+    if (ctx.LogDecomposition) then
+        print(string.format("Slot.IsValid:%s!\n\t- %i", (result and "Success" or "Failed"),
+            ctx.CurrentDecompositionDepth))
+    end
     return result
 end
 

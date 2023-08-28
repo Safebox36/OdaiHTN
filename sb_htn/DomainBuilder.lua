@@ -11,8 +11,8 @@ local DomainBuilder = mc.class("DomainBuilder", BaseDomainBuilder)
 ---@param domainName string
 ---@param factory IFactory
 ---@param T IContext
-function DomainBuilder:initialize(domainName, factory, T)
-    BaseDomainBuilder.initialize(self, domainName, factory or DefaultFactory:new(), DomainBuilder, T)
+function DomainBuilder:initialize(T, domainName, factory)
+    BaseDomainBuilder.initialize(self, T, domainName, factory or DefaultFactory:new(), DomainBuilder)
 end
 
 return DomainBuilder

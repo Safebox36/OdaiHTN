@@ -18,14 +18,18 @@ function PausePlanTask:initialize()
     self.Effects = {}
 end
 
+---@param ctx IContext
+---@return EDecompositionStatus
 function PausePlanTask:OnIsValidFailed(ctx)
     return EDecompositionStatus.Failed
 end
 
+---@param condition ICondition
 function PausePlanTask:AddCondition(condition)
     assert(condition == nil, "Pause Plan tasks does not support conditions.")
 end
 
+---@param effect IEffect
 function PausePlanTask.AddEffect(effect)
     assert(effect == nil, "Pause Plan tasks does not support effects.")
 end
@@ -33,8 +37,12 @@ end
 ---@param ctx IContext
 function PausePlanTask.ApplyEffects(ctx) end
 
+---@param ctx IContext
+---@return boolean
 function PausePlanTask:IsValid(ctx)
-    if (ctx.LogDecomposition) then print(string.format("PausePlanTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth)) end
+    if (ctx.LogDecomposition) then
+        print(string.format("PausePlanTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth))
+    end
     return true
 end
 

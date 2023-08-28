@@ -25,39 +25,45 @@ function PrimitiveTask:initialize()
 end
 
 ---@param ctx IContext
----@return EDecompositionStatus | 0
+---@return EDecompositionStatus
 function PrimitiveTask:OnIsValidFailed(ctx)
     return EDecompositionStatus.Failed
 end
 
 ---@param condition ICondition
----@return ITask
+---@return IPrimitiveTask
 function PrimitiveTask:AddCondition(condition)
     table.insert(self.Conditions, condition)
     return self
 end
 
+---@param condition ICondition
+---@return IPrimitiveTask
 function PrimitiveTask:AddExecutingCondition(condition)
     table.insert(self.ExecutingConditions, condition)
     return self
 end
 
+---@param effect IEffect
+---@return IPrimitiveTask
 function PrimitiveTask:AddEffect(effect)
     table.insert(self.Effects, effect)
     return self
 end
 
+---@param action IOperator
 function PrimitiveTask:SetOperator(action)
     assert(self.Operator == nil, "A Primitive Task can only contain a single Operator!")
 
     self.Operator = action
 end
 
+---@param ctx IContext
 function PrimitiveTask:ApplyEffects(ctx)
     if (ctx.LogDecomposition) then
         ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth + 1
-        if (ctx.ContextState == IContext.EContextState.Planning) then mwse.log("PrimitiveTask.ApplyEffects\n\t- %i",
-                ctx.CurrentDecompositionDepth)
+        if (ctx.ContextState == IContext.EContextState.Planning) then
+            print(string.format("PrimitiveTask.ApplyEffects\n\t- %i", ctx.CurrentDecompositionDepth))
         end
     end
     for _, effect in ipairs(self.Effects) do
@@ -66,6 +72,7 @@ function PrimitiveTask:ApplyEffects(ctx)
     if (ctx.LogDecomposition) then ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth - 1 end
 end
 
+---@param ctx IContext
 function PrimitiveTask:Stop(ctx)
     self.Operator:Stop(ctx)
 end
@@ -73,8 +80,10 @@ end
 ---@param ctx IContext
 ---@return boolean
 function PrimitiveTask:IsValid(ctx)
-    if (ctx.LogDecomposition) then print(string.format(table.size(self.Conditions)) > 0 and "PrimitiveTask.IsValid check" or
-            "PrimitiveTask.IsValid check\n\t- %i", ctx.CurrentDecompositionDepth + 1)
+    if (ctx.LogDecomposition) then
+        print(string.format(
+            table.size(self.Conditions) > 0 and "PrimitiveTask.IsValid check" or "PrimitiveTask.IsValid check\n\t- %i",
+            ctx.CurrentDecompositionDepth + 1))
     end
     for _, condition in ipairs(self.Conditions) do
         if (ctx.LogDecomposition) then
@@ -83,19 +92,22 @@ function PrimitiveTask:IsValid(ctx)
         end
         local result = condition:IsValid(ctx)
         if (ctx.LogDecomposition) then
-            mwse.log("PrimitiveTask.IsValid:%s:%s is%s valid!\n\t- %i", result and "Success" or "Failed", condition.Name
-                , result and "" or " not", ctx.CurrentDecompositionDepth)
+            print(string.format("PrimitiveTask.IsValid:%s:%s is%s valid!\n\t- %i", result and "Success" or "Failed",
+                condition.Name, result and "" or " not", ctx.CurrentDecompositionDepth))
             ctx.CurrentDecompositionDepth = ctx.CurrentDecompositionDepth - 1
         end
         if (result == false) then
-            if (ctx.LogDecomposition) then mwse.log("PrimitiveTask.IsValid:Failed:Preconditions not met!\n\t- %i",
-                    ctx.CurrentDecompositionDepth + 1)
+            if (ctx.LogDecomposition) then
+                print(string.format("PrimitiveTask.IsValid:Failed:Preconditions not met!\n\t- %i",
+                    ctx.CurrentDecompositionDepth + 1))
             end
             return false
         end
     end
 
-    if (ctx.LogDecomposition) then print(string.format("PrimitiveTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth + 1)) end
+    if (ctx.LogDecomposition) then
+        print(string.format("PrimitiveTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth + 1))
+    end
     return true
 end
 

@@ -1,5 +1,4 @@
 local mc = require("sb_htn.Utils.middleclass")
-local Queue = require("sb_htn.Utils.Queue")
 
 ---@class IContext
 local IContext = mc.class("IContext")

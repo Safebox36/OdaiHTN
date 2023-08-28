@@ -6,7 +6,6 @@ local ICompoundTask = require("sb_htn.Tasks.CompoundTasks.ICompoundTask")
 local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
 local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
 local GetKey = require("sb_htn.Utils.GetKey")
-require("sb_htn.Utils.TableExt")
 
 ---@class Selector : CompoundTask
 local Selector = mc.class("Selector", CompoundTask)
@@ -18,19 +17,21 @@ function Selector:initialize()
   self.Plan = Queue:new()
 end
 
+---@param ctx IContext
+---@return boolean
 function Selector:IsValid(ctx)
   -- Check that our preconditions are valid first.
   if (CompoundTask.IsValid(self, ctx) == false) then
-    if (ctx.LogDecomposition) then mwse.log("Selector.IsValid:Failed:Preconditions not met!\n\t- %i",
-        ctx.CurrentDecompositionDepth)
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.IsValid:Failed:Preconditions not met!\n\t- %i", ctx.CurrentDecompositionDepth))
     end
     return false
   end
 
   -- Selector requires there to be at least one sub-task to successfully select from.
   if (table.size(self.Subtasks) == 0) then
-    if (ctx.LogDecomposition) then mwse.log("Selector.IsValid:Failed:No sub-tasks!\n\t- %i",
-        ctx.CurrentDecompositionDepth)
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.IsValid:Failed:No sub-tasks!\n\t- %i", ctx.CurrentDecompositionDepth))
     end
     return false
   end
@@ -70,12 +71,17 @@ end
 
 --- In a Selector decomposition, just a single sub-task must be valid and successfully decompose for the Selector to be
 --- successfully decomposed.
+---@param ctx IContext
+---@param startIndex integer
+---@param result Queue<ITask>
+---@return EDecompositionStatus
 function Selector:OnDecompose(ctx, startIndex, result)
   self.Plan:clear()
 
   for taskIndex = startIndex, table.size(self.Subtasks) do
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecompose:Task index: %i: %s\n\t- %i", taskIndex,
-        self.Subtasks[taskIndex].Name, ctx.CurrentDecompositionDepth)
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecompose:Task index: %i: %s\n\t- %i", taskIndex, self.Subtasks[taskIndex].Name,
+        ctx.CurrentDecompositionDepth))
     end
     -- If the last plan is still running, we need to check whether the
     -- new decomposition can possibly beat it.
@@ -84,12 +90,15 @@ function Selector:OnDecompose(ctx, startIndex, result)
         local currentDecompositionIndex = table.size(ctx.MethodTraversalRecord) + 1
         if (self.BeatsLastMTR(ctx, taskIndex, currentDecompositionIndex) == false) then
           table.insert(ctx.MethodTraversalRecord, 0)
-          if (ctx.DebugMTR) then table.insert(ctx.MTRDebug,
+          if (ctx.DebugMTR) then
+            table.insert(ctx.MTRDebug,
               string.format("REPLAN FAIL %s", self.Subtasks[taskIndex].Name))
           end
 
-          if (ctx.LogDecomposition) then mwse.log("Selector.OnDecompose:Rejected:Index %i is beat by last method traversal record!\n\t- %i"
-              , currentDecompositionIndex, ctx.CurrentDecompositionDepth)
+          if (ctx.LogDecomposition) then
+            print(string.format(
+              "Selector.OnDecompose:Rejected:Index %i is beat by last method traversal record!\n\t- %i",
+              currentDecompositionIndex, ctx.CurrentDecompositionDepth))
           end
           result:clear()
           return EDecompositionStatus.Rejected
@@ -101,8 +110,8 @@ function Selector:OnDecompose(ctx, startIndex, result)
 
     local status = self:OnDecomposeTask(ctx, task, taskIndex, nil, result)
     if (
-        status == EDecompositionStatus.Rejected or status == EDecompositionStatus.Succeeded or
-            status == EDecompositionStatus.Partial) then
+          status == EDecompositionStatus.Rejected or status == EDecompositionStatus.Succeeded or
+          status == EDecompositionStatus.Partial) then
       return status
     end
   end
@@ -111,10 +120,17 @@ function Selector:OnDecompose(ctx, startIndex, result)
   return table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
 end
 
+---@param ctx IContext
+---@param task ITask
+---@param taskIndex integer
+---@param oldStackDepth integer[]
+---@param result Queue<ITask>
+---@return EDecompositionStatus
 function Selector:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
   if (task:IsValid(ctx) == false) then
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeTask:Failed:Task %s.IsValid returned false!\n\t- %i",
-        task.Name, ctx.CurrentDecompositionDepth)
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecomposeTask:Failed:Task %s.IsValid returned false!\n\t- %i", task.Name,
+        ctx.CurrentDecompositionDepth))
     end
     result:copy(self.Plan)
     return task:OnIsValidFailed(ctx)
@@ -125,7 +141,7 @@ function Selector:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
   end
 
   if (task:isInstanceOf(IPrimitiveTask)) then
-    self:OnDecomposePrimitiveTask(ctx, task, taskIndex, nil, result);
+    self:OnDecomposePrimitiveTask(ctx, task, taskIndex, nil, result)
   end
 
   if (task:isInstanceOf(Slot)) then
@@ -135,26 +151,39 @@ function Selector:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
   result:copy(self.Plan)
   local status = table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
 
-  if (ctx.LogDecomposition) then print(string.format("Selector.OnDecomposeTask:%s!\n\t- %i", GetKey(status, EDecompositionStatus)),
-      ctx.CurrentDecompositionDepth)
+  if (ctx.LogDecomposition) then
+    print(string.format("Selector.OnDecomposeTask:%s!\n\t- %i", GetKey(status, EDecompositionStatus),
+      ctx.CurrentDecompositionDepth))
   end
   return status
 end
 
+---@param ctx IContext
+---@param task IPrimitiveTask
+---@param taskIndex integer
+---@param oldStackDepth integer[]
+---@param result Queue<ITask>
 function Selector:OnDecomposePrimitiveTask(ctx, task, taskIndex, oldStackDepth, result)
   -- We need to record the task index before we decompose the task,
   -- so that the traversal record is set up in the right order.
-  table.insert(ctx.MethodTraversalRecord, taskIndex);
-  if (ctx.DebugMTR) then table.insert(ctx.MTRDebug, task.Name); end
+  table.insert(ctx.MethodTraversalRecord, taskIndex)
+  if (ctx.DebugMTR) then table.insert(ctx.MTRDebug, task.Name) end
 
-  if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeTask:Pushed %s to plan!\n\t- %i", task.Name,
-      ctx.CurrentDecompositionDepth)
+  if (ctx.LogDecomposition) then
+    print(string.format("Selector.OnDecomposeTask:Pushed %s to plan!\n\t- %i", task.Name,
+      ctx.CurrentDecompositionDepth))
   end
   task:ApplyEffects(ctx)
   self.Plan:push(task)
-  result:copy(self.Plan);
+  result:copy(self.Plan)
 end
 
+---@param ctx IContext
+---@param task ICompoundTask
+---@param taskIndex integer
+---@param oldStackDepth integer[]
+---@param result Queue<ITask>
+---@return EDecompositionStatus
 function Selector:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, result)
   -- We need to record the task index before we decompose the task,
   -- so that the traversal record is set up in the right order.
@@ -166,9 +195,10 @@ function Selector:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
 
   -- If status is rejected, that means the entire planning procedure should cancel.
   if (status == EDecompositionStatus.Rejected) then
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeCompoundTask:%s: Decomposing %s was rejected.\n\t- %i",
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecomposeCompoundTask:%s: Decomposing %s was rejected.\n\t- %i",
         GetKey(status, EDecompositionStatus),
-        task.Name, ctx.CurrentDecompositionDepth)
+        task.Name, ctx.CurrentDecompositionDepth))
     end
     result:clear()
     return EDecompositionStatus.Rejected
@@ -180,9 +210,10 @@ function Selector:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     ctx.MethodTraversalRecord[table.size(ctx.MethodTraversalRecord)] = nil
     if (ctx.DebugMTR) then ctx.MTRDebug[table.size(ctx.MTRDebug)] = nil end
 
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeCompoundTask:%s: Decomposing %s failed.\n\t- %i",
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecomposeCompoundTask:%s: Decomposing %s failed.\n\t- %i",
         GetKey(status, EDecompositionStatus),
-        task.Name, ctx.CurrentDecompositionDepth)
+        task.Name, ctx.CurrentDecompositionDepth))
     end
     result:copy(self.Plan)
     return EDecompositionStatus.Failed
@@ -190,15 +221,17 @@ function Selector:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
 
   while (table.size(subPlan.list) > 0) do
     local p = subPlan:pop()
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeCompoundTask:Decomposing %s:Pushed %s to plan!\n\t- %i"
-        , task.Name, p.Name, ctx.CurrentDecompositionDepth)
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecomposeCompoundTask:Decomposing %s:Pushed %s to plan!\n\t- %i", task.Name, p
+        .Name, ctx.CurrentDecompositionDepth))
     end
     self.Plan:push(p)
   end
 
   if (ctx.HasPausedPartialPlan) then
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeCompoundTask:Return partial plan at index %i!\n\t- %i",
-        taskIndex, ctx.CurrentDecompositionDepth)
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecomposeCompoundTask:Return partial plan at index %i!\n\t- %i", taskIndex,
+        ctx.CurrentDecompositionDepth))
     end
     result:copy(self.Plan)
     return EDecompositionStatus.Partial
@@ -206,12 +239,19 @@ function Selector:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
 
   result:copy(self.Plan)
   local s = table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
-  if (ctx.LogDecomposition) then print(string.format("Selector.OnDecomposeCompoundTask:%s!\n\t- %i", GetKey(s, EDecompositionStatus))
-      , ctx.CurrentDecompositionDepth)
+  if (ctx.LogDecomposition) then
+    print(string.format("Selector.OnDecomposeCompoundTask:%s!\n\t- %i", GetKey(s, EDecompositionStatus)
+    , ctx.CurrentDecompositionDepth))
   end
   return s
 end
 
+---@param ctx IContext
+---@param task Slot
+---@param taskIndex integer
+---@param oldStackDepth integer[]
+---@param result Queue<ITask>
+---@return EDecompositionStatus
 function Selector:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
   -- We need to record the task index before we decompose the task,
   -- so that the traversal record is set up in the right order.
@@ -223,9 +263,10 @@ function Selector:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
 
   -- If status is rejected, that means the entire planning procedure should cancel.
   if (status == EDecompositionStatus.Rejected) then
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeSlot:%s: Decomposing %s was rejected.\n\t- %i",
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecomposeSlot:%s: Decomposing %s was rejected.\n\t- %i",
         GetKey(status, EDecompositionStatus),
-        task.Name, ctx.CurrentDecompositionDepth)
+        task.Name, ctx.CurrentDecompositionDepth))
     end
     result:clear()
     return EDecompositionStatus.Rejected
@@ -237,8 +278,9 @@ function Selector:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     ctx.MethodTraversalRecord[table.size(ctx.MethodTraversalRecord)] = nil
     if (ctx.DebugMTR) then ctx.MTRDebug[table.size(ctx.MTRDebug)] = nil end
 
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeSlot:%s: Decomposing %s failed.\n\t- %i",
-        GetKey(status, EDecompositionStatus), task.Name, ctx.CurrentDecompositionDepth)
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecomposeSlot:%s: Decomposing %s failed.\n\t- %i",
+        GetKey(status, EDecompositionStatus), task.Name, ctx.CurrentDecompositionDepth))
     end
     result:copy(self.Plan)
     return EDecompositionStatus.Failed
@@ -246,16 +288,16 @@ function Selector:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
 
   while (table.size(subPlan.list) > 0) do
     local p = subPlan:pop()
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeSlot:Decomposing %s:Pushed %s to plan!\n\t- %i",
-        task.Name,
-        p.Name, ctx.CurrentDecompositionDepth)
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecomposeSlot:Decomposing %s:Pushed %s to plan!\n\t- %i", task.Name, p.Name,
+        ctx.CurrentDecompositionDepth))
     end
     self.Plan:push(p)
   end
 
   if (ctx.HasPausedPartialPlan) then
-    if (ctx.LogDecomposition) then mwse.log("Selector.OnDecomposeSlot:Return partial plan!\n\t- %i",
-        ctx.CurrentDecompositionDepth)
+    if (ctx.LogDecomposition) then
+      print(string.format("Selector.OnDecomposeSlot:Return partial plan!\n\t- %i", ctx.CurrentDecompositionDepth))
     end
     result:copy(self.Plan)
     return EDecompositionStatus.Partial
@@ -263,7 +305,9 @@ function Selector:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
 
   result:copy(self.Plan)
   local s = table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
-  if (ctx.LogDecomposition) then print(string.format("Selector.OnDecomposeSlot:%s!\n\t- %i", s, ctx.CurrentDecompositionDepth)) end
+  if (ctx.LogDecomposition) then
+    print(string.format("Selector.OnDecomposeSlot:%s!\n\t- %i", s, ctx.CurrentDecompositionDepth))
+  end
   return s
 end
 

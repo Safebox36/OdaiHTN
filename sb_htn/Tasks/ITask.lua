@@ -28,7 +28,7 @@ function ITask:AddCondition(condition) return {} end
 function ITask:IsValid(ctx) return false end
 
 ---@param ctx IContext
----@return EDecompositionStatus | 0
+---@return EDecompositionStatus
 function ITask:OnIsValidFailed(ctx) return 0 end
 
 return ITask

@@ -1,3 +1,5 @@
+require("sb_htn.Utils.TableExt")
+
 return {
     Conditions = {
         ICondition = require("sb_htn.Conditions.ICondition"),

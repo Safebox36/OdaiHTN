@@ -19,14 +19,14 @@ end
 --- Add a new executing condition to the primitive task. This will be checked before
 --- every call to Operator.Update(...)
 ---@param condition ICondition
----@return ITask
+---@return IPrimitiveTask
 function IPrimitiveTask:AddExecutingCondition(condition) return {} end
 
 ---@param action IOperator
 function IPrimitiveTask:SetOperator(action) end
 
 ---@param effect IEffect
----@return ITask
+---@return IPrimitiveTask
 function IPrimitiveTask:AddEffect(effect) return {} end
 
 ---@param ctx IContext

@@ -8,9 +8,9 @@ local FuncOperator = mc.class("FuncOperator", IOperator)
 ---@param func function<IContext>
 ---@param funcStop function<IContext>
 ---@param T IContext
-function FuncOperator:initialize(func, funcStop, T)
+function FuncOperator:initialize(T, func, funcStop)
     ---@type function<IContext>
-    ---@return ETaskStatus | 0
+    ---@return ETaskStatus
     self.Func = func
     ---@type function<IContext>
     ---@return boolean
@@ -18,11 +18,13 @@ function FuncOperator:initialize(func, funcStop, T)
     self.T = T
 end
 
+---@param ctx IContext
 function FuncOperator:Update(ctx)
     assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
     if (self.Func) then return self.Func(ctx) else return ETaskStatus.Failure end
 end
 
+---@param ctx IContext
 function FuncOperator:Stop(ctx)
     assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
     if (self.FuncStop) then self.FuncStop(ctx) end

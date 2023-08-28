@@ -1,7 +1,6 @@
 local mc = require("sb_htn.Utils.middleclass")
 local Domain = require("sb_htn.Domain")
 local ICompoundTask = require("sb_htn.Tasks.CompoundTasks.ICompoundTask")
-local IDecomposeAll = require("sb_htn.Tasks.CompoundTasks.IDecomposeAll")
 local Sequence = require("sb_htn.Tasks.CompoundTasks.Sequence")
 local Selector = require("sb_htn.Tasks.CompoundTasks.Selector")
 local PrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.PrimitiveTask")
@@ -11,7 +10,6 @@ local FuncCondition = require("sb_htn.Conditions.FuncCondition")
 local FuncOperator = require("sb_htn.Operators.FuncOperator")
 local ActionEffect = require("sb_htn.Effects.ActionEffect")
 local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
-require("sb_htn.Utils.TableExt")
 
 ---@class BaseDomainBuilder<BaseDomainBuilder, IContext>
 local BaseDomainBuilder = mc.class("BaseDomainBuilder")
@@ -20,11 +18,11 @@ local BaseDomainBuilder = mc.class("BaseDomainBuilder")
 ---@param factory IFactory
 ---@param DB BaseDomainBuilder
 ---@param T IContext
-function BaseDomainBuilder:initialize(domainName, factory, DB, T)
+function BaseDomainBuilder:initialize(T, domainName, factory, DB)
     ---@type IFactory
     self._factory = factory
     ---@type Domain
-    self._domain = Domain:new(domainName, T)
+    self._domain = Domain:new(T, domainName)
     ---@type table<ITask>
     self._pointers = self._factory:CreateList()
     table.insert(self._pointers, self._domain.Root)
@@ -32,7 +30,7 @@ function BaseDomainBuilder:initialize(domainName, factory, DB, T)
     self.T = T
 end
 
----@return ITask
+---@return ITask | nil
 function BaseDomainBuilder:Pointer()
     if (table.size(self._pointers) == 0) then return nil end
     return self._pointers[table.size(self._pointers)]
@@ -148,7 +146,7 @@ end
 ---@param condition function<IContext>
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Condition(name, condition)
-    local cond = FuncCondition:new(name, condition, self.T)
+    local cond = FuncCondition:new(self.T, name, condition)
     self:Pointer():AddCondition(cond)
 
     return self
@@ -165,7 +163,7 @@ end
 function BaseDomainBuilder:ExecutingCondition(name, condition)
     assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Executing Condition, but the Pointer is not a Primitive Task!")
-    local cond = FuncCondition:new(name, condition, self.T)
+    local cond = FuncCondition:new(self.T, name, condition)
     self:Pointer():AddExecutingCondition(cond)
 
     return self
@@ -178,7 +176,7 @@ end
 function BaseDomainBuilder:Do(action, forceStopAction)
     assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Operator, but the Pointer is not a Primitive Task!")
-    local op = FuncOperator:new(action, forceStopAction or nil, self.T)
+    local op = FuncOperator:new(self.T, action, forceStopAction or nil)
     self:Pointer():SetOperator(op)
 
     return self
@@ -187,12 +185,12 @@ end
 --- Effects can be added to an Action / primitive task.
 ---@param name string
 ---@param effectType EEffectType
----@param action function<IContext>
+---@param func function<IContext>
 ---@return BaseDomainBuilder
-function BaseDomainBuilder:Effect(name, effectType, action)
+function BaseDomainBuilder:Effect(name, effectType, func)
     assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Effect, but the Pointer is not a Primitive Task!")
-    local effect = ActionEffect:new(name, effectType, action, self.T)
+    local effect = ActionEffect:new(self.T, name, effectType, func)
     self:Pointer():AddEffect(effect)
 
     return self
@@ -258,7 +256,7 @@ function BaseDomainBuilder:Build()
         string.format("The domain definition lacks one or more End() statements. Pointer is '%s', but expected '%s'.",
             self:Pointer().Name, self._domain.Root.Name))
 
-    self._factory:FreeList(self._pointers)
+    self._factory:FreeList(nil, self._pointers)
     return self._domain
 end
 

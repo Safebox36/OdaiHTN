@@ -3,7 +3,6 @@ local IContext = require("sb_htn.Contexts.IContext")
 local Queue = require("sb_htn.Utils.Queue")
 local EEffectType = require("sb_htn.Effects.EEffectType")
 local Stack = require("sb_htn.Utils.Stack")
-require("sb_htn.Utils.TableExt")
 
 ---@class BaseContext : IContext
 local BaseContext = mc.class("BaseContext", IContext)
@@ -31,7 +30,7 @@ function BaseContext:initialize()
     self.LastMTRDebug = nil
     ---@type boolean
     self.DebugMTR = false
-    ---@type Queue PartialPlanEntry
+    ---@type Queue<PartialPlanEntry>
     self.PartialPlanQueue = Queue:new()
     ---@type boolean
     self.HasPausedPartialPlan = false
@@ -39,7 +38,7 @@ function BaseContext:initialize()
     ---@type number[]
     self.WorldState = nil
 
-    ---@type Stack[] table<EEffectType, number>
+    ---@type Stack<table<EEffectType, number>>[]
     self.WorldStateChangeStack = nil
 end
 
@@ -59,10 +58,15 @@ function BaseContext:init()
     self.IsInitialized = true
 end
 
+---@param state any
+---@param value integer
+---@return boolean
 function BaseContext:HasState(state, value)
     return self:GetState(state) == value
 end
 
+---@param state any
+---@return integer
 function BaseContext:GetState(state)
     if (self.ContextState == IContext.EContextState.Executing) then return self.WorldState[state] end
 
@@ -71,6 +75,10 @@ function BaseContext:GetState(state)
     return self.WorldStateChangeStack[state]:peek()[2]
 end
 
+---@param state any
+---@param value integer
+---@param setAsDirty boolean
+---@param e EEffectType | nil
 function BaseContext:SetState(state, value, setAsDirty, e)
     if (self.ContextState == IContext.EContextState.Executing) then
         -- Prevent setting the world state dirty if we're not changing anything.
@@ -87,10 +95,12 @@ function BaseContext:SetState(state, value, setAsDirty, e)
     end
 end
 
+---@param factory IFactory
+---@return any[]
 function BaseContext:GetWorldStateChangeDepth(factory)
-    local stackDepth = factory:CreateArray(table.size(self.WorldStateChangeStack), Stack)
-    for i = 1, table.size(self.WorldStateChangeStack) do stackDepth[i] = table.size(self.WorldStateChangeStack[i].list)
-            or 1
+    local stackDepth = factory:CreateArray(Stack, table.size(self.WorldStateChangeStack))
+    for i = 1, table.size(self.WorldStateChangeStack) do
+        stackDepth[i] = table.size(self.WorldStateChangeStack[i].list) or 1
     end
 
     return stackDepth
@@ -106,6 +116,7 @@ function BaseContext:TrimForExecution()
     end
 end
 
+---@param stackDepth integer
 function BaseContext:TrimToStackDepth(stackDepth)
     assert(self.ContextState ~= IContext.EContextState.Executing, "Can not trim a context when in execution mode")
 

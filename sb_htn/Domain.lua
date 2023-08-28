@@ -4,14 +4,13 @@ local TaskRoot = require("sb_htn.Tasks.CompoundTasks.TaskRoot")
 local IContext = require("sb_htn.Contexts.IContext")
 local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 local Queue = require("sb_htn.Utils.Queue")
-require("sb_htn.Utils.TableExt")
 
 ---@class Domain<IContext> : IDomain
 local Domain = mc.class("Domain", IDomain)
 
 ---@param name string
 ---@param T IContext
-function Domain:initialize(name, T)
+function Domain:initialize(T, name)
     IDomain.initialize(self)
 
     ---@type table<integer, Slot>
@@ -45,7 +44,7 @@ function Domain:AddSlot(parent, slot)
     slot.Parent = parent
 
     if (self._slots == nil) then
-        self._slots = {};
+        self._slots = {}
     end
 
     self._slots[slot.SlotId] = slot
@@ -53,7 +52,7 @@ end
 
 ---@param ctx IContext
 ---@param plan Queue ITask
----@return EDecompositionStatus | 0
+---@return EDecompositionStatus
 function Domain:FindPlan(ctx, plan)
     assert(ctx.IsInitialized, "Context was not initialized!")
 

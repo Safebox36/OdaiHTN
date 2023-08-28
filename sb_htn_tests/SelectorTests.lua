@@ -8,8 +8,8 @@ print(">>> SelectorTests")
 print("> AddCondition_ExpectedBehavior")
 local task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
-local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new("TestCondition",
-    function(context1) return context1.Done == false end, TestContext))
+local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
+    function(context1) return context1.Done == false end))
 assert(t == task)
 assert(table.size(task.Conditions) == 1)
 
@@ -92,9 +92,8 @@ task.Name = "Test"
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context2) return context2.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context2) return context2.Done == true end)))
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
@@ -113,9 +112,8 @@ task.Name = "Test"
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context3) return context3.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context3) return context3.Done == true end)))
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
@@ -136,7 +134,7 @@ task.Name = "Test"
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
     function(context4) return context4.Done == true end
     , TestDebugContext)))
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
@@ -159,9 +157,8 @@ task.Name = "Test"
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context5) return context5.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context5) return context5.Done == true end)))
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
@@ -184,9 +181,8 @@ task.Name = "Test2"
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context6) return context6.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context6) return context6.Done == true end)))
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
@@ -215,15 +211,13 @@ task.Name = "Test2"
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context7) return context7.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context7) return context7.Done == true end)))
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context8) return context8.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context8) return context8.Done == true end)))
 task:AddSubtask(task2)
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
@@ -249,22 +243,19 @@ task.Name = "Test3"
 task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context9) return context9.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context9) return context9.Done == true end)))
 task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context10) return context10.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context10) return context10.Done == true end)))
 task2:AddSubtask(task3)
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context11) return context11.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context11) return context11.Done == true end)))
 task:AddSubtask(task2)
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
@@ -288,9 +279,8 @@ task.Name = "Test2"
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context12) return context12.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context12) return context12.Done == true end)))
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
@@ -320,9 +310,8 @@ task.Name = "Test2"
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context13) return context13.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context13) return context13.Done == true end)))
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
@@ -352,9 +341,8 @@ task.Name = "Test2"
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context14) return context14.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context14) return context14.Done == true end)))
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
@@ -362,9 +350,8 @@ end)())
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context15) return context15.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context15) return context15.Done == true end)))
 task:AddSubtask(task2)
 table.insert(ctx.LastMTR, 1)
 plan = Queue:new()
@@ -387,9 +374,8 @@ task.Name = "Test3"
 task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3-1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context16) return context16.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context16) return context16.Done == true end)))
 task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3-2"
     return p
@@ -397,9 +383,8 @@ end)())
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2-1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context17) return context17.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context17) return context17.Done == true end)))
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2-2"
     return p
@@ -409,8 +394,8 @@ task:AddSubtask(task3)
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1-1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == false",
-    function(context18) return context18.Done == false end, TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == false",
+    function(context18) return context18.Done == false end)))
 rootTask:AddSubtask(task)
 table.insert(ctx.LastMTR, 1)
 table.insert(ctx.LastMTR, 2)
@@ -431,9 +416,8 @@ task.Name = "Test2"
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2-1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context19) return context19.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context19) return context19.Done == true end)))
 task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2-1"
     return p
@@ -441,9 +425,8 @@ end)())
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1-1"
     return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new("Done == true",
-    function(context20) return context20.Done == true end
-    , TestContext)))
+end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
+    function(context20) return context20.Done == true end)))
 task:AddSubtask(task2)
 rootTask:AddSubtask(task)
 table.insert(ctx.LastMTR, 1)

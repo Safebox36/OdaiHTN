@@ -7,23 +7,25 @@ local GetKey = require("sb_htn.Utils.GetKey")
 local ActionEffect = mc.class("ActionEffect", IEffect)
 
 ---@param name string
----@param type EEffectType
+---@param effectType EEffectType
 ---@param func function<IContext>
 ---@param T IContext
-function ActionEffect:initialize(name, type, func, T)
+function ActionEffect:initialize(T, name, effectType, func)
     IEffect.initialize(self)
 
     self.Name = name
-    self.Type = type
+    self.Type = effectType
     ---@type function<IContext, EEffectType>
     self.Func = func
     self.T = T
 end
 
+---@param ctx IContext
 function ActionEffect:Apply(ctx)
     assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
     if (ctx.LogDecomposition) then
-        print(string.format("ActionEffect.Apply:%s\n\t- %i", GetKey(self.Type, EEffectType)), ctx.CurrentDecompositionDepth)
+        print(string.format("ActionEffect.Apply:%s\n\t- %i", GetKey(self.Type, EEffectType),
+            ctx.CurrentDecompositionDepth))
     end
     if (self.Func) then self.Func(ctx, self.Type) end
 end

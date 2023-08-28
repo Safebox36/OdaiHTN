@@ -19,7 +19,7 @@ function ICompoundTask:AddSubtask(subtask) return {} end
 ---@param ctx IContext
 ---@param startIndex integer
 ---@param result Queue ITask - out
----@return EDecompositionStatus | 0
+---@return EDecompositionStatus
 function ICompoundTask:Decompose(ctx, startIndex, result) return 0 end
 
 return ICompoundTask

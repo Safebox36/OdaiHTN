@@ -42,7 +42,7 @@ end
 ---@param ctx IContext
 ---@param startIndex integer
 ---@param result Queue ITask - out
----@return EDecompositionStatus | 0
+---@return EDecompositionStatus
 function CompoundTask:OnDecompose(ctx, startIndex, result) return 0 end
 
 ---@param ctx IContext
@@ -50,7 +50,7 @@ function CompoundTask:OnDecompose(ctx, startIndex, result) return 0 end
 ---@param taskIndex integer
 ---@param oldStackDepth integer[]
 ---@param result Queue ITask - out
----@return EDecompositionStatus | 0
+---@return EDecompositionStatus
 function CompoundTask:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result) return 0 end
 
 ---@param ctx IContext
@@ -58,15 +58,14 @@ function CompoundTask:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, resul
 ---@param taskIndex integer
 ---@param oldStackDepth integer[]
 ---@param result Queue ITask - out
----@return EDecompositionStatus | 0
-function CompoundTask:OnDecomposePrimitiveTask(ctx, task, taskIndex, oldStackDepth, result) return 0 end
+function CompoundTask:OnDecomposePrimitiveTask(ctx, task, taskIndex, oldStackDepth, result) end
 
 ---@param ctx IContext
 ---@param task ICompoundTask
 ---@param taskIndex integer
 ---@param oldStackDepth integer[]
 ---@param result Queue ITask - out
----@return EDecompositionStatus | 0
+---@return EDecompositionStatus
 function CompoundTask:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, result) return 0 end
 
 ---@param ctx IContext
@@ -74,14 +73,17 @@ function CompoundTask:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDept
 ---@param taskIndex integer
 ---@param oldStackDepth integer[]
 ---@param result Queue ITask - out
----@return EDecompositionStatus | 0
+---@return EDecompositionStatus
 function CompoundTask:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result) return 0 end
 
+---@param ctx IContext
+---@return boolean
 function CompoundTask:IsValid(ctx)
     for _, condition in ipairs(self.Conditions) do
         local result = condition:IsValid(ctx)
-        if (ctx.LogDecomposition) then mwse.log("CompoundTask.IsValid:%s:%s is%s valid!\n\t- %i",
-                result and "Success" or "Failed", condition.Name, result and "" or " not", ctx.CurrentDecompositionDepth)
+        if (ctx.LogDecomposition) then
+            print(string.format("CompoundTask.IsValid:%s:%s is%s valid!\n\t- %i", result and "Success" or "Failed",
+                condition.Name, result and "" or " not", ctx.CurrentDecompositionDepth))
         end
         if (result == false) then
             return false

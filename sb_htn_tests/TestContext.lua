@@ -31,8 +31,8 @@ function TestContext:HasState(state, value)
     end
 end
 
-function TestContext:SetState(state, value, type)
-    sb_htn.Contexts.BaseContext.SetState(self, state, (value and 1 or 0), true, type)
+function TestContext:SetState(state, value, T)
+    sb_htn.Contexts.BaseContext.SetState(self, state, (value and 1 or 0), true, T)
 end
 
 return TestContext
