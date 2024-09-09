@@ -18,7 +18,7 @@ function ICompoundTask:AddSubtask(subtask) return {} end
 --- Decompose the task onto the tasks to process queue, mind it's depth first
 ---@param ctx IContext
 ---@param startIndex integer
----@param result Queue ITask - out
+---@param result Queue<ITask> - out
 ---@return EDecompositionStatus
 function ICompoundTask:Decompose(ctx, startIndex, result) return 0 end
 

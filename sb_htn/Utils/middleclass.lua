@@ -35,7 +35,7 @@ local function _createIndexWrapper(aClass, f)
     return function(self, name)
       local value = aClass.__instanceDict[name]
 
-      if value ~= nil then
+      if value then
         return value
       else
         return (f(self, name))
@@ -45,7 +45,7 @@ local function _createIndexWrapper(aClass, f)
     return function(self, name)
       local value = aClass.__instanceDict[name]
 
-      if value ~= nil then
+      if value then
         return value
       else
         return f[name]

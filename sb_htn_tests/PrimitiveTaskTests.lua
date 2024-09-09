@@ -1,9 +1,9 @@
 local sb_htn = require("sb_htn.interop")
 local TestContext = require("sb_htn_tests.TestContext")
 
-print(">>> PrimitiveTaskTests")
+print("  > PrimitiveTaskTests")
 
-print("> AddCondition_ExpectedBehavior")
+print("    > AddCondition_ExpectedBehavior")
 local task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task.Name = "Test"
 local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
@@ -11,7 +11,7 @@ local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Te
 assert(t == task)
 assert(table.size(task.Conditions) == 1)
 
-print("> AddExecutingCondition_ExpectedBehavior")
+print("    > AddExecutingCondition_ExpectedBehavior")
 task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task.Name = "Test"
 t = task:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
@@ -19,7 +19,7 @@ t = task:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, 
 assert(t == task)
 assert(table.size(task.ExecutingConditions) == 1)
 
-print("> AddEffect_ExpectedBehavior")
+print("    > AddEffect_ExpectedBehavior")
 task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task.Name = "Test"
 t = task:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
@@ -27,13 +27,13 @@ t = task:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb
 assert(t == task)
 assert(table.size(task.Effects) == 1)
 
-print("> SetOperator_ExpectedBehavior")
+print("    > SetOperator_ExpectedBehavior")
 task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task.Name = "Test"
 task:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext))
-assert(task.Operator ~= nil)
+assert(task.Operator)
 
-print("> SetOperatorThrowsExceptionIfAlreadySet_ExpectedBehavior")
+print("    > SetOperatorThrowsExceptionIfAlreadySet_ExpectedBehavior")
 task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task.Name = "Test"
 task:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext))
@@ -41,7 +41,7 @@ if (pcall(function() task:SetOperator(sb_htn.Operators.FuncOperator:new(TestCont
     print("Exception not caught.")
 end
 
-print("> ApplyEffects_ExpectedBehavior")
+print("    > ApplyEffects_ExpectedBehavior")
 local ctx = TestContext:new()
 task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task.Name = "Test"
@@ -50,16 +50,16 @@ t = task:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb
 task:ApplyEffects(ctx)
 assert(true == ctx.Done)
 
-print("> StopWithValidOperator_ExpectedBehavior")
+print("    > StopWithValidOperator_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task.Name = "Test"
 task:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, nil, function(context5) context5.Done = true end))
 task:Stop(ctx)
-assert(task.Operator ~= nil)
+assert(task.Operator)
 assert(true == ctx.Done)
 
-print("> StopWithNullOperator_ExpectedBehavior")
+print("    > StopWithNullOperator_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task.Name = "Test"
@@ -67,7 +67,7 @@ if (pcall(function() task:Stop(ctx) end)) then
     print("Exception not caught.")
 end
 
-print("> IsValid_ExpectedBehavior")
+print("    > IsValid_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task.Name = "Test"

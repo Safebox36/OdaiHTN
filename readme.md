@@ -10,7 +10,8 @@
 * Easy to extend.
 * Uses a Factory interface internally to create and free tables/queues/stacks/objects, allowing for pooling, or other memory management schemes.
 * Decomposition logging, for debugging.
-* Minimal MWSE dependency, allowing for easy porting to OpenMW (official port to come).
+* Minimal dependency, allowing for easy importing to MWSE, OpenMW, LÖVE, Defold, Roblox, etc.
+* 148 unit tests.
 
 ## Concepts
 
@@ -184,6 +185,65 @@ Get A
 Get B
 Get C
 Done
+```
+## Partial Planning
+
+We can easily integrate the concept of partial planning into our domains. We call it a Pause Plan, and it must be within a sequence to be valid. It allows the planner to only plan up to a certain step, then continue from once the partial plan has been completed.
+
+```lua
+:Sequence("A")
+    :Action("1")
+        --...
+    :End()
+    :PausePlan()
+    :Action("2")
+        --...
+    :End()
+:End()
+```
+
+## Sub-Domains
+
+### Splicing
+
+We can define sub-domains and splice them together to form new domains, but they must share the same context type to be compatible. This is useful for sharing sub-domains between larger domains and to make larger domains more legible.
+
+```lua
+local subDomain = DomainBuilder:new(MyContext, "SubDomain")
+    :Select("B")
+        --...
+    :End()
+    :Build();
+    
+local myDomain = DomainBuilder:new(MyContext, "MyDomain")
+    :Select("A")
+        --...
+    :End()
+    :Splice(subDomain)
+    :Select("C")
+        --...
+    :End()
+    :Build();
+```
+
+### Slots
+
+We can define slots in our domains, and mark them with unique ids. This allow us to hook up sub-domains at run-time. This can be useful for smart objects that extend the behaviour of an agent.
+
+```lua
+local subDomain = DomainBuilder:new(MyContext, "SubDomain")
+    .Select("B")
+        //...
+    .End()
+    .Build();
+
+local myDomain = DomainBuilder:new(MyContext, "MyDomain")
+    .Slot(1)
+    .Build();
+    
+myDomain.TrySetSlotDomain(1, subDomain);
+//...
+myDomain.ClearSlot(1);
 ```
 
 ## Extensions

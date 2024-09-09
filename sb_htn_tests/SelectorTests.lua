@@ -3,9 +3,9 @@ local Queue = require("sb_htn.Utils.Queue")
 local TestContext = require("sb_htn_tests.TestContext")
 local TestDebugContext = require("sb_htn_tests.TestDebugContext")
 
-print(">>> SelectorTests")
+print("  > SelectorTests")
 
-print("> AddCondition_ExpectedBehavior")
+print("    > AddCondition_ExpectedBehavior")
 local task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
 local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
@@ -13,7 +13,7 @@ local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Te
 assert(t == task)
 assert(table.size(task.Conditions) == 1)
 
-print("> AddSubtask_ExpectedBehavior")
+print("    > AddSubtask_ExpectedBehavior")
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
 t = task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
@@ -23,13 +23,13 @@ end)())
 assert(t == task)
 assert(table.size(task.Subtasks) == 1)
 
-print("> IsValidFailsWithoutSubtasks_ExpectedBehavior")
+print("    > IsValidFailsWithoutSubtasks_ExpectedBehavior")
 local ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
 assert(task:IsValid(ctx) == false)
 
-print("> IsValid_ExpectedBehavior")
+print("    > IsValid_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -39,7 +39,7 @@ task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:
 end)())
 assert(task:IsValid(ctx))
 
-print("> DecomposeWithNoSubtasks_ExpectedBehavior")
+print("    > DecomposeWithNoSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -48,7 +48,7 @@ local status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Failed)
 assert(table.size(plan.list) == 0)
 
-print("> DecomposeWithSubtasks_ExpectedBehavior")
+print("    > DecomposeWithSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -67,7 +67,7 @@ assert(table.size(plan.list) > 0)
 assert(table.size(plan.list) == 1)
 assert("Sub-task1" == plan:peek().Name)
 
-print("> DecomposeWithSubtasks2_ExpectedBehavior")
+print("    > DecomposeWithSubtasks2_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -85,7 +85,7 @@ assert(table.size(plan.list) > 0)
 assert(table.size(plan.list) == 1)
 assert("Sub-task2" == plan:peek().Name)
 
-print("> DecomposeWithSubtasks3_ExpectedBehavior")
+print("    > DecomposeWithSubtasks3_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -105,7 +105,7 @@ assert(table.size(plan.list) > 0)
 assert(table.size(plan.list) == 1)
 assert("Sub-task2" == plan:peek().Name)
 
-print("> DecomposeMTRFails_ExpectedBehavior")
+print("    > DecomposeMTRFails_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -126,7 +126,7 @@ assert(table.size(plan.list) == 0)
 assert(table.size(ctx.MethodTraversalRecord) == 1)
 assert(0 == ctx.MethodTraversalRecord[1])
 
-print("> DecomposeDebugMTRFails_ExpectedBehavior")
+print("    > DecomposeDebugMTRFails_ExpectedBehavior")
 ctx = TestDebugContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
@@ -135,8 +135,7 @@ task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:
     p.Name = "Sub-task1"
     return p
 end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true",
-    function(context4) return context4.Done == true end
-    , TestDebugContext)))
+    function(context4) return context4.Done == true end, TestDebugContext)))
 task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
@@ -150,7 +149,7 @@ assert(table.size(ctx.MTRDebug) == 1)
 assert(ctx.MTRDebug[1]:find("REPLAN FAIL", 1, true))
 assert(ctx.MTRDebug[1]:find("Sub-task2", 1, true))
 
-print("> DecomposeMTRSucceedsWhenEqual_ExpectedBehavior")
+print("    > DecomposeMTRSucceedsWhenEqual_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -172,7 +171,7 @@ assert(table.size(ctx.MethodTraversalRecord) == 1)
 assert(table.size(plan.list) == 1)
 assert(ctx.MethodTraversalRecord[1] == ctx.LastMTR[1])
 
-print("> DecomposeCompoundSubtaskSucceeds_ExpectedBehavior")
+print("    > DecomposeCompoundSubtaskSucceeds_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -202,7 +201,7 @@ assert(table.size(ctx.MethodTraversalRecord) == 2)
 assert(ctx.MethodTraversalRecord[1] == 1)
 assert(ctx.MethodTraversalRecord[2] == 2)
 
-print("> DecomposeCompoundSubtaskFails_ExpectedBehavior")
+print("    > DecomposeCompoundSubtaskFails_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -232,7 +231,7 @@ assert("Sub-task3" == plan:peek().Name)
 assert(table.size(ctx.MethodTraversalRecord) == 1)
 assert(ctx.MethodTraversalRecord[1] == 2)
 
-print("> DecomposeNestedCompoundSubtaskFails_ExpectedBehavior")
+print("    > DecomposeNestedCompoundSubtaskFails_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -270,7 +269,7 @@ assert("Sub-task4" == plan:peek().Name)
 assert(table.size(ctx.MethodTraversalRecord) == 1)
 assert(ctx.MethodTraversalRecord[1] == 2)
 
-print("> DecomposeCompoundSubtaskBeatsLastMTR_ExpectedBehavior")
+print("    > DecomposeCompoundSubtaskBeatsLastMTR_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -301,7 +300,7 @@ assert(table.size(ctx.MethodTraversalRecord) == 2)
 assert(ctx.MethodTraversalRecord[1] == 1)
 assert(ctx.MethodTraversalRecord[2] == 2)
 
-print("> DecomposeCompoundSubtaskEqualToLastMTR_ExpectedBehavior")
+print("    > DecomposeCompoundSubtaskEqualToLastMTR_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -332,7 +331,7 @@ assert(table.size(ctx.MethodTraversalRecord) == 2)
 assert(ctx.MethodTraversalRecord[1] == 1)
 assert(ctx.MethodTraversalRecord[2] == 2)
 
-print("> DecomposeCompoundSubtaskLoseToLastMTR_ExpectedBehavior")
+print("    > DecomposeCompoundSubtaskLoseToLastMTR_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Test"
@@ -361,7 +360,7 @@ assert(table.size(plan.list) == 0)
 assert(table.size(ctx.MethodTraversalRecord) == 1)
 assert(ctx.MethodTraversalRecord[1] == 0)
 
-print("> DecomposeCompoundSubtaskWinOverLastMTR_ExpectedBehavior")
+print("    > DecomposeCompoundSubtaskWinOverLastMTR_ExpectedBehavior")
 ctx = TestContext:new()
 local rootTask = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Root"
@@ -405,7 +404,7 @@ plan = Queue:new()
 status = rootTask:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
 
-print("> DecomposeCompoundSubtaskLoseToLastMTR2_ExpectedBehavior")
+print("    > DecomposeCompoundSubtaskLoseToLastMTR2_ExpectedBehavior")
 ctx = TestContext:new()
 rootTask = sb_htn.Tasks.CompoundTasks.Selector:new()
 task.Name = "Root"

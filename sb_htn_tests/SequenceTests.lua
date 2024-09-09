@@ -2,9 +2,9 @@ local sb_htn = require("sb_htn.interop")
 local Queue = require("sb_htn.Utils.Queue")
 local TestContext = require("sb_htn_tests.TestContext")
 
-print(">>> SequenceTests")
+print("  > SequenceTests")
 
-print("> AddCondition_ExpectedBehavior")
+print("    > AddCondition_ExpectedBehavior")
 local task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
 local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
@@ -12,7 +12,7 @@ local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Te
 assert(t == task)
 assert(table.size(task.Conditions) == 1)
 
-print("> AddSubtask_ExpectedBehavior")
+print("    > AddSubtask_ExpectedBehavior")
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
 t = task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
@@ -22,13 +22,13 @@ end)())
 assert(t == task)
 assert(table.size(task.Subtasks) == 1)
 
-print("> IsValidFailsWithoutSubtasks_ExpectedBehavior")
+print("    > IsValidFailsWithoutSubtasks_ExpectedBehavior")
 local ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
 assert(task:IsValid(ctx) == false)
 
-print("> IsValid_ExpectedBehavior")
+print("    > IsValid_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
@@ -38,7 +38,7 @@ task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:
 end)())
 assert(task:IsValid(ctx))
 
-print("> DecomposeRequiresContextInitFails_ExpectedBehavior")
+print("    > DecomposeRequiresContextInitFails_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
@@ -47,7 +47,7 @@ if (pcall(function() task:Decompose(ctx, 1, plan) end)) then
     print("Exception not caught.")
 end
 
-print("> DecomposeWithNoSubtasks_ExpectedBehavior")
+print("    > DecomposeWithNoSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
@@ -57,7 +57,7 @@ local status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Failed)
 assert(table.size(plan.list) == 0)
 
-print("> DecomposeWithSubtasks_ExpectedBehavior")
+print("    > DecomposeWithSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
@@ -76,7 +76,7 @@ assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
 assert(table.size(plan.list) == 2)
 assert("Sub-task1" == plan:peek().Name)
 
-print("> DecomposeNestedSubtasks_ExpectedBehavior")
+print("    > DecomposeNestedSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
@@ -111,7 +111,7 @@ assert(table.size(plan.list) == 2)
 assert("Sub-task2" == plan:pop().Name)
 assert("Sub-task4" == plan:pop().Name)
 
-print("> DecomposeWithSubtasksOneFail_ExpectedBehavior")
+print("    > DecomposeWithSubtasksOneFail_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
@@ -131,7 +131,7 @@ status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Failed)
 assert(table.size(plan.list) == 0)
 
-print("> DecomposeWithSubtasksCompoundSubtaskFails_ExpectedBehavior")
+print("    > DecomposeWithSubtasksCompoundSubtaskFails_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
@@ -150,7 +150,7 @@ status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Failed)
 assert(table.size(plan.list) == 0)
 
-print("> DecomposeFailureReturnToPreviousWorldState_ExpectedBehavior")
+print("    > DecomposeFailureReturnToPreviousWorldState_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
@@ -182,7 +182,7 @@ assert(1 == ctx:GetState(TestContext.TestEnum.StateA))
 assert(1 == ctx:GetState(TestContext.TestEnum.StateB))
 assert(1 == ctx:GetState(TestContext.TestEnum.StateC))
 
-print("> DecomposeNestedCompoundSubtaskLoseToMTR_ExpectedBehavior")
+print("    > DecomposeNestedCompoundSubtaskLoseToMTR_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
@@ -221,7 +221,7 @@ assert(table.size(ctx.MethodTraversalRecord) == 2)
 assert(ctx.MethodTraversalRecord[1] == 1)
 assert(ctx.MethodTraversalRecord[2] == 0)
 
-print("> DecomposeNestedCompoundSubtaskLoseToMTR2_ExpectedBehavior")
+print("    > DecomposeNestedCompoundSubtaskLoseToMTR2_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
@@ -261,7 +261,7 @@ assert(table.size(ctx.MethodTraversalRecord) == 2)
 assert(ctx.MethodTraversalRecord[1] == 2)
 assert(ctx.MethodTraversalRecord[2] == 0)
 
-print("> DecomposeNestedCompoundSubtaskEqualToMTR_ExpectedBehavior")
+print("    > DecomposeNestedCompoundSubtaskEqualToMTR_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
@@ -302,7 +302,7 @@ assert(ctx.MethodTraversalRecord[2] == 2)
 assert("Sub-task3" == plan:pop().Name)
 assert("Sub-task4" == plan:pop().Name)
 
-print("> DecomposeNestedCompoundSubtaskLoseToMTRReturnToPreviousWorldState_ExpectedBehavior")
+print("    > DecomposeNestedCompoundSubtaskLoseToMTRReturnToPreviousWorldState_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
@@ -370,7 +370,7 @@ assert(1 == ctx:GetState(TestContext.TestEnum.StateA))
 assert(1 == ctx:GetState(TestContext.TestEnum.StateB))
 assert(1 == ctx:GetState(TestContext.TestEnum.StateC))
 
-print("> DecomposeNestedCompoundSubtaskFailReturnToPreviousWorldState_ExpectedBehavior")
+print("    > DecomposeNestedCompoundSubtaskFailReturnToPreviousWorldState_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
@@ -433,7 +433,7 @@ assert(1 == ctx:GetState(TestContext.TestEnum.StateA))
 assert(1 == ctx:GetState(TestContext.TestEnum.StateB))
 assert(1 == ctx:GetState(TestContext.TestEnum.StateC))
 
-print("> PausePlan_ExpectedBehavior")
+print("    > PausePlan_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
@@ -457,7 +457,7 @@ assert(table.size(ctx.PartialPlanQueue.list) == 1)
 assert(task == ctx.PartialPlanQueue:peek().Task)
 assert(3 == ctx.PartialPlanQueue:peek().TaskIndex)
 
-print("> ContinuePausedPlan_ExpectedBehavior")
+print("    > ContinuePausedPlan_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
@@ -497,7 +497,7 @@ end
 assert(table.size(plan.list) == 1)
 assert("Sub-task2" == plan:peek().Name)
 
-print("> NestedPausePlan_ExpectedBehavior")
+print("    > NestedPausePlan_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
@@ -538,7 +538,7 @@ assert(3 == queueAsArray[1].TaskIndex)
 assert(task == queueAsArray[2].Task)
 assert(2 == queueAsArray[2].TaskIndex)
 
-print("> ContinueNestedPausePlan_ExpectedBehavior")
+print("    > ContinueNestedPausePlan_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
@@ -599,7 +599,7 @@ assert(table.size(plan.list) == 2)
 assert("Sub-task2" == plan:pop().Name)
 assert("Sub-task4" == plan:pop().Name)
 
-print("> ContinueMultipleNestedPausePlan_ExpectedBehavior")
+print("    > ContinueMultipleNestedPausePlan_ExpectedBehavior")
 ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()

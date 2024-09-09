@@ -24,7 +24,7 @@ end
 
 ---@param parent ICompoundTask
 ---@param subtask ITask
-function Domain.AddTask(parent, subtask)
+function Domain:AddTask(parent, subtask)
     assert(parent ~= subtask, "Parent-task and Sub-task can't be the same instance!")
 
     parent:AddSubtask(subtask)
@@ -34,9 +34,7 @@ end
 ---@param parent ICompoundTask
 ---@param slot Slot
 function Domain:AddSlot(parent, slot)
-    assert(parent ~= slot, "Parent-task and Sub-task can't be the same instance!")
-
-    if (self._slots ~= nil) then
+    if (self._slots) then
         assert(self._slots[slot.SlotId] == nil, "This slot id already exist in the domain definition!")
     end
 
@@ -50,13 +48,202 @@ function Domain:AddSlot(parent, slot)
     self._slots[slot.SlotId] = slot
 end
 
+--- If decomposition status is failed or rejected, the replan failed.
+---@param status EDecompositionStatus
+---@return boolean
+local function HasDecompositionSucceeded(status)
+    return status == EDecompositionStatus.Succeeded or status == EDecompositionStatus.Partial
+end
+
+--- Pushs the sub plan's queue onto the existing plan
+---@param plan Queue<ITask>
+---@param subPlan Queue<ITask>
+local function PushToExistingPlan(plan, subPlan)
+    while (table.size(subPlan.list) > 0) do
+        plan:push(subPlan:pop())
+    end
+end
+
+--- If decomposition status is failed or rejected, the replan failed.
+---@param status EDecompositionStatus
+local function HasDecompositionFailed(status)
+    return status == EDecompositionStatus.Rejected or status == EDecompositionStatus.Failed
+end
+
+--- We only erase the MTR if we start from the root task of the domain.
 ---@param ctx IContext
----@param plan Queue ITask
+local function ClearMethodTraversalRecord(ctx)
+    ctx.MethodTraversalRecord = {}
+
+    if (ctx.DebugMTR) then
+        ctx.MTRDebug = {}
+    end
+end
+
+--- We first check whether we have a stored start task. This is true
+--- if we had a partial plan pause somewhere in our plan, and we now
+--- want to continue where we left off.
+--- If this is the case, we don't erase the MTR, but continue building it.
+---@param self Domain
+---@param ctx IContext
+---@param plan Queue<ITask>
+---@param status EDecompositionStatus
+local function OnPausedPartialPlan(self, ctx, plan, status)
+    ctx.HasPausedPartialPlan = false
+    while (table.size(ctx.PartialPlanQueue.list) > 0) do
+        local kvp = ctx.PartialPlanQueue:pop()
+        if (table.size(plan.list) == 0) then
+            status = kvp.Task:Decompose(ctx, kvp.TaskIndex, plan)
+        else
+            local subPlan = Queue:new()
+            status = kvp.Task:Decompose(ctx, kvp.TaskIndex, subPlan)
+            if (HasDecompositionSucceeded(status)) then
+                PushToExistingPlan(plan, subPlan)
+            end
+        end
+
+        -- While continuing a partial plan, we might encounter
+        -- a new pause.
+        if (ctx.HasPausedPartialPlan) then
+            break
+        end
+    end
+
+    -- If we failed to continue the paused partial plan,
+    -- then we have to start planning from the root.
+    if (HasDecompositionFailed(status)) then
+        ClearMethodTraversalRecord(ctx)
+        
+        status = self.Root:Decompose(ctx, 1, plan)
+    end
+
+    return status
+end
+
+--- If there is a paused partial plan, we cache it to a last partial plan queue.
+--- This is useful when we want to perform a replan, but don't know yet if it will
+--- win over the current plan.
+---@param ctx IContext
+---@return Queue | nil
+local function CacheLastPartialPlan(ctx)
+    if (ctx.HasPausedPartialPlan == false) then
+        return nil
+    end
+
+    ctx.HasPausedPartialPlan = false
+    local lastPartialPlanQueue = ctx.Factory:CreateQueue()
+    
+    while (table.size(ctx.PartialPlanQueue.list) > 0) do
+        lastPartialPlanQueue:push(ctx.PartialPlanQueue:pop())
+    end
+
+    return lastPartialPlanQueue
+end
+
+--- If we failed to find a new plan, we have to restore the old plan,
+--- if it was a partial plan.
+---@param ctx IContext
+---@param lastPartialPlanQueue Queue<PartialPlanEntry> | nil
+---@param status EDecompositionStatus
+local function RestoreLastPartialPlan(ctx, lastPartialPlanQueue, status)
+    if (lastPartialPlanQueue == nil) then
+        return
+    end
+
+    ctx.HasPausedPartialPlan = true
+    ctx.PartialPlanQueue:clear()
+
+    while (table.size(lastPartialPlanQueue.list) > 0) do
+        ctx.PartialPlanQueue:push(lastPartialPlanQueue:pop())
+    end
+
+    ctx.Factory:FreeQueue(lastPartialPlanQueue)
+end
+
+--- We first check whether we have a stored start task. This is true
+--- if we had a partial plan pause somewhere in our plan, and we now
+--- want to continue where we left off.
+--- If this is the case, we don't erase the MTR, but continue building it.
+--- However, if we have a partial plan, but LastMTR is not 0, that means
+--- that the partial plan is still running, but something triggered a replan.
+--- When this happens, we have to plan from the domain root (we're not
+--- continuing the current plan), so that we're open for other plans to replace
+--- the running partial plan.
+---@param self Domain
+---@param ctx IContext
+---@param plan Queue<ITask>
+---@param status EDecompositionStatus
+---@return EDecompositionStatus
+local function OnReplanDuringPartialPlanning(self, ctx, plan, status)
+    local lastPartialPlanQueue = CacheLastPartialPlan(ctx)
+
+    ClearMethodTraversalRecord(ctx)
+
+    -- Replan through decomposition of the hierarchy
+    status = self.Root:Decompose(ctx, 1, plan)
+
+    if (HasDecompositionFailed(status)) then
+        RestoreLastPartialPlan(ctx, lastPartialPlanQueue, status)
+    end
+
+    return status
+end
+
+--- If this MTR equals the last MTR, then we need to double-check whether we ended up
+--- just finding the exact same plan. During decomposition each compound task can't check
+--- for equality, only for less than, so this case needs to be treated after the fact.
+---@param ctx IContext
+---@return boolean
+local function HasFoundSamePlan(ctx)
+    local isMTRsEqual = table.size(ctx.MethodTraversalRecord) == table.size(ctx.LastMTR)
+    if (isMTRsEqual) then
+        for i = 1, table.size(ctx.MethodTraversalRecord) do
+            if (ctx.MethodTraversalRecord[i] < ctx.LastMTR[i]) then
+                isMTRsEqual = false
+                break
+            end
+        end
+
+        return isMTRsEqual
+    end
+
+    return false
+end
+
+--- Apply permanent world state changes to the actual world state used during plan execution.
+---@param ctx IContext
+local function ApplyPermanentWorldStateStackChanges(ctx)
+    -- Trim away any plan-only or plan&execute effects from the world state change stack, that only
+    -- permanent effects on the world state remains now that the planning is done.
+    ctx:TrimForExecution()
+
+    -- Apply permanent world state changes to the actual world state used during plan execution.
+    for i = 1, table.size(ctx.WorldStateChangeStack) do
+        local stack = ctx.WorldStateChangeStack[i]
+        if (stack and table.size(stack.list) > 0) then
+            ctx.WorldState[i] = stack:peek()[2]
+            stack:clear()
+        end
+    end
+end
+
+-- Clear away any changes that might have been applied to the stack
+---@param ctx IContext
+local function ClearWorldStateStackChanges(ctx)
+    for _, stack in ipairs(ctx.WorldStateChangeStack) do
+        if (stack and table.size(stack.list) > 0) then
+            stack:clear()
+        end
+    end
+end
+
+---@param ctx IContext
+---@param plan Queue<ITask>
 ---@return EDecompositionStatus
 function Domain:FindPlan(ctx, plan)
     assert(ctx.IsInitialized, "Context was not initialized!")
 
-    assert(ctx.MethodTraversalRecord ~= nil, "We require the Method Traversal Record to have a valid instance.")
+    assert(ctx.MethodTraversalRecord, "We require the Method Traversal Record to have a valid instance.")
 
     ctx.ContextState = IContext.EContextState.Planning
 
@@ -73,104 +260,26 @@ function Domain:FindPlan(ctx, plan)
     -- continuing the current plan), so that we're open for other plans to replace
     -- the running partial plan.
     if (ctx.HasPausedPartialPlan and table.size(ctx.LastMTR) == 0) then
-        ctx.HasPausedPartialPlan = false
-        while (table.size(ctx.PartialPlanQueue.list) > 0) do
-            local kvp = ctx.PartialPlanQueue:pop()
-            if (table.size(plan.list) == 0) then
-                status = kvp.Task:Decompose(ctx, kvp.TaskIndex, plan)
-            else
-                local p = Queue:new()
-                status = kvp.Task:Decompose(ctx, kvp.TaskIndex, p)
-                if (status == EDecompositionStatus.Succeeded or status == EDecompositionStatus.Partial) then
-                    while (table.size(p.list) > 0) do
-                        plan:push(p:pop())
-                    end
-                end
-            end
-
-            -- While continuing a partial plan, we might encounter
-            -- a new pause.
-            if (ctx.HasPausedPartialPlan) then
-                break
-            end
-        end
-
-        -- If we failed to continue the paused partial plan,
-        -- then we have to start planning from the root.
-        if (status == EDecompositionStatus.Rejected or status == EDecompositionStatus.Failed) then
-            ctx.MethodTraversalRecord = {}
-            if (ctx.DebugMTR) then ctx.MTRDebug = {} end
-
-            status = self.Root:Decompose(ctx, 1, plan)
-        end
+        status = OnPausedPartialPlan(self, ctx, plan, status)
     else
-        local lastPartialPlanQueue = nil
-        if (ctx.HasPausedPartialPlan) then
-            ctx.HasPausedPartialPlan = false
-            lastPartialPlanQueue = ctx.Factory:CreateQueue()
-            while (table.size(ctx.PartialPlanQueue.list) > 0) do
-                lastPartialPlanQueue:push(ctx.PartialPlanQueue:pop())
-            end
-        end
-
-        -- We only erase the MTR if we start from the root task of the domain.
-        ctx.MethodTraversalRecord = {}
-        if (ctx.DebugMTR) then ctx.MTRDebug = {} end
-
-        status = self.Root:Decompose(ctx, 1, plan)
-
-        -- If we failed to find a new plan, we have to restore the old plan,
-        -- if it was a partial plan.
-        if (lastPartialPlanQueue ~= nil) then
-            if (status == EDecompositionStatus.Rejected or status == EDecompositionStatus.Failed) then
-                ctx.HasPausedPartialPlan = true
-                ctx.PartialPlanQueue:clear()
-                while (table.size(lastPartialPlanQueue.list) > 0) do
-                    ctx.PartialPlanQueue:push(lastPartialPlanQueue:pop())
-                end
-                ctx.Factory:FreeQueue(lastPartialPlanQueue)
-            end
-        end
+        status = OnReplanDuringPartialPlanning(self, ctx, plan, status)
     end
 
-    -- If this MTR equals the last MTR, then we need to double check whether we ended up
+    -- If this MTR equals the last MTR, then we need to double-check whether we ended up
     -- just finding the exact same plan. During decomposition each compound task can't check
     -- for equality, only for less than, so this case needs to be treated after the fact.
-    local isMTRsEqual = table.size(ctx.MethodTraversalRecord) == table.size(ctx.LastMTR)
-    if (isMTRsEqual) then
-        for i = 1, table.size(ctx.MethodTraversalRecord) do
-            if (ctx.MethodTraversalRecord[i] < ctx.LastMTR[i]) then
-                isMTRsEqual = false
-                break
-            end
-        end
-
-        if (isMTRsEqual) then
-            plan:clear()
-            status = EDecompositionStatus.Rejected
-        end
+    if (HasFoundSamePlan(ctx)) then
+        plan:clear()
+        status = EDecompositionStatus.Rejected
     end
 
-    if (status == EDecompositionStatus.Succeeded or status == EDecompositionStatus.Partial) then
-        -- Trim away any plan-only or plan&execute effects from the world state change stack, that only
-        -- permanent effects on the world state remains now that the planning is done.
-        ctx:TrimForExecution()
-
+    if (HasDecompositionSucceeded(status)) then
         -- Apply permanent world state changes to the actual world state used during plan execution.
-        for i = 1, table.size(ctx.WorldStateChangeStack) do
-            local stack = ctx.WorldStateChangeStack[i]
-            if (stack and table.size(stack.list) > 0) then
-                ctx.WorldState[i] = stack:peek()[2]
-                stack:clear()
-            end
-        end
+        ApplyPermanentWorldStateStackChanges(ctx)
     else
         -- Clear away any changes that might have been applied to the stack
         -- No changes should be made or tracked further when the plan failed.
-        for i = 1, table.size(ctx.WorldStateChangeStack) do
-            local stack = ctx.WorldStateChangeStack[i]
-            if (stack and table.size(stack.list) > 0) then stack:clear() end
-        end
+        ClearWorldStateStackChanges(ctx)
     end
 
     ctx.ContextState = IContext.EContextState.Executing

@@ -24,8 +24,7 @@ end
 function ActionEffect:Apply(ctx)
     assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
     if (ctx.LogDecomposition) then
-        print(string.format("ActionEffect.Apply:%s\n\t- %i", GetKey(self.Type, EEffectType),
-            ctx.CurrentDecompositionDepth))
+        log("%i - ActionEffect.Apply:%s", ctx.CurrentDecompositionDepth, GetKey(self.Type, EEffectType))
     end
     if (self.Func) then self.Func(ctx, self.Type) end
 end

@@ -35,4 +35,7 @@ function IPrimitiveTask:ApplyEffects(ctx) end
 ---@param ctx IContext
 function IPrimitiveTask:Stop(ctx) end
 
+---@param ctx IContext
+function IPrimitiveTask:Aborted(ctx) end
+
 return IPrimitiveTask

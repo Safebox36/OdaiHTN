@@ -68,11 +68,11 @@ end
 ---@param task ICompoundTask
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:CompoundTask(name, task)
-    assert(task ~= nil, "task")
+    assert(task, "task")
     assert(self:Pointer():isInstanceOf(ICompoundTask),
         "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?")
     task.Name = name
-    self._domain.AddTask(self:Pointer(), task)
+    self._domain:AddTask(self:Pointer(), task)
     table.insert(self._pointers, task)
     return self
 end
@@ -90,7 +90,7 @@ function BaseDomainBuilder:PrimitiveTask(name, P)
         "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?")
     local parent = P:new()
     parent.Name = name
-    self._domain.AddTask(self:Pointer(), parent)
+    self._domain:AddTask(self:Pointer(), parent)
     table.insert(self._pointers, parent)
 
     return self
@@ -109,7 +109,7 @@ function BaseDomainBuilder:PausePlanTask()
         "Pointer is not a decompose-all compound task type, like a Sequence. Maybe you tried to Pause Plan a Selector, or forget an End() after a Primitive Task Action was defined?")
     local parent = PausePlanTask:new()
     parent.Name = "Pause Plan"
-    self._domain.AddTask(self:Pointer(), parent)
+    self._domain:AddTask(self:Pointer(), parent)
 
     return self
 end
@@ -208,7 +208,7 @@ end
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Splice(domain)
     assert(self:Pointer():isInstanceOf(ICompoundTask), "Pointer is not a compound task type. Did you forget an End()?")
-    self._domain.AddTask(self:Pointer(), domain.Root)
+    self._domain:AddTask(self:Pointer(), domain.Root)
 
     return self
 end

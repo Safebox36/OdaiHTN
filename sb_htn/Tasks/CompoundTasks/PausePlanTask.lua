@@ -30,18 +30,18 @@ function PausePlanTask:AddCondition(condition)
 end
 
 ---@param effect IEffect
-function PausePlanTask.AddEffect(effect)
+function PausePlanTask:AddEffect(effect)
     assert(effect == nil, "Pause Plan tasks does not support effects.")
 end
 
 ---@param ctx IContext
-function PausePlanTask.ApplyEffects(ctx) end
+function PausePlanTask:ApplyEffects(ctx) end
 
 ---@param ctx IContext
 ---@return boolean
 function PausePlanTask:IsValid(ctx)
     if (ctx.LogDecomposition) then
-        print(string.format("PausePlanTask.IsValid:Success!\n\t- %i", ctx.CurrentDecompositionDepth))
+        log("%i - PausePlanTask.IsValid:Success!", ctx.CurrentDecompositionDepth)
     end
     return true
 end

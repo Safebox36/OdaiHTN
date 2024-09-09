@@ -33,6 +33,8 @@ function IContext:initialize()
 
     ---@type IFactory
     self.Factory = nil
+    ---@type IPlannerState
+    self.PlannerState = nil
 
     --- The Method Traversal Record is used while decomposing a domain and
     --- records the valid decomposition indices as we go through our
@@ -74,7 +76,7 @@ function IContext:initialize()
     ---@type boolean
     self.LogDecomposition = nil
 
-    ---@type Queue PartialPlanEntry
+    ---@type Queue<PartialPlanEntry>
     self.PartialPlanQueue = nil
 
     ---@type boolean

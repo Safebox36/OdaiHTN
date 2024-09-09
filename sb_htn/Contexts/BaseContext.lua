@@ -20,6 +20,8 @@ function BaseContext:initialize()
     self.CurrentDecompositionDepth = 0
     ---@type IFactory
     self.Factory = nil
+    ---@type IPlannerState
+    self.PlannerState = nil
     ---@type table<integer>
     self.MethodTraversalRecord = {}
     ---@type table<integer>

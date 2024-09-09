@@ -1,19 +1,19 @@
 local sb_htn = require("sb_htn.interop")
 local TestContext = require("sb_htn_tests.TestContext")
 
-print(">>> DomainBuilderTests")
+print("  > DomainBuilderTests")
 
-print("> Build_ForgotEnd")
+print("    > Build_ForgotEnd")
 -- Arrange
 local builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
 local ptr = builder:Pointer()
 local domain = builder:Build()
-assert(domain.Root ~= nil)
+assert(domain.Root)
 assert(ptr == domain.Root)
 assert("Test" == domain.Root.Name)
 
-print("> BuildInvalidatesPointer_ForgotEnd")
+print("    > BuildInvalidatesPointer_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -22,7 +22,7 @@ if (pcall(function() assert(builder:Pointer() == domain.Root) end)) then
     print("Exception not caught.")
 end
 
-print("> Selector_ExpectedBehavior")
+print("    > Selector_ExpectedBehavior")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -31,7 +31,7 @@ builder:End()
 -- Assert
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 
-print("> Selector_ForgotEnd")
+print("    > Selector_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -40,7 +40,7 @@ builder:Select("select test")
 assert(false == builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.Selector))
 
-print("> SelectorBuild_ForgotEnd")
+print("    > SelectorBuild_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -49,7 +49,7 @@ if (pcall(function() domain = builder:Build() end)) then
     print("Exception not caught.")
 end
 
-print("> Selector_CompoundTask")
+print("    > Selector_CompoundTask")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -58,7 +58,7 @@ builder:Compound("select test", sb_htn.Tasks.CompoundTasks.Selector)
 assert(false == builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.Selector))
 
-print("> Sequence_ExpectedBehavior")
+print("    > Sequence_ExpectedBehavior")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -67,7 +67,7 @@ builder:End()
 -- Assert
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 
-print("> Sequence_ForgotEnd")
+print("    > Sequence_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -75,7 +75,7 @@ builder:Sequence("sequence test")
 -- Assert
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.Sequence))
 
-print("> Sequence_CompoundTask")
+print("    > Sequence_CompoundTask")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -83,7 +83,7 @@ builder:Compound("sequence test", sb_htn.Tasks.CompoundTasks.Sequence)
 -- Assert
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.Sequence))
 
-print("> Action_ExpectedBehavior")
+print("    > Action_ExpectedBehavior")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -92,7 +92,7 @@ builder:End()
 -- Assert
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 
-print("> Action_ForgotEnd")
+print("    > Action_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -100,7 +100,7 @@ builder:Action("sequence test")
 -- Assert
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask))
 
-print("> Action_PrimitiveTask")
+print("    > Action_PrimitiveTask")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -108,7 +108,7 @@ builder:PrimitiveTask("sequence test", sb_htn.Tasks.PrimitiveTasks.PrimitiveTask
 -- Assert
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask))
 
-print("> PausePlanThrowsWhenPointerIsNotDecomposeAll")
+print("    > PausePlanThrowsWhenPointerIsNotDecomposeAll")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -116,7 +116,7 @@ if (pcall(function() builder:PausePlan() end)) then
     print("Exception not caught.")
 end
 
-print("> PausePlan_ExpectedBehaviour")
+print("    > PausePlan_ExpectedBehaviour")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -125,7 +125,7 @@ builder:PausePlan()
 builder:End()
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 
-print("> PausePlan_ForgotEnd")
+print("    > PausePlan_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -133,14 +133,14 @@ builder:Sequence("sequence test")
 builder:PausePlan()
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.Sequence))
 
-print("> Condition_ExpectedBehaviour")
+print("    > Condition_ExpectedBehaviour")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
 builder:Condition("test", function(ctx) return true end)
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 
-print("> ExecutingCondition_ThrowsIfNotPrimitiveTaskPointer")
+print("    > ExecutingCondition_ThrowsIfNotPrimitiveTaskPointer")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -148,7 +148,7 @@ if (pcall(function() builder:ExecutingCondition("test", function(ctx) return tru
     print("Exception not caught.")
 end
 
-print("> ExecutingCondition_ExpectedBehavior")
+print("    > ExecutingCondition_ExpectedBehavior")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -157,7 +157,7 @@ builder:ExecutingCondition("test", function(ctx) return true end)
 builder:End()
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 
-print("> ExecutingCondition_ForgotEnd")
+print("    > ExecutingCondition_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -165,7 +165,7 @@ builder:Action("test")
 builder:ExecutingCondition("test", function(ctx) return true end)
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask))
 
-print("> Do_ThrowsIfNotPrimitiveTaskPointer")
+print("    > Do_ThrowsIfNotPrimitiveTaskPointer")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -173,7 +173,7 @@ if (pcall(function() builder:Do(function(ctx) return sb_htn.Tasks.ETaskStatus.Su
     print("Exception not caught.")
 end
 
-print("> Do_ExpectedBehavior")
+print("    > Do_ExpectedBehavior")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -182,7 +182,7 @@ builder:Do(function(ctx) return sb_htn.Tasks.ETaskStatus.Success end)
 builder:End()
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 
-print("> Do_ForgotEnd")
+print("    > Do_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -190,7 +190,7 @@ builder:Action("test")
 builder:Do(function(ctx) return sb_htn.Tasks.ETaskStatus.Success end)
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask))
 
-print("> Effect_ThrowsIfNotPrimitiveTaskPointer")
+print("    > Effect_ThrowsIfNotPrimitiveTaskPointer")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -198,7 +198,7 @@ if (pcall(function() builder:Effect("test", sb_htn.Effects.EEffectType.Permanent
     print("Exception not caught.")
 end
 
-print("> Effect_ExpectedBehavior")
+print("    > Effect_ExpectedBehavior")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -207,7 +207,7 @@ builder:Effect("test", sb_htn.Effects.EEffectType.Permanent, function(ctx, effec
 builder:End()
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 
-print("> Effect_ForgotEnd")
+print("    > Effect_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -215,7 +215,7 @@ builder:Action("test")
 builder:Effect("test", sb_htn.Effects.EEffectType.Permanent, function(ctx, effectType) return end)
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask))
 
-print("> Splice_ThrowsIfNotCompoundPointer")
+print("    > Splice_ThrowsIfNotCompoundPointer")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -225,7 +225,7 @@ if (pcall(function() builder:Splice(domain) end)) then
     print("Exception not caught.")
 end
 
-print("> Splice_ExpectedBehavior")
+print("    > Splice_ExpectedBehavior")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -233,7 +233,7 @@ domain = sb_htn.DomainBuilder:new(TestContext, "sub-domain"):Build()
 builder:Splice(domain)
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 
-print("> Splice_ForgotEnd")
+print("    > Splice_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -242,7 +242,7 @@ builder:Select("test")
 builder:Splice(domain)
 assert(builder:Pointer():isInstanceOf(sb_htn.Tasks.CompoundTasks.Selector))
 
-print("> Slot_ThrowsIfNotCompoundPointer")
+print("    > Slot_ThrowsIfNotCompoundPointer")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -251,7 +251,7 @@ if (pcall(function() builder:Slot(1) end)) then
     print("Exception not caught.")
 end
 
-print("> Slot_ThrowsIfSlotIdAlreadyDefined")
+print("    > Slot_ThrowsIfSlotIdAlreadyDefined")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -260,7 +260,7 @@ if (pcall(function() builder:Slot(1) end)) then
     print("Exception not caught.")
 end
 
-print("> Slot_ExpectedBehavior")
+print("    > Slot_ExpectedBehavior")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act
@@ -274,13 +274,13 @@ assert(domain:TrySetSlotDomain(99, subDomain) == false) -- Need to define slotId
 assert(table.size(domain.Root.Subtasks) == 1)
 assert(domain.Root.Subtasks[1]:isInstanceOf(sb_htn.Tasks.OtherTasks.Slot))
 local slot = domain.Root.Subtasks[1]
-assert(slot.Subtask ~= nil)
+assert(slot.Subtask)
 assert(slot.Subtask:isInstanceOf(sb_htn.Tasks.CompoundTasks.TaskRoot))
 assert(slot.Subtask.Name == "sub-domain")
 domain:ClearSlot(1)
 assert(slot.Subtask == nil)
 
-print("> Slot_ForgotEnd")
+print("    > Slot_ForgotEnd")
 -- Arrange
 builder = sb_htn.DomainBuilder:new(TestContext, "Test")
 -- Act

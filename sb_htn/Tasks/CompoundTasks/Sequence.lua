@@ -17,7 +17,7 @@ function Sequence:initialize()
     CompoundTask.initialize(self)
     self.IDecomposeAll = IDecomposeAll:new()
 
-    ---@type Queue ITask
+    ---@type Queue<ITask>
     self.Plan = Queue:new()
 end
 
@@ -27,7 +27,7 @@ function Sequence:IsValid(ctx)
     -- Check that our preconditions are valid first.
     if (CompoundTask.IsValid(self, ctx) == false) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.IsValid:Failed:Preconditions not met!\n\t- %i", ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.IsValid:Failed:Preconditions not met!", ctx.CurrentDecompositionDepth)
         end
         return false
     end
@@ -35,14 +35,13 @@ function Sequence:IsValid(ctx)
     -- Selector requires there to be subtasks to successfully select from.
     if (table.size(self.Subtasks) == 0) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.IsValid:Failed:No sub-tasks!\n\t- %i", ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.IsValid:Failed:No sub-tasks!", ctx.CurrentDecompositionDepth)
         end
         return false
     end
 
     if (ctx.LogDecomposition) then
-        print(string.format("Sequence.IsValid:Success!\n\t- %i",
-            ctx.CurrentDecompositionDepth))
+        log("%i - Sequence.IsValid:Success!", ctx.CurrentDecompositionDepth)
     end
     return true
 end
@@ -61,14 +60,11 @@ function Sequence:OnDecompose(ctx, startIndex, result)
     for taskIndex = startIndex, table.size(self.Subtasks) do
         local task = self.Subtasks[taskIndex]
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecompose:Task index: %i: %s\n\t- %i", taskIndex, task.Name,
-                ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecompose:Task index: %i: %s", ctx.CurrentDecompositionDepth, taskIndex, task.Name)
         end
 
         local status = self:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
-        if (
-                status == EDecompositionStatus.Rejected or status == EDecompositionStatus.Failed or
-                status == EDecompositionStatus.Partial) then
+        if (status == EDecompositionStatus.Rejected or status == EDecompositionStatus.Failed or status == EDecompositionStatus.Partial) then
             ctx.Factory:FreeArray(nil, oldStackDepth)
             return status
         end
@@ -89,8 +85,7 @@ end
 function Sequence:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
     if (task:IsValid(ctx) == false) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeTask:Failed:Task %s.IsValid returned false!\n\t- %i", task.Name,
-                ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeTask:Failed:Task %s.IsValid returned false!", ctx.CurrentDecompositionDepth, task.Name)
         end
         self.Plan:clear()
         ctx:TrimToStackDepth(oldStackDepth)
@@ -104,8 +99,7 @@ function Sequence:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
         self:OnDecomposePrimitiveTask(ctx, task, taskIndex, oldStackDepth, result)
     elseif (task:isInstanceOf(PausePlanTask)) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeTask:Return partial plan at index %i!\n\t- %i", taskIndex,
-                ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeTask:Return partial plan at index %i!", ctx.CurrentDecompositionDepth, taskIndex)
         end
         ctx.HasPausedPartialPlan = true
         ctx.PartialPlanQueue:push((function()
@@ -124,8 +118,7 @@ function Sequence:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
     result:copy(self.Plan)
     local s = table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
     if (ctx.LogDecomposition) then
-        print(string.format("Sequence.OnDecomposeTask:%s!\n\t- %i", GetKey(s, EDecompositionStatus),
-            ctx.CurrentDecompositionDepth))
+        log("%i - Sequence.OnDecomposeTask:%s!", ctx.CurrentDecompositionDepth, GetKey(s, EDecompositionStatus))
     end
     return s
 end
@@ -139,8 +132,7 @@ function Sequence:OnDecomposePrimitiveTask(ctx, task, taskIndex, oldStackDepth, 
     -- We don't add MTR tracking on sequences for primary sub-tasks, since they will always be included, so they're irrelevant to MTR tracking.
 
     if (ctx.LogDecomposition) then
-        print(string.format("Sequence.OnDecomposeTask:Pushed %s to plan!\n\t- %i", task.Name,
-            ctx.CurrentDecompositionDepth))
+        log("%i - Sequence.OnDecomposeTask:Pushed %s to plan!", ctx.CurrentDecompositionDepth, task.Name)
     end
     task:ApplyEffects(ctx)
     self.Plan:push(task)
@@ -159,8 +151,8 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     -- If result is null, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeCompoundTask:%s: Decomposing %s was rejected.\n\t- %i",
-                GetKey(status, EDecompositionStatus), task.Name, ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeCompoundTask:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth,
+             GetKey(status, EDecompositionStatus), task.Name)
         end
 
         self.Plan:clear()
@@ -173,8 +165,8 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     -- If the decomposition failed
     if (status == EDecompositionStatus.Failed) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeCompoundTask:%s: Decomposing %s failed.\n\t- %i",
-                GetKey(status, EDecompositionStatus), task.Name, ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeCompoundTask:%s: Decomposing %s failed.", ctx.CurrentDecompositionDepth,
+             GetKey(status, EDecompositionStatus), task.Name)
         end
 
         self.Plan:clear()
@@ -186,16 +178,15 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     while (table.size(subPlan.list) > 0) do
         local p = subPlan:pop()
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeCompoundTask:Decomposing %s:Pushed %s to plan!\n\t- %i", task.Name,
-                p.Name, ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeCompoundTask:Decomposing %s:Pushed %s to plan!", ctx.CurrentDecompositionDepth,
+             task.Name, p.Name)
         end
         self.Plan:push(p)
     end
 
     if (ctx.HasPausedPartialPlan) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeCompoundTask:Return partial plan at index %i!\n\t- %i", taskIndex,
-                ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeCompoundTask:Return partial plan at index %i!", ctx.CurrentDecompositionDepth, taskIndex)
         end
         if (taskIndex < table.size(self.Subtasks)) then
             ctx.PartialPlanQueue:push((function()
@@ -212,7 +203,7 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
 
     result:copy(self.Plan)
     if (ctx.LogDecomposition) then
-        print(string.format("Sequence.OnDecomposeCompoundTask:Succeeded!\n\t- %i", ctx.CurrentDecompositionDepth))
+        log("%i - Sequence.OnDecomposeCompoundTask:Succeeded!", ctx.CurrentDecompositionDepth)
     end
     return EDecompositionStatus.Succeeded
 end
@@ -230,8 +221,8 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     -- If result is null, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeSlot:%s: Decomposing %s was rejected.\n\t- %i",
-                GetKey(status, EDecompositionStatus), task.Name, ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeSlot:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth,
+             GetKey(status, EDecompositionStatus), task.Name)
         end
 
         self.Plan:clear()
@@ -244,8 +235,8 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     -- If the decomposition failed
     if (status == EDecompositionStatus.Failed) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeSlot:%s: Decomposing %s failed.\n\t- %i",
-                GetKey(status, EDecompositionStatus), task.Name, ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeSlot:%s: Decomposing %s failed.", ctx.CurrentDecompositionDepth,
+             GetKey(status, EDecompositionStatus), task.Name)
         end
 
         self.Plan:clear()
@@ -257,16 +248,15 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     while (table.size(subPlan.list) > 0) do
         local p = subPlan:pop()
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeSlot:Decomposing %s:Pushed %s to plan!\n\t- %i", task.Name, p.Name,
-                ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeSlot:Decomposing %s:Pushed %s to plan!", ctx.CurrentDecompositionDepth,
+             task.Name, p.Name)
         end
         self.Plan:push(p)
     end
 
     if (ctx.HasPausedPartialPlan) then
         if (ctx.LogDecomposition) then
-            print(string.format("Sequence.OnDecomposeSlot:Return partial plan at index %i!\n\t- %i", taskIndex,
-                ctx.CurrentDecompositionDepth))
+            log("%i - Sequence.OnDecomposeSlot:Return partial plan at index %i!", ctx.CurrentDecompositionDepth, taskIndex)
         end
         if (taskIndex < table.size(self.Subtasks)) then
             ctx.PartialPlanQueue:push((function()
@@ -283,8 +273,7 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
 
     result:copy(self.Plan)
     if (ctx.LogDecomposition) then
-        print(string.format("Sequence.OnDecomposeSlot:Succeeded!\n\t- %i",
-            ctx.CurrentDecompositionDepth))
+        log("%i - Sequence.OnDecomposeSlot:Succeeded!", ctx.CurrentDecompositionDepth)
     end
     return EDecompositionStatus.Succeeded
 end

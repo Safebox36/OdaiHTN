@@ -48,7 +48,7 @@ end
 
 ---@param ctx IContext
 ---@param startIndex integer
----@param result Queue ITask - out
+---@param result Queue<ITask> - out
 ---@return EDecompositionStatus
 function Slot:Decompose(ctx, startIndex, result)
     if (self.Subtask) then
@@ -64,8 +64,7 @@ end
 function Slot:IsValid(ctx)
     local result = self.Subtask and true or false
     if (ctx.LogDecomposition) then
-        print(string.format("Slot.IsValid:%s!\n\t- %i", (result and "Success" or "Failed"),
-            ctx.CurrentDecompositionDepth))
+        log("%i - Slot.IsValid:%s!", ctx.CurrentDecompositionDepth, (result and "Success" or "Failed"))
     end
     return result
 end

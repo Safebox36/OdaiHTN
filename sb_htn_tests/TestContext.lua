@@ -14,6 +14,7 @@ function TestContext:initialize()
 
     self.WorldState       = {}
     self.Factory          = sb_htn.Factory.DefaultFactory:new()
+    self.PlannerState     = sb_htn.Planners.DefaultPlannerState:new()
     self.DebugMTR         = false
     self.Done             = false
     self.LogDecomposition = false

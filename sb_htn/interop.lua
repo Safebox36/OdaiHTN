@@ -1,4 +1,5 @@
 require("sb_htn.Utils.TableExt")
+require("sb_htn.Utils.PrintExt")
 
 return {
     Conditions = {
@@ -28,6 +29,8 @@ return {
     },
 
     Planners = {
+        IPlannerState = require("sb_htn.Planners.IPlannerState"),
+        DefaultPlannerState = require("sb_htn.Planners.DefaultPlannerState"),
         Planner = require("sb_htn.Planners.Planner"),
     },
 
