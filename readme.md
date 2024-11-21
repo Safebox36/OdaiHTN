@@ -1,4 +1,6 @@
-## ﻿Features
+![FluadHTN](https://raw.githubusercontent.com/Safebox36/OdaiHTN/refs/heads/main/lua%20-%20fluidHTN%20-%20logo%20full.png)
+
+## Features
 
 * [Total-order forward decomposition planner](http://www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf).
 * Pre-existing Domain Builder to simplify the design of code-oriented HTN domains.
@@ -23,7 +25,7 @@ High level tasks that have multiple ways of being accomplished. There are primar
 These tasks are decomposed until left with only Primitive Tasks, which represent a final plan. Compound tasks are comprised of a set of subtasks and a set of conditions.
 
 ### Primitive Tasks
-Represent a single step that can be performed. A set of Primitive Tasks is the plan that are ultimately getting out of OdaiHTN. Primitive Tasks are comprised:
+Represent a single step that can be performed. A set of Primitive Tasks is the plan that are ultimately getting out of FluadHTN. Primitive Tasks are comprised:
 
 * Operators
 * Effects
@@ -248,7 +250,7 @@ myDomain.ClearSlot(1);
 
 ## Extensions
 
-OdaiHTN can be extended further, much like its C# inspiration FluidHTN. For details on how this might be done, please see that repository.
+FluadHTN can be extended further, much like its C# inspiration FluidHTN. For details on how this might be done, please see that repository.
 
 ## Credit
 

@@ -1,4 +1,4 @@
-print("> OdaiHTN Tests")
+print("> FluadHTN Tests")
 dofile("sb_htn_tests/ActionEffectTests.lua")
 dofile("sb_htn_tests/BaseContextTests.lua")
 dofile("sb_htn_tests/DomainBuilderTests.lua")
