@@ -78,8 +78,8 @@ function PrimitiveTask:Stop(ctx)
 end
 
 ---@param ctx IContext
-function PrimitiveTask:Aborted(ctx)
-    if (self.Operator) then self.Operator:Aborted(ctx) end
+function PrimitiveTask:Abort(ctx)
+    if (self.Operator) then self.Operator:Abort(ctx) end
 end
 
 ---@param ctx IContext

@@ -19,6 +19,7 @@ function DefaultPlannerState:OnStopCurrentTask() end
 function DefaultPlannerState:OnCurrentTaskCompletedSuccessfully() end
 function DefaultPlannerState:OnApplyEffect() end
 function DefaultPlannerState:OnCurrentTaskFailed() end
+function DefaultPlannerState:OnCurrentTaskStarted() end
 function DefaultPlannerState:OnCurrentTaskContinues() end
 function DefaultPlannerState:OnCurrentTaskExecutingConditionFailed() end
 

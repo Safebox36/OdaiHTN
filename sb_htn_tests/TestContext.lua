@@ -1,6 +1,7 @@
 local mc = require("sb_htn.Utils.middleclass")
 local sb_htn = require("sb_htn.interop")
 
+---@class TestContext : BaseContext
 local TestContext = mc.class("TestContext", sb_htn.Contexts.BaseContext)
 
 TestContext.TestEnum = {
@@ -17,6 +18,7 @@ function TestContext:initialize()
     self.PlannerState     = sb_htn.Planners.DefaultPlannerState:new()
     self.DebugMTR         = false
     self.Done             = false
+    self.ExecutionDepth   = 0
     self.LogDecomposition = false
 
     for _, v in pairs(self.TestEnum) do

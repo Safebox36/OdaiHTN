@@ -1,6 +1,7 @@
 local mc = require("sb_htn.Utils.middleclass")
 local TestContext = require("sb_htn_tests.TestContext")
 
+---@class TestDebugContext : TestContext
 local TestDebugContext = mc.class("TestDebugContext", TestContext)
 
 function TestDebugContext:initialize()

@@ -171,12 +171,13 @@ end
 
 --- The operator of an Action / primitive task.
 ---@param action function<IContext>
+---@param start function<IContext>
 ---@param forceStopAction function<IContext>
 ---@return BaseDomainBuilder
-function BaseDomainBuilder:Do(action, forceStopAction)
+function BaseDomainBuilder:Do(action, start, forceStopAction)
     assert(self:Pointer():isInstanceOf(IPrimitiveTask),
         "Tried to add an Operator, but the Pointer is not a Primitive Task!")
-    local op = FuncOperator:new(self.T, action, forceStopAction or nil)
+    local op = FuncOperator:new(self.T, action, start or nil, forceStopAction or nil)
     self:Pointer():SetOperator(op)
 
     return self

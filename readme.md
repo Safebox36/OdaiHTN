@@ -13,7 +13,7 @@
 * Uses a Factory interface internally to create and free tables/queues/stacks/objects, allowing for pooling, or other memory management schemes.
 * Decomposition logging, for debugging.
 * Minimal dependency, allowing for easy importing to MWSE, OpenMW, LÖVE, Defold, Roblox, etc.
-* 148 unit tests.
+* 159 unit tests.
 
 ## Concepts
 
@@ -215,7 +215,7 @@ local subDomain = DomainBuilder:new(MyContext, "SubDomain")
     :Select("B")
         --...
     :End()
-    :Build();
+    :Build()
     
 local myDomain = DomainBuilder:new(MyContext, "MyDomain")
     :Select("A")
@@ -225,7 +225,7 @@ local myDomain = DomainBuilder:new(MyContext, "MyDomain")
     :Select("C")
         --...
     :End()
-    :Build();
+    :Build()
 ```
 
 ### Slots
@@ -237,15 +237,15 @@ local subDomain = DomainBuilder:new(MyContext, "SubDomain")
     .Select("B")
         //...
     .End()
-    .Build();
+    .Build()
 
 local myDomain = DomainBuilder:new(MyContext, "MyDomain")
     .Slot(1)
-    .Build();
+    .Build()
     
-myDomain.TrySetSlotDomain(1, subDomain);
+myDomain.TrySetSlotDomain(1, subDomain)
 //...
-myDomain.ClearSlot(1);
+myDomain.ClearSlot(1)
 ```
 
 ## Extensions
@@ -258,5 +258,5 @@ FluadHTN can be extended further, much like its C# inspiration FluidHTN. For det
 * Enrique García Cota for [Middleclass.lua](https://github.com/kikito/middleclass).
 
 ## See Also
-
+### Version 2023-08-28 (C# 0.2)
 * [Working LÖVE prototype](https://github.com/Safebox36/Last-Party---Plus-One/tree/main/src/ai).

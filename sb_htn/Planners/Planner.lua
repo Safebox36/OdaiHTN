@@ -6,8 +6,7 @@ local IContext = require("sb_htn.Contexts.IContext")
 local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
 
 --- A planner is a responsible for handling the management of finding plans in a domain, replan when the state of the
---- running plan
---- demands it, or look for a new potential plan if the world state gets dirty.
+--- running plan demands it, or look for a new potential plan if the world state gets dirty.
 ---@class Planner
 local Planner = mc.class("Planner")
 
@@ -17,7 +16,7 @@ function Planner:initialize(T)
 end
 
 --- Check whether state has changed or the current plan has finished running.
---- and if so, try to find a new plan.
+--- And if so, try to find a new plan.
 ---@param ctx IContext
 ---@return boolean
 local function ShouldFindNewPlan(ctx)
@@ -31,7 +30,7 @@ local function CanSelectNextTaskInPlan(ctx)
     return ctx.PlannerState.CurrentTask == nil and table.size(ctx.PlannerState.Plan.list) > 0
 end
 
---- Prepare the planner state and context for a clean replan
+--- Prepare the planner state and context for a clean replan.
 ---@param ctx IContext
 local function ClearPlanForReplan(ctx)
     ctx.PlannerState.CurrentTask = nil
@@ -53,7 +52,9 @@ end
 ---@param ctx IContext
 ---@param task IPrimitiveTask
 local function AbortTask(ctx, task)
-    task:Aborted(ctx)
+    if (task.Abort) then
+        task:Abort(ctx)
+    end
     ClearPlanForReplan(ctx)
 end
 
@@ -62,17 +63,18 @@ end
 ---@param domain Domain
 ---@param ctx IContext
 ---@param task IPrimitiveTask
----@param allowImmediateReplan boolean
-local function IsExecutingConditionsValid(self, domain, ctx, task, allowImmediateReplan)
+---@param allowImmediateReplanAndExecute boolean
+local function IsExecutingConditionsValid(self, domain, ctx, task, allowImmediateReplanAndExecute)
     ---@param condition ICondition
     for _, condition in ipairs(task.ExecutingConditions) do
         -- If a condition failed, then the plan failed to progress! A replan is required.
         if (condition:IsValid(ctx) == false) then
-            ctx.PlannerState:OnCurrentTaskExecutingConditionFailed(task, condition)
-
+            if (ctx.PlannerState.OnCurrentTaskExecutingConditionFailed) then
+                ctx.PlannerState:OnCurrentTaskExecutingConditionFailed(task, condition)
+            end
             AbortTask(ctx, task)
 
-            if (allowImmediateReplan) then
+            if (allowImmediateReplanAndExecute) then
                 self:Tick(domain, ctx, false)
             end
 
@@ -88,15 +90,19 @@ end
 ---@param domain Domain
 ---@param ctx IContext
 ---@param task IPrimitiveTask
----@param allowImmediateReplan boolean
-local function OnOperatorFinishedSuccessfully(self, domain, ctx, task, allowImmediateReplan)
-    ctx.PlannerState:OnCurrentTaskCompletedSuccessfully(task)
+---@param allowImmediateReplanAndExecute boolean
+local function OnOperatorFinishedSuccessfully(self, domain, ctx, task, allowImmediateReplanAndExecute)
+    if (ctx.PlannerState.OnCurrentTaskCompletedSuccessfully) then
+        ctx.PlannerState:OnCurrentTaskCompletedSuccessfully(task)
+    end
 
-    -- All effects that is a result of running this task should be applied when the task is a success.
+    --- All effects that is a result of running this task should be applied when the task is a success.
     ---@param effect IEffect
     for _, effect in ipairs(task.Effects) do
         if (effect.Type == EEffectType.PlanAndExecute) then
-            ctx.PlannerState:OnApplyEffect(effect)
+            if (ctx.PlannerState.OnApplyEffect) then
+                ctx.PlannerState:OnApplyEffect(effect)
+            end
             effect:Apply(ctx)
         end
     end
@@ -111,20 +117,29 @@ local function OnOperatorFinishedSuccessfully(self, domain, ctx, task, allowImme
 
         ctx.IsDirty = false
 
-        if (allowImmediateReplan) then
+        if (allowImmediateReplanAndExecute) then
             self:Tick(domain, ctx, false)
         end
     end
 end
 
 --- If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
+---@param self Planner
+---@param domain Domain
 ---@param ctx IContext
 ---@param task IPrimitiveTask
-local function FailEntirePlan(ctx, task)
-    ctx.PlannerState:OnCurrentTaskFailed(task)
+---@param allowImmediateReplanAndExecute boolean
+local function FailEntirePlan(self, domain, ctx, task, allowImmediateReplanAndExecute)
+    if (ctx.PlannerState.OnCurrentTaskFailed) then
+        ctx.PlannerState:OnCurrentTaskFailed(task)
+    end
 
-    task:Aborted(ctx)
+    task:Abort(ctx)
     ClearPlanForReplan(ctx)
+
+    if (allowImmediateReplanAndExecute) then
+        self:Tick(domain, ctx, false)
+    end
 end
 
 --- While we have a valid primitive task running, we should tick it each tick of the plan execution.
@@ -132,11 +147,11 @@ end
 ---@param domain Domain
 ---@param ctx IContext
 ---@param task IPrimitiveTask
----@param allowImmediateReplan boolean
+---@param allowImmediateReplanAndExecute boolean
 ---@return boolean
-local function TryTickPrimitiveTaskOperator(self, domain, ctx, task, allowImmediateReplan)
+local function TryTickPrimitiveTaskOperator(self, domain, ctx, task, allowImmediateReplanAndExecute)
     if (task.Operator) then
-        if (IsExecutingConditionsValid(self, domain, ctx, task, allowImmediateReplan) == false) then
+        if (IsExecutingConditionsValid(self, domain, ctx, task, allowImmediateReplanAndExecute) == false) then
             return false
         end
 
@@ -144,23 +159,25 @@ local function TryTickPrimitiveTaskOperator(self, domain, ctx, task, allowImmedi
 
         -- If the operation finished successfully, we set task to null so that we dequeue the next task in the plan the following tick.
         if (ctx.PlannerState.LastStatus == ETaskStatus.Success) then
-            OnOperatorFinishedSuccessfully(self, domain, ctx, task, allowImmediateReplan)
+            OnOperatorFinishedSuccessfully(self, domain, ctx, task, allowImmediateReplanAndExecute)
             return true
         end
 
         -- If the operation failed to finish, we need to fail the entire plan, so that we will replan the next tick.
         if (ctx.PlannerState.LastStatus == ETaskStatus.Failure) then
-            FailEntirePlan(ctx, task)
+            FailEntirePlan(self, domain, ctx, task, allowImmediateReplanAndExecute)
             return true
         end
 
         -- Otherwise the operation isn't done yet and need to continue.
-        ctx.PlannerState:OnCurrentTaskContinues(task)
+        if (ctx.PlannerState.OnCurrentTaskContinues) then
+            ctx.PlannerState:OnCurrentTaskContinues(task)
+        end
         return true
     end
 
     -- This should not really happen if a domain is set up properly.
-    task:Aborted(ctx)
+    task:Abort(ctx)
     ctx.PlannerState.CurrentTask = nil
     ctx.PlannerState.LastStatus = ETaskStatus.Failure
     return true
@@ -251,7 +268,9 @@ local function OnFoundNewPlan(ctx, newPlan)
 
     -- If a task was running from the previous plan, we stop it.
     if (ctx.PlannerState.CurrentTask and ctx.PlannerState.CurrentTask:isInstanceOf(IPrimitiveTask)) then
-        ctx.PlannerState:OnStopCurrentTask(ctx.PlannerState.CurrentTask)
+        if (ctx.PlannerState.OnStopCurrentTask) then
+            ctx.PlannerState:OnStopCurrentTask(ctx.PlannerState.CurrentTask)
+        end
         ctx.PlannerState.CurrentTask:Stop(ctx)
         ctx.PlannerState.CurrentTask = nil
     end
@@ -326,7 +345,9 @@ local function IsConditionsValid(ctx)
     for _, condition in ipairs(ctx.PlannerState.CurrentTask.Conditions) do
         -- If a condition failed, then the plan failed to progress! A replan is required.
         if (condition:IsValid(ctx) == false) then
-            ctx.PlannerState:OnNewTaskConditionFailed(ctx.PlannerState.CurrentTask, condition)
+            if (ctx.PlannerState.OnNewTaskConditionFailed) then
+                ctx.PlannerState:OnNewTaskConditionFailed(ctx.PlannerState.CurrentTask, condition)
+            end
             AbortTask(ctx, ctx.PlannerState.CurrentTask)
 
             return false
@@ -343,11 +364,54 @@ end
 local function SelectNextTaskInPlan(domain, ctx)
     ctx.PlannerState.CurrentTask = ctx.PlannerState.Plan:pop()
     if (ctx.PlannerState.CurrentTask) then
-        ctx.PlannerState:OnNewTask(ctx.PlannerState.CurrentTask)
+        if (ctx.PlannerState.OnNewTask) then
+            ctx.PlannerState:OnNewTask(ctx.PlannerState.CurrentTask)
+        end
 
         return IsConditionsValid(ctx)
     end
 
+    return true
+end
+
+---@param self Planner
+---@param domain Domain
+---@param ctx IContext
+---@param task IPrimitiveTask
+---@param allowImmediateReplanAndExecute boolean
+---@return boolean
+local function TryStartPrimitiveTaskOperator(self, domain, ctx, task, allowImmediateReplanAndExecute)
+    if (task.Operator) then
+        ctx.PlannerState.LastStatus = task.Operator:Start(ctx)
+
+        -- If the operation finished successfully already on start, we set task to null so that we dequeue the next task in the plan the following tick.
+        if (ctx.PlannerState.LastStatus == ETaskStatus.Success) then
+            -- We have to first invoke that the task operator has run its start function successfully, before we report that the operator finished.
+            if (ctx.PlannerState.OnCurrentTaskStarted) then
+                ctx.PlannerState:OnCurrentTaskStarted(task)
+            end
+
+            OnOperatorFinishedSuccessfully(self, domain, ctx, task, allowImmediateReplanAndExecute)
+            return true
+        end
+
+        -- If the operation failed to start, we need to fail the entire plan, so that we will replan the next tick.
+        if (ctx.PlannerState.LastStatus == ETaskStatus.Failure) then
+            FailEntirePlan(self, domain, ctx, task, allowImmediateReplanAndExecute)
+            return true
+        end
+
+        -- Otherwise the operation started as expected, and we are ready to start running Update ticks on the operator.
+        if (ctx.PlannerState.OnCurrentTaskStarted) then
+            ctx.PlannerState:OnCurrentTaskStarted(task)
+        end
+        return true
+    end
+
+    -- This should not really happen if a domain is set up properly.
+    task:Abort(ctx)
+    ctx.PlannerState.CurrentTask = nil
+    ctx.PlannerState.LastStatus = ETaskStatus.Failure
     return true
 end
 
@@ -365,14 +429,13 @@ end
 --- runtime.
 ---
 --- If the plan completes or fails, the planner will find a new plan, or if the context is marked dirty, the planner
---- will attempt
---- a replan to see whether we can find a better plan now that the state of the world has changed.
+--- will attempt a replan to see whether we can find a better plan now that the state of the world has changed.
 ---
 --- This planner can also be used as a blueprint for writing a custom planner.
 ---@param domain Domain
 ---@param ctx IContext
----@param allowImmediateReplan boolean | nil
-function Planner:Tick(domain, ctx, allowImmediateReplan)
+---@param allowImmediateReplanAndExecute boolean | nil
+function Planner:Tick(domain, ctx, allowImmediateReplanAndExecute)
     assert(ctx.IsInitialized == true, "Context was not initialized!")
 
     local decompositionStatus = EDecompositionStatus.Failed
@@ -390,11 +453,17 @@ function Planner:Tick(domain, ctx, allowImmediateReplan)
         if (SelectNextTaskInPlan(domain, ctx) == false) then
             return
         end
+
+        if (ctx.PlannerState.CurrentTask:isInstanceOf(IPrimitiveTask)) then
+            if (TryStartPrimitiveTaskOperator(self, domain, ctx, ctx.PlannerState.CurrentTask, allowImmediateReplanAndExecute == nil or allowImmediateReplanAndExecute) == false) then
+                return
+            end
+        end
     end
 
     -- If the current task is a primitive task, we try to tick its operator.
     if (ctx.PlannerState.CurrentTask and ctx.PlannerState.CurrentTask:isInstanceOf(IPrimitiveTask)) then
-        if (TryTickPrimitiveTaskOperator(self, domain, ctx, ctx.PlannerState.CurrentTask, allowImmediateReplan) == false) then
+        if (TryTickPrimitiveTaskOperator(self, domain, ctx, ctx.PlannerState.CurrentTask, allowImmediateReplanAndExecute == nil or allowImmediateReplanAndExecute) == false) then
             return
         end
     end

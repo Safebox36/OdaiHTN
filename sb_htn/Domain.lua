@@ -25,8 +25,6 @@ end
 ---@param parent ICompoundTask
 ---@param subtask ITask
 function Domain:AddTask(parent, subtask)
-    assert(parent ~= subtask, "Parent-task and Sub-task can't be the same instance!")
-
     parent:AddSubtask(subtask)
     subtask.Parent = parent
 end

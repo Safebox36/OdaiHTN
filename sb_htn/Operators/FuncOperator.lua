@@ -6,13 +6,17 @@ local ETaskStatus = require("sb_htn.Tasks.ETaskStatus")
 local FuncOperator = mc.class("FuncOperator", IOperator)
 
 ---@param func function<IContext, ETaskStatus>
+---@param funcStart function<IContext> | nil
 ---@param funcStop function<IContext> | nil
 ---@param funcAborted function<IContext> | nil
 ---@param T IContext
-function FuncOperator:initialize(T, func, funcStop, funcAborted)
+function FuncOperator:initialize(T, func, funcStart, funcStop, funcAborted)
     ---@type function<IContext, ETaskStatus>
     ---@return ETaskStatus
     self.Func = func
+    ---@type function<IContext, ETaskStatus>
+    ---@return ETaskStatus
+    self.FuncStart = funcStart
     ---@type function<IContext>
     ---@return boolean
     self.FuncStop = funcStop
@@ -20,6 +24,12 @@ function FuncOperator:initialize(T, func, funcStop, funcAborted)
     ---@return boolean
     self.FuncAborted = funcAborted
     self.T = T
+end
+
+---@param ctx IContext
+function FuncOperator:Start(ctx)
+    assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
+    if (self.FuncStart) then return self.FuncStart(ctx) else return ETaskStatus.Continue end -- Start is not required, so report back Continue if we have no Start func.
 end
 
 ---@param ctx IContext
@@ -35,7 +45,7 @@ function FuncOperator:Stop(ctx)
 end
 
 ---@param ctx IContext
-function FuncOperator:Aborted(ctx)
+function FuncOperator:Abort(ctx)
     assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
     if (self.FuncAborted) then self.FuncAborted(ctx) end
 end

@@ -28,6 +28,7 @@ function MyContext:initialize()
     end
 
     self.Done = false
+    self.ExecutionCount = 0
 end
 
 function MyContext:Init()

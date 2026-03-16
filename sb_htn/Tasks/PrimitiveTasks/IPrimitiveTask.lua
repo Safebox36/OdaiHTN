@@ -32,10 +32,12 @@ function IPrimitiveTask:AddEffect(effect) return {} end
 ---@param ctx IContext
 function IPrimitiveTask:ApplyEffects(ctx) end
 
+--- Graceful end of task execution.
 ---@param ctx IContext
 function IPrimitiveTask:Stop(ctx) end
 
+--- Forced termination of task execution.
 ---@param ctx IContext
-function IPrimitiveTask:Aborted(ctx) end
+function IPrimitiveTask:Abort(ctx) end
 
 return IPrimitiveTask
