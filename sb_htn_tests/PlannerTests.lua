@@ -72,7 +72,7 @@ task1.Name = "Test"
 local task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
 assert(ctx.PlannerState.CurrentTask == nil)
 assert(ctx.PlannerState.LastStatus == sb_htn.Tasks.ETaskStatus.Failure)
@@ -94,7 +94,7 @@ task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
 assert(ctx.PlannerState.CurrentTask == nil)
 assert(ctx.PlannerState.LastStatus == sb_htn.Tasks.ETaskStatus.Failure)
@@ -116,7 +116,7 @@ task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context1) return sb_htn.Tasks.ETaskStatus.Success end))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
 assert(ctx.PlannerState.CurrentTask == nil)
 assert(ctx.PlannerState.LastStatus == sb_htn.Tasks.ETaskStatus.Success)
@@ -138,7 +138,7 @@ task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context2) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
 assert(ctx.PlannerState.CurrentTask)
 assert(ctx.PlannerState.LastStatus == sb_htn.Tasks.ETaskStatus.Continue)
@@ -162,7 +162,7 @@ task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context3) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
 assert(test)
 
@@ -185,16 +185,15 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 local task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Sub-task1"
-task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context4) return context4.Done == false end))
+task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context4) return context4.Done == false end))
 local task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task4.Name = "Sub-task2"
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context5) return sb_htn.Tasks.ETaskStatus.Continue end))
 task4:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context6) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(domain.Root, task2)
-domain:AddTask(task1, task3)
-domain:AddTask(task2, task4)
+domain:AddTask(task1,       task3)
+domain:AddTask(task2,       task4)
 ctx.Done = true
 planner:Tick(domain, ctx)
 ctx.Done = false
@@ -221,7 +220,7 @@ task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context7) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
 assert(test)
 
@@ -244,8 +243,7 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Sub-task1"
-task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context8) return context8.Done == false end))
+task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context8) return context8.Done == false end))
 task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task4.Name = "Sub-task2"
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context9) return sb_htn.Tasks.ETaskStatus.Success end))
@@ -254,12 +252,12 @@ task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(contex
 -- state change. This method is used here only to invoke the desired callback, not because
 -- its correct practice.
 task3:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.PlanAndExecute,
-    function(context10, effectType) context10.Done = true end))
+                                                function(context10, effectType) context10.Done = true end))
 task4:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context11) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(domain.Root, task2)
-domain:AddTask(task1, task3)
-domain:AddTask(task2, task4)
+domain:AddTask(task1,       task3)
+domain:AddTask(task2,       task4)
 ctx.Done = true
 planner:Tick(domain, ctx)
 ctx.Done = false
@@ -274,20 +272,20 @@ This callback allows applications to perform one-time initialization when a task
 This test demonstrates that operator lifecycle callbacks work correctly during task execution startup.
 ]]
 print("    > OnStartNewTask_ExpectedBehavior")
-test = false;
-ctx = TestContext:new();
-ctx:init();
-planner = sb_htn.Planners.Planner:new(TestContext);
+test = false
+ctx = TestContext:new()
+ctx:init()
+planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskStarted = function(self, t) test = t.Name == "Sub-task" end
-domain = sb_htn.Domain:new(TestContext, "Test");
+domain = sb_htn.Domain:new(TestContext, "Test")
 task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task1.Name = "Test"
 task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
-task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context12) return sb_htn.Tasks.ETaskStatus.Continue end, function(context13) return sb_htn.Tasks.ETaskStatus.Continue end));
-domain:AddTask(domain.Root, task1);
-domain:AddTask(task1, task2);
-planner:Tick(domain, ctx);
+task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context12) return sb_htn.Tasks.ETaskStatus.Continue end, function(context13) return sb_htn.Tasks.ETaskStatus.Continue end))
+domain:AddTask(domain.Root, task1)
+domain:AddTask(task1,       task2)
+planner:Tick(domain, ctx)
 assert(true == test)
 
 --[[
@@ -297,20 +295,20 @@ This feature enables efficient single-tick operations and allows task completion
 This test demonstrates that task lifecycle callbacks properly reflect successful completion from the Start phase.
 ]]
 print("    > StartNewTaskCanCompleteTask_ExpectedBehavior")
-test = false;
-ctx = TestContext:new();
-ctx:init();
-planner = sb_htn.Planners.Planner:new(TestContext);
+test = false
+ctx = TestContext:new()
+ctx:init()
+planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskCompletedSuccessfully = function(self, t) test = t.Name == "Sub-task" end
-domain = sb_htn.Domain:new(TestContext, "Test");
+domain = sb_htn.Domain:new(TestContext, "Test")
 task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task1.Name = "Test"
 task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
-task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context14) return sb_htn.Tasks.ETaskStatus.Continue end, function(context15) return sb_htn.Tasks.ETaskStatus.Success end));
-domain:AddTask(domain.Root, task1);
-domain:AddTask(task1, task2);
-planner:Tick(domain, ctx);
+task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context14) return sb_htn.Tasks.ETaskStatus.Continue end, function(context15) return sb_htn.Tasks.ETaskStatus.Success end))
+domain:AddTask(domain.Root, task1)
+domain:AddTask(task1,       task2)
+planner:Tick(domain, ctx)
 assert(true == test)
 
 --[[
@@ -320,20 +318,20 @@ This early failure detection enables quick rejection of invalid task executions.
 This test demonstrates that task lifecycle callbacks properly reflect failure initiated from the Start phase.
 ]]
 print("    > StartNewTaskCanFailTask_ExpectedBehavior")
-test = false;
-ctx = TestContext:new();
-ctx:init();
-planner = sb_htn.Planners.Planner:new(TestContext);
+test = false
+ctx = TestContext:new()
+ctx:init()
+planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskFailed = function(self, t) test = t.Name == "Sub-task" end
-domain = sb_htn.Domain:new(TestContext, "Test");
+domain = sb_htn.Domain:new(TestContext, "Test")
 task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task1.Name = "Test"
 task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
-task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context16) return sb_htn.Tasks.ETaskStatus.Continue end, function(context17) return sb_htn.Tasks.ETaskStatus.Failure end));
-domain:AddTask(domain.Root, task1);
-domain:AddTask(task1, task2);
-planner:Tick(domain, ctx);
+task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context16) return sb_htn.Tasks.ETaskStatus.Continue end, function(context17) return sb_htn.Tasks.ETaskStatus.Failure end))
+domain:AddTask(domain.Root, task1)
+domain:AddTask(task1,       task2)
+planner:Tick(domain, ctx)
 assert(true == test)
 
 --[[
@@ -355,16 +353,15 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Sub-task1"
-task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context12) return context12.Done == false end))
+task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context12) return context12.Done == false end))
 task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task4.Name = "Sub-task2"
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context18) return sb_htn.Tasks.ETaskStatus.Continue end))
 task4:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context19) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(domain.Root, task2)
-domain:AddTask(task1, task3)
-domain:AddTask(task2, task4)
+domain:AddTask(task1,       task3)
+domain:AddTask(task2,       task4)
 ctx.Done = true
 planner:Tick(domain, ctx)
 ctx.Done = false
@@ -391,16 +388,15 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Sub-task1"
-task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context15) return context15.Done == false end))
+task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context15) return context15.Done == false end))
 task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task4.Name = "Sub-task2"
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context20) return sb_htn.Tasks.ETaskStatus.Success end))
 task4:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context21) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(domain.Root, task2)
-domain:AddTask(task1, task3)
-domain:AddTask(task2, task4)
+domain:AddTask(task1,       task3)
+domain:AddTask(task2,       task4)
 ctx.Done = true
 planner:Tick(domain, ctx)
 ctx.Done = false
@@ -427,24 +423,23 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Sub-task1"
-task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context18) return not context18:HasState(TestContext.TestEnum.StateA) end))
+task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context18) return not context18:HasState(TestContext.TestEnum.StateA) end))
 task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task4.Name = "Sub-task2"
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context22) return sb_htn.Tasks.ETaskStatus.Success end))
 task3:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.PlanAndExecute,
-    function(context20, effectType) context20:SetState(TestContext.TestEnum.StateA, true, sb_htn.Tasks.ETaskStatus.Continue) end))
+                                                function(context20, effectType) context20:SetState(TestContext.TestEnum.StateA, true, sb_htn.Tasks.ETaskStatus.Continue) end))
 task4:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context23) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(domain.Root, task2)
-domain:AddTask(task1, task3)
-domain:AddTask(task2, task4)
+domain:AddTask(task1,       task3)
+domain:AddTask(task2,       task4)
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Executing
 ctx:SetState(TestContext.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
-planner:Tick(domain, ctx)
+planner:Tick(domain,                      ctx)
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Executing
 ctx:SetState(TestContext.TestEnum.StateA, false, sb_htn.Effects.EEffectType.Permanent)
-planner:Tick(domain, ctx)
+planner:Tick(domain,                      ctx)
 assert(test)
 
 --[[
@@ -466,7 +461,7 @@ task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context24) return sb_htn.Tasks.ETaskStatus.Failure end))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
 assert(test)
 
@@ -489,7 +484,7 @@ task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context25) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
 assert(test)
 
@@ -504,7 +499,8 @@ test = false
 ctx = TestContext:new()
 ctx:init()
 planner = sb_htn.Planners.Planner:new(TestContext)
-ctx.PlannerState.OnCurrentTaskExecutingConditionFailed = function(self, t7, c2) test = t7.Name == "Sub-task" and
+ctx.PlannerState.OnCurrentTaskExecutingConditionFailed = function(self, t7, c2)
+    test = t7.Name == "Sub-task" and
         c2.Name == "TestCondition"
 end
 domain = sb_htn.Domain:new(TestContext, "Test")
@@ -513,10 +509,9 @@ task1.Name = "Test"
 task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context26) return sb_htn.Tasks.ETaskStatus.Continue end))
-task2:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context25) return context25.Done end))
+task2:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context25) return context25.Done end))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
 assert(test)
 
@@ -535,21 +530,17 @@ local select = sb_htn.Tasks.CompoundTasks.Selector:new()
 select.Name = "Test Select"
 local actionA = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 actionA.Name = "Test Action A"
-actionA:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A",
-    function(context27) return context27.Done == true end))
-actionA:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A",
-    function(context28) return context28.Done == true end))
+actionA:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context27) return context27.Done == true end))
+actionA:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context28) return context28.Done == true end))
 actionA:SetOperator(TestOperator:new())
 local actionB = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 actionB.Name = "Test Action B"
-actionB:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A",
-    function(context29) return context29.Done == false end))
-actionB:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A",
-    function(context30) return context30.Done == false end))
+actionB:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context29) return context29.Done == false end))
+actionB:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context30) return context30.Done == false end))
 actionB:SetOperator(TestOperator:new())
 domain:AddTask(domain.Root, select)
-domain:AddTask(select, actionA)
-domain:AddTask(select, actionB)
+domain:AddTask(select,      actionA)
+domain:AddTask(select,      actionB)
 planner:Tick(domain, ctx, false)
 local plan = ctx.PlannerState.Plan
 local currentTask = ctx.PlannerState.CurrentTask
@@ -584,17 +575,15 @@ select = sb_htn.Tasks.CompoundTasks.Selector:new()
 select.Name = "Test Select"
 actionA = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 actionA.Name = "Test Action A"
-actionA:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A",
-    function(context31) return context31:GetState(TestContext.TestEnum.StateA) == 1 end))
+actionA:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context31) return context31:GetState(TestContext.TestEnum.StateA) == 1 end))
 actionA:SetOperator(TestOperator:new())
 actionB = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 actionB.Name = "Test Action B"
-actionB:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A",
-    function(context32) return context32:GetState(TestContext.TestEnum.StateA) == 0 end))
+actionB:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context32) return context32:GetState(TestContext.TestEnum.StateA) == 0 end))
 actionB:SetOperator(TestOperator:new())
 domain:AddTask(domain.Root, select)
-domain:AddTask(select, actionA)
-domain:AddTask(select, actionB)
+domain:AddTask(select,      actionA)
+domain:AddTask(select,      actionB)
 planner:Tick(domain, ctx, false)
 plan = ctx.PlannerState.Plan
 currentTask = ctx.PlannerState.CurrentTask
@@ -605,7 +594,7 @@ assert(ctx.MethodTraversalRecord[1] == 1)
 assert(ctx.MethodTraversalRecord[2] == 2)
 -- When we change the condition to Done = true, we should now be able to find a better plan!
 ctx:SetState(TestContext.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
-planner:Tick(domain, ctx, true)
+planner:Tick(domain,                      ctx,  true)
 plan = ctx.PlannerState.Plan
 currentTask = ctx.PlannerState.CurrentTask
 assert(table.size(plan.list) == 0)
@@ -629,21 +618,17 @@ select = sb_htn.Tasks.CompoundTasks.Selector:new()
 select.Name = "Test Select"
 actionA = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 actionA.Name = "Test Action A"
-actionA:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A",
-    function(context33) return context33:GetState(TestContext.TestEnum.StateA) == 0 end))
-actionA:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A",
-    function(context34) return context34:GetState(TestContext.TestEnum.StateA) == 0 end))
+actionA:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context33) return context33:GetState(TestContext.TestEnum.StateA) == 0 end))
+actionA:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context34) return context34:GetState(TestContext.TestEnum.StateA) == 0 end))
 actionA:SetOperator(TestOperator:new())
 actionB = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 actionB.Name = "Test Action B"
-actionB:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A",
-    function(context35) return context35:GetState(TestContext.TestEnum.StateA) == 1 end))
-actionB:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A",
-    function(context36) return context36:GetState(TestContext.TestEnum.StateA) == 1 end))
+actionB:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context35) return context35:GetState(TestContext.TestEnum.StateA) == 1 end))
+actionB:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context36) return context36:GetState(TestContext.TestEnum.StateA) == 1 end))
 actionB:SetOperator(TestOperator:new())
 domain:AddTask(domain.Root, select)
-domain:AddTask(select, actionA)
-domain:AddTask(select, actionB)
+domain:AddTask(select,      actionA)
+domain:AddTask(select,      actionB)
 planner:Tick(domain, ctx, false)
 plan = ctx.PlannerState.Plan
 currentTask = ctx.PlannerState.CurrentTask
@@ -654,7 +639,7 @@ assert(ctx.MethodTraversalRecord[1] == 1)
 assert(ctx.MethodTraversalRecord[2] == 1)
 -- When we change the condition to Done = true, the first plan should no longer be allowed, we should find the second plan instead!
 ctx:SetState(TestContext.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
-planner:Tick(domain, ctx, true)
+planner:Tick(domain,                      ctx,  true)
 plan = ctx.PlannerState.Plan
 currentTask = ctx.PlannerState.CurrentTask
 assert(table.size(plan.list) == 0)
@@ -670,30 +655,30 @@ Therefore, a task with a failed planning condition can still remain the current 
 This test demonstrates the limitation of relying only on planning conditions and the need for executing conditions.
 ]]
 print("    > ToggleBetweenTwoPlansWithOnlyPlannerConditionWontWork_ExpectedBehavior")
-local c = TestContext:new();
-c:init();
-planner = sb_htn.Planners.Planner:new(TestContext);
+local c = TestContext:new()
+c:init()
+planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.DomainBuilder:new(TestContext, "Test")
     :Action("A")
-        :Condition("Is True", function(ctx) return ctx:HasState(c.TestEnum.StateA) end)
-        :Do(function(ctx)
-            ctx.Done = true;
-            return sb_htn.Tasks.ETaskStatus.Continue
-        end)
+    :Condition("Is True", function(ctx) return ctx:HasState(c.TestEnum.StateA) end)
+    :Do(function(ctx)
+        ctx.Done = true
+        return sb_htn.Tasks.ETaskStatus.Continue
+    end)
     :End()
     :Action("B")
-        :Condition("Is False", function(ctx) return ctx:HasState(c.TestEnum.StateA) == false end)
-        :Do(function(ctx)
-            ctx.Done = false;
-            return sb_htn.Tasks.ETaskStatus.Continue;
-        end)
+    :Condition("Is False", function(ctx) return ctx:HasState(c.TestEnum.StateA) == false end)
+    :Do(function(ctx)
+        ctx.Done = false
+        return sb_htn.Tasks.ETaskStatus.Continue
+    end)
     :End()
-    :Build();
-c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+    :Build()
+c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(true == c.Done); -- We're running Action A
-c:SetState(c.TestEnum.StateA, false, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+c:SetState(c.TestEnum.StateA, false, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(true == c.Done); -- Our change triggered a replan, but B can't beat A due to MTR. So A won't get invalidated.
 
 --[[
@@ -703,35 +688,35 @@ When an executing condition fails, the planner triggers replanning and can switc
 This test demonstrates that executing conditions enable dynamic and responsive plan switching based on runtime conditions.
 ]]
 print("    > ToggleBetweenTwoPlansWithExecutingConditionWillWork_ExpectedBehavior")
-c = TestContext:new();
-c:init();
-planner = sb_htn.Planners.Planner:new(TestContext);
+c = TestContext:new()
+c:init()
+planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.DomainBuilder:new(TestContext, "Test")
     :Action("A")
     :Condition("Is True", function(ctx) return ctx:HasState(c.TestEnum.StateA) end)
     :ExecutingCondition("Is True", function(ctx) return ctx:HasState(c.TestEnum.StateA) end)
     :Do(function(ctx)
-        ctx.Done = true;
-        return sb_htn.Tasks.ETaskStatus.Continue;
+        ctx.Done = true
+        return sb_htn.Tasks.ETaskStatus.Continue
     end)
     :End()
     :Action("B")
     :Condition("Is False", function(ctx) return ctx:HasState(c.TestEnum.StateA) == false end)
     :ExecutingCondition("Is False", function(ctx) return ctx:HasState(c.TestEnum.StateA) == false end)
     :Do(function(ctx)
-        ctx.Done = false;
-        return sb_htn.Tasks.ETaskStatus.Continue;
+        ctx.Done = false
+        return sb_htn.Tasks.ETaskStatus.Continue
     end)
     :End()
-    :Build();
-c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+    :Build()
+c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(true == c.Done); -- We're running A
-c:SetState(c.TestEnum.StateA, false, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+c:SetState(c.TestEnum.StateA, false, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(false == c.Done); -- Out executing condition will realize that A is no longer valid, and we find B instead.
-c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(true == c.Done); -- We're running A
 
 --[[
@@ -741,41 +726,41 @@ If an operator detects that conditions no longer support the current task, it ca
 This test demonstrates an alternative approach to plan switching where operators detect and respond to condition changes.
 ]]
 print("    > ToggleBetweenTwoPlansWithConditionSuccessInOperatorWillWork_ExpectedBehavior")
-c = TestContext:new();
-c:init();
-planner = sb_htn.Planners.Planner:new(TestContext);
+c = TestContext:new()
+c:init()
+planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.DomainBuilder:new(TestContext, "Test")
     :Action("A")
     :Condition("Is True", function(ctx) return ctx:HasState(c.TestEnum.StateA) end)
     :Do(function(ctx)
         if (ctx:HasState(c.TestEnum.StateA) == false) then
-            return sb_htn.Tasks.ETaskStatus.Success;
+            return sb_htn.Tasks.ETaskStatus.Success
         end
 
-        ctx.Done = true;
-        return sb_htn.Tasks.ETaskStatus.Continue;
+        ctx.Done = true
+        return sb_htn.Tasks.ETaskStatus.Continue
     end)
     :End()
     :Action("B")
     :Condition("Is False", function(ctx) return ctx:HasState(c.TestEnum.StateA) == false end)
     :Do(function(ctx)
         if (ctx:HasState(c.TestEnum.StateA)) then
-            return sb_htn.Tasks.ETaskStatus.Success;
+            return sb_htn.Tasks.ETaskStatus.Success
         end
 
-        ctx.Done = false;
-        return sb_htn.Tasks.ETaskStatus.Continue;
+        ctx.Done = false
+        return sb_htn.Tasks.ETaskStatus.Continue
     end)
     :End()
-    :Build();
-c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+    :Build()
+c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(true == c.Done); -- We're running A
-c:SetState(c.TestEnum.StateA, false, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+c:SetState(c.TestEnum.StateA, false, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(false == c.Done); -- Out executing condition will realize that A is no longer valid, and we find B instead.
-c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(true == c.Done); -- We're running A
 
 --[[
@@ -785,41 +770,41 @@ This test demonstrates the distinction between task failure (which occurs due to
 Understanding these semantics is important for designing responsive replanning behaviors.
 ]]
 print("    > ToggleBetweenTwoPlansWithConditionFailureInOperatorWontWork_ExpectedBehavior")
-c = TestContext:new();
-c:init();
-planner = sb_htn.Planners.Planner:new(TestContext);
+c = TestContext:new()
+c:init()
+planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.DomainBuilder:new(TestContext, "Test")
     :Action("A")
     :Condition("Is True", function(ctx) return ctx:HasState(c.TestEnum.StateA) end)
     :Do(function(ctx)
         if (ctx:HasState(c.TestEnum.StateA) == false) then
-            return sb_htn.Tasks.ETaskStatus.Failure;
+            return sb_htn.Tasks.ETaskStatus.Failure
         end
 
-        ctx.Done = true;
-        return sb_htn.Tasks.ETaskStatus.Continue;
+        ctx.Done = true
+        return sb_htn.Tasks.ETaskStatus.Continue
     end)
     :End()
     :Action("B")
     :Condition("Is False", function(ctx) return ctx:HasState(c.TestEnum.StateA) == false end)
     :Do(function(ctx)
         if (ctx:HasState(c.TestEnum.StateA)) then
-            return sb_htn.Tasks.ETaskStatus.Failure;
+            return sb_htn.Tasks.ETaskStatus.Failure
         end
 
-        ctx.Done = false;
-        return sb_htn.Tasks.ETaskStatus.Continue;
+        ctx.Done = false
+        return sb_htn.Tasks.ETaskStatus.Continue
     end)
     :End()
-    :Build();
-c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+    :Build()
+c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(true == c.Done); -- We're running A
-c:SetState(c.TestEnum.StateA, false, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+c:SetState(c.TestEnum.StateA, false, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(false == c.Done); -- Out executing condition will realize that A is no longer valid, and we find B instead.
-c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent);
-planner:Tick(domain, c);
+c:SetState(c.TestEnum.StateA, true, sb_htn.Effects.EEffectType.Permanent)
+planner:Tick(domain, c)
 assert(true == c.Done); -- We're running A
 
 --[[
@@ -842,42 +827,42 @@ This test demonstrates the corner-case by:
 This test serves as corner-case documentation to clarify expected behavior.
 ]]
 print("    > OperatorExecutedOnlyOnceWhenPlanCompletes_ExpectedBehavior")
-ctx = TestContext:new();
-ctx:init();
+ctx = TestContext:new()
+ctx:init()
 ctx.ExecutionCount = 0; -- Track operator executions
-planner = sb_htn.Planners.Planner:new(TestContext);
+planner = sb_htn.Planners.Planner:new(TestContext)
 -- Build a simple domain: selector with one action that always succeeds
 -- The condition is always true, not checking any world state
 domain = sb_htn.DomainBuilder:new(TestContext, "Test")
     :Select("Root Selector")
-        :Action("Complete Action")
-            :Condition("Always True", function(context37) return true end)
-            :Do(function(context38)
-                context38.ExecutionCount = context38.ExecutionCount + 1;
-                context38.Done = true;
-                return sb_htn.Tasks.ETaskStatus.Success;
-            end)
-        :End()
+    :Action("Complete Action")
+    :Condition("Always True", function(context37) return true end)
+    :Do(function(context38)
+        context38.ExecutionCount = context38.ExecutionCount + 1
+        context38.Done = true
+        return sb_htn.Tasks.ETaskStatus.Success
+    end)
     :End()
-    :Build();
+    :End()
+    :Build()
 -- Execute a single tick with default allowImmediateReplanAndExecute=true
-planner:Tick(domain, ctx);
+planner:Tick(domain, ctx)
 -- EXPECTED: Operator should execute twice because planner is ticked with allowImmediateReplanAndExecute, and the action has
 --           no condition (always true) and return Success immediately, which will trigger immediate replan and select
 --           the same action again. We only replan immediately once in a single planner tick, which prevents this from
 --           going into an infinite loop.
 assert(2 == ctx.ExecutionCount,
-    "Operator should execute exactly once, but executed " .. ctx.ExecutionCount .. " times");
-assert(true == ctx.Done, "Task should have completed");
-assert(ctx.PlannerState.CurrentTask == nil, "No current task after plan completion");
-assert(sb_htn.Tasks.ETaskStatus.Success == ctx.PlannerState.LastStatus, "Last status should be Success");
+       "Operator should execute exactly once, but executed " .. ctx.ExecutionCount .. " times")
+assert(true == ctx.Done,                                                "Task should have completed")
+assert(ctx.PlannerState.CurrentTask == nil,                             "No current task after plan completion")
+assert(sb_htn.Tasks.ETaskStatus.Success == ctx.PlannerState.LastStatus, "Last status should be Success")
 -- Reset execution count
-ctx.ExecutionCount = 0;
+ctx.ExecutionCount = 0
 -- Execute a single tick with allowImmediateReplanAndExecute=false
-planner:Tick(domain, ctx, false);
+planner:Tick(domain, ctx, false)
 -- EXPECTED: Operator should execute exactly once now that we don't allow immediate replan.
 assert(1 == ctx.ExecutionCount,
-    "Operator should execute exactly once, but executed " .. ctx.ExecutionCount .. " times");
-assert(true == ctx.Done, "Task should have completed");
-assert(ctx.PlannerState.CurrentTask == nil, "No current task after plan completion");
-assert(sb_htn.Tasks.ETaskStatus.Success == ctx.PlannerState.LastStatus, "Last status should be Success");
+       "Operator should execute exactly once, but executed " .. ctx.ExecutionCount .. " times")
+assert(true == ctx.Done,                                                "Task should have completed")
+assert(ctx.PlannerState.CurrentTask == nil,                             "No current task after plan completion")
+assert(sb_htn.Tasks.ETaskStatus.Success == ctx.PlannerState.LastStatus, "Last status should be Success")

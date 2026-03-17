@@ -68,9 +68,8 @@ end
 ---@param task ICompoundTask
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:CompoundTask(name, task)
-    assert(task, "task")
-    assert(self:Pointer():isInstanceOf(ICompoundTask),
-        "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?")
+    assert(task,                                       "task")
+    assert(self:Pointer():isInstanceOf(ICompoundTask), "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?")
     task.Name = name
     self._domain:AddTask(self:Pointer(), task)
     table.insert(self._pointers, task)
@@ -86,8 +85,7 @@ end
 ---@param P IPrimitiveTask
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:PrimitiveTask(name, P)
-    assert(self:Pointer():isInstanceOf(ICompoundTask),
-        "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?")
+    assert(self:Pointer():isInstanceOf(ICompoundTask), "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?")
     local parent = P:new()
     parent.Name = name
     self._domain:AddTask(self:Pointer(), parent)
@@ -105,8 +103,7 @@ end
 --- http:--www.gameaipro.com/GameAIPro/GameAIPro_Chapter12_Exploring_HTN_Planners_through_Example.pdf
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:PausePlanTask()
-    assert(self:Pointer().IDecomposeAll,
-        "Pointer is not a decompose-all compound task type, like a Sequence. Maybe you tried to Pause Plan a Selector, or forget an End() after a Primitive Task Action was defined?")
+    assert(self:Pointer().IDecomposeAll, "Pointer is not a decompose-all compound task type, like a Sequence. Maybe you tried to Pause Plan a Selector, or forget an End() after a Primitive Task Action was defined?")
     local parent = PausePlanTask:new()
     parent.Name = "Pause Plan"
     self._domain:AddTask(self:Pointer(), parent)
@@ -161,8 +158,7 @@ end
 ---@param condition function<IContext>
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:ExecutingCondition(name, condition)
-    assert(self:Pointer():isInstanceOf(IPrimitiveTask),
-        "Tried to add an Executing Condition, but the Pointer is not a Primitive Task!")
+    assert(self:Pointer():isInstanceOf(IPrimitiveTask), "Tried to add an Executing Condition, but the Pointer is not a Primitive Task!")
     local cond = FuncCondition:new(self.T, name, condition)
     self:Pointer():AddExecutingCondition(cond)
 
@@ -175,8 +171,7 @@ end
 ---@param forceStopAction function<IContext>
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Do(action, start, forceStopAction)
-    assert(self:Pointer():isInstanceOf(IPrimitiveTask),
-        "Tried to add an Operator, but the Pointer is not a Primitive Task!")
+    assert(self:Pointer():isInstanceOf(IPrimitiveTask), "Tried to add an Operator, but the Pointer is not a Primitive Task!")
     local op = FuncOperator:new(self.T, action, start or nil, forceStopAction or nil)
     self:Pointer():SetOperator(op)
 
@@ -189,8 +184,7 @@ end
 ---@param func function<IContext>
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Effect(name, effectType, func)
-    assert(self:Pointer():isInstanceOf(IPrimitiveTask),
-        "Tried to add an Effect, but the Pointer is not a Primitive Task!")
+    assert(self:Pointer():isInstanceOf(IPrimitiveTask), "Tried to add an Effect, but the Pointer is not a Primitive Task!")
     local effect = ActionEffect:new(self.T, name, effectType, func)
     self:Pointer():AddEffect(effect)
 
@@ -253,9 +247,7 @@ end
 --- Build the designed domain and return a domain instance.
 ---@return Domain
 function BaseDomainBuilder:Build()
-    assert(self:Pointer() == self._domain.Root,
-        string.format("The domain definition lacks one or more End() statements. Pointer is '%s', but expected '%s'.",
-            self:Pointer().Name, self._domain.Root.Name))
+    assert(self:Pointer() == self._domain.Root, string.format("The domain definition lacks one or more End() statements. Pointer is '%s', but expected '%s'.", self:Pointer().Name, self._domain.Root.Name))
 
     self._factory:FreeList(nil, self._pointers)
     return self._domain

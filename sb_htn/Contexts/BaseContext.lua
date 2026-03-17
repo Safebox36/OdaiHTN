@@ -93,7 +93,7 @@ function BaseContext:SetState(state, value, setAsDirty, e)
             self.IsDirty = true -- When a state change during execution, we need to mark the context dirty for replanning!
         end
     else
-        self.WorldStateChangeStack[state]:push({ e or EEffectType.Permanent, value })
+        self.WorldStateChangeStack[state]:push{e or EEffectType.Permanent, value}
     end
 end
 

@@ -111,7 +111,7 @@ local function OnPausedPartialPlan(self, ctx, plan, status)
     -- then we have to start planning from the root.
     if (HasDecompositionFailed(status)) then
         ClearMethodTraversalRecord(ctx)
-        
+
         status = self.Root:Decompose(ctx, 1, plan)
     end
 
@@ -130,7 +130,7 @@ local function CacheLastPartialPlan(ctx)
 
     ctx.HasPausedPartialPlan = false
     local lastPartialPlanQueue = ctx.Factory:CreateQueue()
-    
+
     while (table.size(ctx.PartialPlanQueue.list) > 0) do
         lastPartialPlanQueue:push(ctx.PartialPlanQueue:pop())
     end

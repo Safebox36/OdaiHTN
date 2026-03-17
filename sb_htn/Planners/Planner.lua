@@ -209,7 +209,7 @@ local function CopyMtrToLastMtr(ctx)
         for _, record in ipairs(ctx.MethodTraversalRecord) do
             table.insert(ctx.LastMTR, record)
         end
-        
+
         if (ctx.DebugMTR) then
             ctx.LastMTRDebug = {}
             for _, record in ipairs(ctx.MTRDebug) do
@@ -249,7 +249,7 @@ end
 ---@return boolean
 local function HasFoundNewPlan(decompositionStatus)
     return decompositionStatus == EDecompositionStatus.Succeeded or
-           decompositionStatus == EDecompositionStatus.Partial
+        decompositionStatus == EDecompositionStatus.Partial
 end
 
 ---@param ctx IContext
@@ -422,7 +422,7 @@ end
 ---@return boolean
 local function HasFailedToFindPlan(isTryingToReplacePlan, decompositionStatus, ctx)
     return ctx.PlannerState.CurrentTask == nil and table.size(ctx.PlannerState.Plan.list) == 0 and isTryingToReplacePlan == false and
-            (decompositionStatus == EDecompositionStatus.Failed or decompositionStatus == EDecompositionStatus.Rejected)
+        (decompositionStatus == EDecompositionStatus.Failed or decompositionStatus == EDecompositionStatus.Rejected)
 end
 
 --- Call this with a domain and context instance to have the planner manage plan and task handling for the domain at
@@ -481,7 +481,7 @@ function Planner:Reset(ctx)
     if (ctx.PlannerState.CurrentTask and ctx.PlannerState.CurrentTask:isInstanceOf(IPrimitiveTask)) then
         ctx.PlannerState.CurrentTask:Stop(ctx)
     end
-    
+
     ClearPlanForReplan(ctx)
 end
 

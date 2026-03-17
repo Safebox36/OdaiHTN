@@ -151,8 +151,7 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     -- If result is null, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then
-            log("%i - Sequence.OnDecomposeCompoundTask:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth,
-             GetKey(status, EDecompositionStatus), task.Name)
+            log("%i - Sequence.OnDecomposeCompoundTask:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)
         end
 
         self.Plan:clear()
@@ -165,8 +164,7 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     -- If the decomposition failed
     if (status == EDecompositionStatus.Failed) then
         if (ctx.LogDecomposition) then
-            log("%i - Sequence.OnDecomposeCompoundTask:%s: Decomposing %s failed.", ctx.CurrentDecompositionDepth,
-             GetKey(status, EDecompositionStatus), task.Name)
+            log("%i - Sequence.OnDecomposeCompoundTask:%s: Decomposing %s failed.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)
         end
 
         self.Plan:clear()
@@ -178,8 +176,7 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     while (table.size(subPlan.list) > 0) do
         local p = subPlan:pop()
         if (ctx.LogDecomposition) then
-            log("%i - Sequence.OnDecomposeCompoundTask:Decomposing %s:Pushed %s to plan!", ctx.CurrentDecompositionDepth,
-             task.Name, p.Name)
+            log("%i - Sequence.OnDecomposeCompoundTask:Decomposing %s:Pushed %s to plan!", ctx.CurrentDecompositionDepth, task.Name, p.Name)
         end
         self.Plan:push(p)
     end
@@ -221,8 +218,7 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     -- If result is null, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then
-            log("%i - Sequence.OnDecomposeSlot:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth,
-             GetKey(status, EDecompositionStatus), task.Name)
+            log("%i - Sequence.OnDecomposeSlot:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)
         end
 
         self.Plan:clear()
@@ -235,8 +231,7 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     -- If the decomposition failed
     if (status == EDecompositionStatus.Failed) then
         if (ctx.LogDecomposition) then
-            log("%i - Sequence.OnDecomposeSlot:%s: Decomposing %s failed.", ctx.CurrentDecompositionDepth,
-             GetKey(status, EDecompositionStatus), task.Name)
+            log("%i - Sequence.OnDecomposeSlot:%s: Decomposing %s failed.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)
         end
 
         self.Plan:clear()
@@ -248,8 +243,7 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     while (table.size(subPlan.list) > 0) do
         local p = subPlan:pop()
         if (ctx.LogDecomposition) then
-            log("%i - Sequence.OnDecomposeSlot:Decomposing %s:Pushed %s to plan!", ctx.CurrentDecompositionDepth,
-             task.Name, p.Name)
+            log("%i - Sequence.OnDecomposeSlot:Decomposing %s:Pushed %s to plan!", ctx.CurrentDecompositionDepth, task.Name, p.Name)
         end
         self.Plan:push(p)
     end

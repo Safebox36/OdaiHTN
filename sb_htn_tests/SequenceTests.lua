@@ -14,7 +14,7 @@ print("    > AddCondition_ExpectedBehavior")
 local task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
 local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context1) return context1.Done == false end))
+                                                                function(context1) return context1.Done == false end))
 assert(t == task)
 assert(table.size(task.Conditions) == 1)
 
@@ -27,7 +27,8 @@ This test confirms the fluent builder pattern allows chaining subtask additions 
 print("    > AddSubtask_ExpectedBehavior")
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
-t = task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+t = task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task"
     return p
 end)())
@@ -56,7 +57,8 @@ print("    > IsValid_ExpectedBehavior")
 ctx = TestContext:new()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task"
     return p
 end)())
@@ -104,11 +106,13 @@ ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
 end)())
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
@@ -133,22 +137,26 @@ local task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 local task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task3.Name = "Test3"
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
 task2:AddSubtask(task3)
-task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task2:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     return p
 end)())
 task:AddSubtask(task2)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
     return p
 end)())
@@ -171,11 +179,13 @@ ctx:init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
 end)())
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
@@ -197,11 +207,13 @@ ctx:init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
-task:AddSubtask((function() local s = sb_htn.Tasks.CompoundTasks.Selector:new()
+task:AddSubtask((function()
+    local s = sb_htn.Tasks.CompoundTasks.Selector:new()
     s.Name = "Sub-task1"
     return s
 end)())
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
@@ -225,15 +237,18 @@ ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Perma
 ctx:SetState(TestContext.TestEnum.StateC, true, sb_htn.Effects.EEffectType.PlanOnly)
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
-        function(context2, effectType) context2:SetState(TestContext.TestEnum.StateA, false,
-                sb_htn.Effects.EEffectType.PlanOnly)
-        end))
+                                                function(context2, effectType)
+                                                    context2:SetState(TestContext.TestEnum.StateA, false,
+                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                end))
     return p
 end)())
-task:AddSubtask((function() local s = sb_htn.Tasks.CompoundTasks.Selector:new()
+task:AddSubtask((function()
+    local s = sb_htn.Tasks.CompoundTasks.Selector:new()
     s.Name = "Sub-task2"
     return s
 end)())
@@ -264,22 +279,26 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task3.Name = "Test3"
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
 task2:AddSubtask(task3)
-task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task2:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     return p
 end)())
 task:AddSubtask(task2)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
     return p
 end)())
@@ -309,23 +328,27 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task3.Name = "Test3"
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
-task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task2:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
 task2:AddSubtask(task3)
 task:AddSubtask(task2)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
     return p
 end)())
@@ -354,23 +377,27 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task3.Name = "Test3"
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     return p
 end)())
-task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task2:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
 task2:AddSubtask(task3)
 task:AddSubtask(task2)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
     return p
 end)())
@@ -405,43 +432,52 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task3.Name = "Test3"
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
-        function(context3, effectType) context3:SetState(TestContext.TestEnum.StateA, false,
-                sb_htn.Effects.EEffectType.PlanOnly)
-        end))
+                                                function(context3, effectType)
+                                                    context3:SetState(TestContext.TestEnum.StateA, false,
+                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                end))
     return p
 end)())
 task2:AddSubtask(task3)
-task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task2:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
-        function(context4, effectType) context4:SetState(TestContext.TestEnum.StateB, false,
-                sb_htn.Effects.EEffectType.PlanOnly)
-        end))
+                                                function(context4, effectType)
+                                                    context4:SetState(TestContext.TestEnum.StateB, false,
+                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                end))
     return p
 end)())
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
-        function(context5, effectType) context5:SetState(TestContext.TestEnum.StateA, false,
-                sb_htn.Effects.EEffectType.PlanOnly)
-        end))
+                                                function(context5, effectType)
+                                                    context5:SetState(TestContext.TestEnum.StateA, false,
+                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                end))
     return p
 end)())
 task:AddSubtask(task2)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task5"
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
-        function(context6, effectType) context6:SetState(TestContext.TestEnum.StateC, false,
-                sb_htn.Effects.EEffectType.PlanOnly)
-        end))
+                                                function(context6, effectType)
+                                                    context6:SetState(TestContext.TestEnum.StateC, false,
+                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                end))
     return p
 end)())
 table.insert(ctx.LastMTR, 1)
@@ -479,43 +515,52 @@ task2 = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task3.Name = "Test3"
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
-        function(context7, effectType) context7:SetState(TestContext.TestEnum.StateA, false,
-                sb_htn.Effects.EEffectType.PlanOnly)
-        end))
+                                                function(context7, effectType)
+                                                    context7:SetState(TestContext.TestEnum.StateA, false,
+                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                end))
     return p
 end)())
 task2:AddSubtask(task3)
-task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task2:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
-        function(context8, effectType) context8:SetState(TestContext.TestEnum.StateB, false,
-                sb_htn.Effects.EEffectType.PlanOnly)
-        end))
+                                                function(context8, effectType)
+                                                    context8:SetState(TestContext.TestEnum.StateB, false,
+                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                end))
     return p
 end)())
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
-        function(context9, effectType) context9:SetState(TestContext.TestEnum.StateA, false,
-                sb_htn.Effects.EEffectType.PlanOnly)
-        end))
+                                                function(context9, effectType)
+                                                    context9:SetState(TestContext.TestEnum.StateA, false,
+                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                end))
     return p
 end)())
 task:AddSubtask(task2)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task5"
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
-        function(context10, effectType) context10:SetState(TestContext.TestEnum.StateC, false,
-                sb_htn.Effects.EEffectType.PlanOnly)
-        end))
+                                                function(context10, effectType)
+                                                    context10:SetState(TestContext.TestEnum.StateC, false,
+                                                                       sb_htn.Effects.EEffectType.PlanOnly)
+                                                end))
     return p
 end)())
 plan = Queue:new()
@@ -540,12 +585,14 @@ ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
 end)())
 task:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
@@ -570,12 +617,14 @@ ctx = TestContext:new()
 ctx:init()
 task = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task.Name = "Test"
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
 end)())
 task:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
@@ -594,9 +643,7 @@ while (table.size(ctx.PartialPlanQueue.list) > 0) do
     local kvp = ctx.PartialPlanQueue:pop()
     local p = Queue:new()
     local s = kvp.Task:Decompose(ctx, kvp.TaskIndex, p)
-    if (
-        s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded or
-            s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial) then
+    if (s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded or s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial) then
         while (table.size(p.list) > 0) do
             plan:push(p:pop())
         end
@@ -620,22 +667,26 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task3.Name = "Test3"
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
 end)())
 task3:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
 task2:AddSubtask(task3)
-task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task2:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     return p
 end)())
 task:AddSubtask(task2)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
     return p
 end)())
@@ -667,22 +718,26 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task3.Name = "Test3"
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
 end)())
 task3:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
 task2:AddSubtask(task3)
-task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task2:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     return p
 end)())
 task:AddSubtask(task2)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
     return p
 end)())
@@ -704,9 +759,7 @@ while (table.size(ctx.PartialPlanQueue.list) > 0) do
     local kvp = ctx.PartialPlanQueue:pop()
     local p = Queue:new()
     local s = kvp.Task:Decompose(ctx, kvp.TaskIndex, p)
-    if (
-        s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded or
-            s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial) then
+    if (s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded or s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial) then
         while (table.size(p.list) > 0) do
             plan:push(p:pop())
         end
@@ -736,36 +789,43 @@ task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task3.Name = "Test3"
 local task4 = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task4.Name = "Test4"
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task1"
     return p
 end)())
 task3:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task3:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task3:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task2"
     return p
 end)())
 task2:AddSubtask(task3)
-task2:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task2:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task3"
     return p
 end)())
-task4:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task4:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task5"
     return p
 end)())
 task4:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task4:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task4:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task6"
     return p
 end)())
 task:AddSubtask(task2)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task4"
     return p
 end)())
 task:AddSubtask(task4)
-task:AddSubtask((function() local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
+task:AddSubtask((function()
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
     p.Name = "Sub-task7"
     return p
 end)())
@@ -787,9 +847,7 @@ while (table.size(ctx.PartialPlanQueue.list) > 0) do
     local kvp = ctx.PartialPlanQueue:pop()
     local p = Queue:new()
     local s = kvp.Task:Decompose(ctx, kvp.TaskIndex, p)
-    if (
-        s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded or
-            s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial) then
+    if (s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded or s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial) then
         while (table.size(p.list) > 0) do
             plan:push(p:pop())
         end
@@ -808,9 +866,7 @@ while (table.size(ctx.PartialPlanQueue.list) > 0) do
     local kvp = ctx.PartialPlanQueue:pop()
     local p = Queue:new()
     local s = kvp.Task:Decompose(ctx, kvp.TaskIndex, p)
-    if (
-        s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded or
-            s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial) then
+    if (s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded or s == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial) then
         while (table.size(p.list) > 0) do
             plan:push(p:pop())
         end

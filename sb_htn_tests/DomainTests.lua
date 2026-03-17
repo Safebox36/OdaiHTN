@@ -29,7 +29,9 @@ local task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Test"
 domain:AddTask(task1, task2)
 assert(function()
-    for _, value in ipairs(task1.Subtasks) do if (value == task2) then return true end end
+    for _, value in ipairs(task1.Subtasks) do
+        if (value == task2) then return true end
+    end
     return false
 end)
 assert(task2.Parent == task1)
@@ -122,7 +124,7 @@ task1.Name = "Test"
 task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task"
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
+domain:AddTask(task1,       task2)
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -144,20 +146,17 @@ task1 = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task1.Name = "Test"
 task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task1"
-task2:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect1", sb_htn.Effects.EEffectType.PlanOnly,
-    function(context1, effectType1) context1:SetState(TestContext.TestEnum.StateA, true, effectType1) end))
+task2:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect1", sb_htn.Effects.EEffectType.PlanOnly, function(context1, effectType1) context1:SetState(TestContext.TestEnum.StateA, true, effectType1) end))
 local task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Sub-task2"
-task3:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect2", sb_htn.Effects.EEffectType.PlanAndExecute,
-    function(context2, effectType2) context2:SetState(TestContext.TestEnum.StateB, true, effectType2) end))
+task3:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect2", sb_htn.Effects.EEffectType.PlanAndExecute, function(context2, effectType2) context2:SetState(TestContext.TestEnum.StateB, true, effectType2) end))
 local task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task4.Name = "Sub-task3"
-task4:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect3", sb_htn.Effects.EEffectType.Permanent,
-    function(context3, effectType3) context3:SetState(TestContext.TestEnum.StateC, true, effectType3) end))
+task4:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect3", sb_htn.Effects.EEffectType.Permanent, function(context3, effectType3) context3:SetState(TestContext.TestEnum.StateC, true, effectType3) end))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
-domain:AddTask(task1, task3)
-domain:AddTask(task1, task4)
+domain:AddTask(task1,       task2)
+domain:AddTask(task1,       task3)
+domain:AddTask(task1,       task4)
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -183,25 +182,21 @@ task1 = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task1.Name = "Test"
 task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Sub-task1"
-task2:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect1", sb_htn.Effects.EEffectType.PlanOnly,
-    function(context4, effectType4) context4:SetState(TestContext.TestEnum.StateA, true, effectType4) end))
+task2:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect1", sb_htn.Effects.EEffectType.PlanOnly, function(context4, effectType4) context4:SetState(TestContext.TestEnum.StateA, true, effectType4) end))
 task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Sub-task2"
-task3:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect2", sb_htn.Effects.EEffectType.PlanAndExecute,
-    function(context5, effectType5) context5:SetState(TestContext.TestEnum.StateB, true, effectType5) end))
+task3:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect2", sb_htn.Effects.EEffectType.PlanAndExecute, function(context5, effectType5) context5:SetState(TestContext.TestEnum.StateB, true, effectType5) end))
 task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task4.Name = "Sub-task3"
-task4:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect3", sb_htn.Effects.EEffectType.Permanent,
-    function(context6, effectType6) context6:SetState(TestContext.TestEnum.StateC, true, effectType6) end))
+task4:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect3", sb_htn.Effects.EEffectType.Permanent, function(context6, effectType6) context6:SetState(TestContext.TestEnum.StateC, true, effectType6) end))
 local task5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task5.Name = "Sub-task4"
-task5:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context7) return context7.Done == true end))
+task5:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context7) return context7.Done == true end))
 domain:AddTask(domain.Root, task1)
-domain:AddTask(task1, task2)
-domain:AddTask(task1, task3)
-domain:AddTask(task1, task4)
-domain:AddTask(task1, task5)
+domain:AddTask(task1,       task2)
+domain:AddTask(task1,       task3)
+domain:AddTask(task1,       task4)
+domain:AddTask(task1,       task5)
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Rejected)
@@ -234,19 +229,17 @@ task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Sub-task1"
-task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context8) return context8.Done == true end))
+task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context8) return context8.Done == true end))
 task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task4.Name = "Sub-task1"
 task5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task5.Name = "Sub-task2"
-task5:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context9) return context9.Done == true end))
+task5:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context9) return context9.Done == true end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(domain.Root, task2)
-domain:AddTask(task1, task3)
-domain:AddTask(task2, task4)
-domain:AddTask(task2, task5)
+domain:AddTask(task1,       task3)
+domain:AddTask(task2,       task4)
+domain:AddTask(task2,       task5)
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Rejected)
@@ -269,33 +262,31 @@ table.insert(ctx.LastMTR, 1)
 -- Root is a Selector that branch off into task1 selector or task2 sequence.
 -- MTR tracks decomposition of compound tasks and priary tasks that are subtasks of selectors,
 -- so our MTR is 2 layer deep.
-domain = sb_htn.Domain:new(TestContext, "Test");
+domain = sb_htn.Domain:new(TestContext, "Test")
 task1 = sb_htn.Tasks.CompoundTasks.Sequence:new()
 task1.Name = "Test1"
 task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
 task2.Name = "Test2"
 task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Sub-task1"
-task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
-    function(context10) return context10.Done == true end));
+task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context10) return context10.Done == true end))
 task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task4.Name = "Sub-task1"
 task5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task5.Name = "Sub-task2"
-task5:AddCondition(sb_htn.Conditions.FuncCondition(TestContext, "TestCondition",
-    function(context11) return context11.Done == true end))
-domain:AddTask(domain.Root, task1);
-domain:AddTask(domain.Root, task2);
-domain:AddTask(task1, task3);
-domain:AddTask(task2, task4);
-domain:AddTask(task2, task5);
-plan = Queue:new();
-status = domain:FindPlan(ctx, plan);
-assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Rejected);
+task5:AddCondition(sb_htn.Conditions.FuncCondition(TestContext, "TestCondition", function(context11) return context11.Done == true end))
+domain:AddTask(domain.Root, task1)
+domain:AddTask(domain.Root, task2)
+domain:AddTask(task1,       task3)
+domain:AddTask(task2,       task4)
+domain:AddTask(task2,       task5)
+plan = Queue:new()
+status = domain:FindPlan(ctx, plan)
+assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Rejected)
 assert(table.size(plan.list) == 0)
 assert(table.size(ctx.MethodTraversalRecord) == 2)
-assert(ctx.MethodTraversalRecord[1] == ctx.LastMTR[1]);
-assert(ctx.MethodTraversalRecord[2] == ctx.LastMTR[2]);
+assert(ctx.MethodTraversalRecord[1] == ctx.LastMTR[1])
+assert(ctx.MethodTraversalRecord[2] == ctx.LastMTR[2])
 
 --[[
 Verifies that FindPlan can find a better plan (with different MTR) when world state changes make it possible.
@@ -304,8 +295,8 @@ the new MTR will differ and the new plan will be accepted if valid.
 This test demonstrates the replanning mechanism: state changes can invalidate the last plan, requiring exploration of new decomposition paths.
 ]]
 print("    > FindPlanIfSelectorFindBetterPrimaryTaskMTRChangeSuccessfully_ExpectedBehavior")
-ctx = TestContext:new();
-ctx:init();
+ctx = TestContext:new()
+ctx:init()
 table.insert(ctx.LastMTR, 1)
 table.insert(ctx.LastMTR, 2)
 -- Root is a Selector that branch off into two primary tasks.
@@ -313,36 +304,34 @@ table.insert(ctx.LastMTR, 2)
 -- but it will be a rejected plan because of LastMTR equality.
 -- We then change the Done state to true before we do a replan,
 -- and now we intend task 2 (Test Action A) to be selected, since its MTR beast LastMTR score.
-domain = sb_htn.Domain(TestContext, "Test");
+domain = sb_htn.Domain(TestContext, "Test")
 task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test Select";
+task1.Name = "Test Select"
 task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task2.Name = "Test Action A"
-task2:AddCondition(sb_htn.Conditions.FuncCondition(TestContext, "Can choose A",
-    function(context12) return context12.Done == true end));
+task2:AddCondition(sb_htn.Conditions.FuncCondition(TestContext, "Can choose A", function(context12) return context12.Done == true end))
 task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 task3.Name = "Test Action B"
-task3:AddCondition(sb_htn.Conditions.FuncCondition(TestContext, "Can not choose A",
-    function(context13) return context13.Done == false end));
-domain:AddTask(domain.Root, task1);
-domain:AddTask(task1, task2);
-domain:AddTask(task1, task3);
+task3:AddCondition(sb_htn.Conditions.FuncCondition(TestContext, "Can not choose A", function(context13) return context13.Done == false end))
+domain:AddTask(domain.Root, task1)
+domain:AddTask(task1,       task2)
+domain:AddTask(task1,       task3)
 -- We expect this to first get rejected, because LastMTR holds [0, 1] which is what we'll get back from the planner.
-plan = Queue:new();
-status = domain:FindPlan(ctx, plan);
-assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Rejected);
-assert(table.size(plan.list) == 0);
-assert(table.size(ctx.MethodTraversalRecord) == 2);
-assert(ctx.MethodTraversalRecord[1] == ctx.LastMTR[1]);
-assert(ctx.MethodTraversalRecord[2] == ctx.LastMTR[2]);
+plan = Queue:new()
+status = domain:FindPlan(ctx, plan)
+assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Rejected)
+assert(table.size(plan.list) == 0)
+assert(table.size(ctx.MethodTraversalRecord) == 2)
+assert(ctx.MethodTraversalRecord[1] == ctx.LastMTR[1])
+assert(ctx.MethodTraversalRecord[2] == ctx.LastMTR[2])
 -- When we change the condition to Done = true, we should now be able to find a better plan!
-ctx.Done = true;
-status = domain:FindPlan(ctx, plan);
-assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded);
-assert(table.size(plan.list) > 0);
-assert(table.size(ctx.MethodTraversalRecord) == 2);
-assert(ctx.MethodTraversalRecord[1] == ctx.LastMTR[1]);
-assert(ctx.MethodTraversalRecord[2] < ctx.LastMTR[2]);
+ctx.Done = true
+status = domain:FindPlan(ctx, plan)
+assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
+assert(table.size(plan.list) > 0)
+assert(table.size(ctx.MethodTraversalRecord) == 2)
+assert(ctx.MethodTraversalRecord[1] == ctx.LastMTR[1])
+assert(ctx.MethodTraversalRecord[2] < ctx.LastMTR[2])
 
 --[[
 Verifies that FindPlan returns Partial status when a PausePlanTask is encountered during decomposition.
@@ -361,9 +350,9 @@ subtask1.Name = "Sub-task1"
 local subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 subtask2.Name = "Sub-task2"
 domain:AddTask(domain.Root, task)
-domain:AddTask(task, subtask1)
-domain:AddTask(task, sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-domain:AddTask(task, subtask2)
+domain:AddTask(task,        subtask1)
+domain:AddTask(task,        sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
+domain:AddTask(task,        subtask2)
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)
@@ -392,9 +381,9 @@ subtask1.Name = "Sub-task1"
 subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 subtask2.Name = "Sub-task2"
 domain:AddTask(domain.Root, task)
-domain:AddTask(task, subtask1)
-domain:AddTask(task, sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-domain:AddTask(task, subtask2)
+domain:AddTask(task,        subtask1)
+domain:AddTask(task,        sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
+domain:AddTask(task,        subtask2)
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)
@@ -436,13 +425,13 @@ subtask3.Name = "Sub-task3"
 local subtask4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 subtask4.Name = "Sub-task4"
 domain:AddTask(domain.Root, task)
-domain:AddTask(task, task2)
-domain:AddTask(task, subtask4)
-domain:AddTask(task2, task3)
-domain:AddTask(task2, subtask3)
-domain:AddTask(task3, subtask1)
-domain:AddTask(task3, sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-domain:AddTask(task3, subtask1)
+domain:AddTask(task,        task2)
+domain:AddTask(task,        subtask4)
+domain:AddTask(task2,       task3)
+domain:AddTask(task2,       subtask3)
+domain:AddTask(task3,       subtask1)
+domain:AddTask(task3,       sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
+domain:AddTask(task3,       subtask1)
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)
@@ -482,13 +471,13 @@ subtask3.Name = "Sub-task3"
 subtask4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 subtask4.Name = "Sub-task4"
 domain:AddTask(domain.Root, task)
-domain:AddTask(task, task2)
-domain:AddTask(task, subtask4)
-domain:AddTask(task2, task3)
-domain:AddTask(task2, subtask3)
-domain:AddTask(task3, subtask1)
-domain:AddTask(task3, sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-domain:AddTask(task3, subtask2)
+domain:AddTask(task,        task2)
+domain:AddTask(task,        subtask4)
+domain:AddTask(task2,       task3)
+domain:AddTask(task2,       subtask3)
+domain:AddTask(task3,       subtask1)
+domain:AddTask(task3,       sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
+domain:AddTask(task3,       subtask2)
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)
@@ -542,18 +531,18 @@ subtask6.Name = "Sub-task6"
 local subtask7 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
 subtask7.Name = "Sub-task7"
 domain:AddTask(domain.Root, task)
-domain:AddTask(task3, subtask1)
-domain:AddTask(task3, sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-domain:AddTask(task3, subtask2)
-domain:AddTask(task2, task3)
-domain:AddTask(task2, subtask3)
-domain:AddTask(task4, subtask5)
-domain:AddTask(task4, sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-domain:AddTask(task4, subtask6)
-domain:AddTask(task, task2)
-domain:AddTask(task, subtask4)
-domain:AddTask(task, task4)
-domain:AddTask(task, subtask7)
+domain:AddTask(task3,       subtask1)
+domain:AddTask(task3,       sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
+domain:AddTask(task3,       subtask2)
+domain:AddTask(task2,       task3)
+domain:AddTask(task2,       subtask3)
+domain:AddTask(task4,       subtask5)
+domain:AddTask(task4,       sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
+domain:AddTask(task4,       subtask6)
+domain:AddTask(task,        task2)
+domain:AddTask(task,        subtask4)
+domain:AddTask(task,        task4)
+domain:AddTask(task,        subtask7)
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)

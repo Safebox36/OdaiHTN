@@ -21,9 +21,9 @@ Start allows operators to initialize state, allocate resources, or perform one-t
 This test ensures that Start with a null function is valid, supporting partial operator implementations where only certain lifecycle methods are needed.
 ]]
 print("    > StartDoesNothingWithoutFunctionPtr_ExpectedBehavior")
-ctx = TestContext:new();
-e = sb_htn.Operators.FuncOperator:new(TestContext);
-e:Start(ctx);
+ctx = TestContext:new()
+e = sb_htn.Operators.FuncOperator:new(TestContext)
+e:Start(ctx)
 
 --[[
 Verifies that a FuncOperator gracefully handles Stop being called with a null function pointer by treating it as a no-op.
@@ -55,7 +55,7 @@ The context is critical for Start to initialize operator state and validate init
 This test ensures the operator validates input at the start of the lifecycle, catching invalid parameters before execution progresses.
 ]]
 print("    > StartThrowsIfBadContext_ExpectedBehavior")
-e = sb_htn.Operators.FuncOperator:new(TestContext);
+e = sb_htn.Operators.FuncOperator:new(TestContext)
 if (pcall(function() e:Start(nil) end)) then
     print("Exception not caught.")
 end
@@ -80,8 +80,7 @@ This test confirms the lambda wrapping mechanism properly executes the Update fu
 ]]
 print("    > UpdateReturnsStatusInternalFunctionPtr_ExpectedBehavior")
 ctx = TestContext:new()
-e = sb_htn.Operators.FuncOperator:new(TestContext,
-    function(context1) return sb_htn.Tasks.ETaskStatus.Success end)
+e = sb_htn.Operators.FuncOperator:new(TestContext, function(context1) return sb_htn.Tasks.ETaskStatus.Success end)
 local status = e:Update(ctx)
 assert(sb_htn.Tasks.ETaskStatus.Success == status)
 
@@ -92,10 +91,9 @@ Start can return TaskStatus.Success to skip Update and complete immediately, Tas
 This test confirms that Start functions can signal completion during the initialization phase and that the TaskStatus is properly returned to the planner.
 ]]
 print("    > StartReturnsStatusInternalFunctionPtr_ExpectedBehavior")
-ctx = TestContext:new();
-e = sb_htn.Operators.FuncOperator:new(TestContext, nil,
-    function(context2) return sb_htn.Tasks.ETaskStatus.Success end);
-status = e:Start(ctx);
+ctx = TestContext:new()
+e = sb_htn.Operators.FuncOperator:new(TestContext, nil, function(context2) return sb_htn.Tasks.ETaskStatus.Success end)
+status = e:Start(ctx)
 assert(sb_htn.Tasks.ETaskStatus.Success == status)
 
 --[[
@@ -106,7 +104,6 @@ This test confirms that Stop functions execute properly and that any world state
 ]]
 print("    > StopCallsInternalFunctionPtr_ExpectedBehavior")
 ctx = TestContext:new()
-e = sb_htn.Operators.FuncOperator:new(TestContext, nil, nil,
-    function(context3) context3.Done = true end)
+e = sb_htn.Operators.FuncOperator:new(TestContext, nil, nil, function(context3) context3.Done = true end)
 e:Stop(ctx)
 assert(true == ctx.Done)
