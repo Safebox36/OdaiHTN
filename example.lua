@@ -22,6 +22,7 @@ function MyContext:initialize()
     self.LogDecomposition = false
 
     self.Factory          = sb_htn.Factory.DefaultFactory:new()
+    self.PlannerState     = sb_htn.Planners.DefaultPlannerState:new()
 
     for _, v in pairs(EMyWorldState) do
         self.WorldState[v] = 0
@@ -32,11 +33,11 @@ function MyContext:initialize()
 end
 
 function MyContext:Init()
-    sb_htn.Contexts.BaseContext.init(self)
+    sb_htn.Contexts.BaseContext.Init(self)
 end
 
 ---@param state EMyWorldState
----@param value boolean | nil
+---@param value boolean?
 function MyContext:HasState(state, value)
     if (value ~= nil) then
         return sb_htn.Contexts.BaseContext.HasState(self, state, (value and 1 or 0))
@@ -56,56 +57,56 @@ end
 
 local domain = sb_htn.DomainBuilder:new(MyContext, "MyDomain")
     :Select("C")
-        :Condition("Has A and B", function(ctx)
-            return ctx:HasState(EMyWorldState.HasA) and ctx:HasState(EMyWorldState.HasB)
-        end)
-        :Condition("Has NOT C", function(ctx)
-            return not ctx:HasState(EMyWorldState.HasC)
-        end)
-        :Action("Get C")
-            :Do(function(ctx)
-                print("Get C")
-                return sb_htn.Tasks.ETaskStatus.Success
-            end)
-            :Effect("Has C", sb_htn.Effects.EEffectType.PlanAndExecute, function(ctx, effectType)
-                ctx:SetState(EMyWorldState.HasC, true)
-            end)
-        :End()
+    :Condition("Has A and B", function(ctx)
+        return ctx:HasState(EMyWorldState.HasA) and ctx:HasState(EMyWorldState.HasB)
+    end)
+    :Condition("Has NOT C", function(ctx)
+        return not ctx:HasState(EMyWorldState.HasC)
+    end)
+    :Action("Get C")
+    :Do(function(ctx)
+        print("Get C")
+        return sb_htn.Tasks.ETaskStatus.Success
+    end)
+    :Effect("Has C", sb_htn.Effects.EEffectType.PlanAndExecute, function(ctx, effectType)
+        ctx:SetState(EMyWorldState.HasC, true)
+    end)
+    :End()
     :End()
     :Sequence("A and B")
-        :Condition("Has NOT A nor B", function(ctx)
-            return not (ctx:HasState(EMyWorldState.HasA) and ctx:HasState(EMyWorldState.HasB))
-        end)
-        :Action("Get A")
-            :Do(function(ctx)
-                print("Get A")
-                return sb_htn.Tasks.ETaskStatus.Success
-            end)
-            :Effect("Has A", sb_htn.Effects.EEffectType.PlanAndExecute, function(ctx, effectType)
-                ctx:SetState(EMyWorldState.HasA, true)
-            end)
-        :End()
-        :Action("Get B")
-            :Condition("Has A", function(ctx)
-                return ctx:HasState(EMyWorldState.HasA)
-            end)
-            :Do(function(ctx)
-                print("Get B")
-                return sb_htn.Tasks.ETaskStatus.Success
-            end)
-            :Effect("Has B", sb_htn.Effects.EEffectType.PlanAndExecute, function(ctx, effectType)
-                ctx:SetState(EMyWorldState.HasB, true)
-            end)
-        :End()
+    :Condition("Has NOT A nor B", function(ctx)
+        return not (ctx:HasState(EMyWorldState.HasA) and ctx:HasState(EMyWorldState.HasB))
+    end)
+    :Action("Get A")
+    :Do(function(ctx)
+        print("Get A")
+        return sb_htn.Tasks.ETaskStatus.Success
+    end)
+    :Effect("Has A", sb_htn.Effects.EEffectType.PlanAndExecute, function(ctx, effectType)
+        ctx:SetState(EMyWorldState.HasA, true)
+    end)
+    :End()
+    :Action("Get B")
+    :Condition("Has A", function(ctx)
+        return ctx:HasState(EMyWorldState.HasA)
+    end)
+    :Do(function(ctx)
+        print("Get B")
+        return sb_htn.Tasks.ETaskStatus.Success
+    end)
+    :Effect("Has B", sb_htn.Effects.EEffectType.PlanAndExecute, function(ctx, effectType)
+        ctx:SetState(EMyWorldState.HasB, true)
+    end)
+    :End()
     :End()
     :Select("Done")
-        :Action("Done")
-            :Do(function(ctx)
-                print("Done")
-                ctx.Done = true
-                return sb_htn.Tasks.ETaskStatus.Continue
-            end)
-        :End()
+    :Action("Done")
+    :Do(function(ctx)
+        print("Done")
+        ctx.Done = true
+        return sb_htn.Tasks.ETaskStatus.Continue
+    end)
+    :End()
     :End()
     :Build()
 

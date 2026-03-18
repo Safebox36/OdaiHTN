@@ -3,18 +3,18 @@ local ITask = require("sb_htn.Tasks.ITask")
 local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 
 ---@class PausePlanTask : ITask
+---@field Effects IEffect[]
 local PausePlanTask = mc.class("PausePlanTask", ITask)
 
-function PausePlanTask:initialize()
-    ITask.initialize(self)
+---@class PausePlanTaskParams
+---@field public Name string?
+---@field public Parent ICompoundTask?
 
-    ---@type string
-    self.Name = ""
-    ---@type ICompoundTask
-    self.Parent = nil
-    ---@type table<ICondition>
+---@param params PausePlanTaskParams?
+function PausePlanTask:initialize(params)
+    self.Name = params and params.Name or "Pause Plan"
+    self.Parent = params and params.Parent or nil
     self.Conditions = {}
-    ---@type table<IEffect>
     self.Effects = {}
 end
 

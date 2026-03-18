@@ -1,6 +1,6 @@
 ---@param v number
----@param kvp table<string, number>
----@return string | nil
+---@param kvp string, number[]
+---@return string?
 return function(v, kvp)
     ---@param key string
     ---@param value number

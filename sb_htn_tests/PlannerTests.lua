@@ -51,7 +51,7 @@ This capability is useful for testing and for dynamic domains that start empty a
 ]]
 print("    > TickWithEmptyDomain_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
 planner = sb_htn.Planners.Planner:new(TestContext)
 planner:Tick(domain, ctx)
@@ -64,13 +64,11 @@ This test demonstrates that the planner validates operator presence and handles 
 ]]
 print("    > TickWithPrimitiveTaskWithoutOperator_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.Domain:new(TestContext, "Test")
-local task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-local task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+local task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+local task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
 planner:Tick(domain, ctx)
@@ -85,13 +83,11 @@ This test demonstrates that the planner handles null operator functions graceful
 ]]
 print("    > TickWithFuncOperatorWithNullFunc_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -107,13 +103,11 @@ The test validates that successful task completion is handled efficiently withou
 ]]
 print("    > TickWithDefaultSuccessOperatorWontStackOverflows_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context1) return sb_htn.Tasks.ETaskStatus.Success end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -129,13 +123,11 @@ This test validates that the planner properly maintains task state across ticks 
 ]]
 print("    > TickWithDefaultContinueOperator_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context2) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -152,14 +144,12 @@ This test demonstrates that callbacks are properly invoked during the planning c
 print("    > OnNewPlan_ExpectedBehavior")
 local test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnNewPlan = function(self, p) test = table.size(p.list) == 1 end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context3) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -175,19 +165,15 @@ This test demonstrates that replanning callbacks work correctly when conditions 
 print("    > OnReplacePlan_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnReplacePlan = function(self, op, ct, p) test = table.size(op.list) == 0 and ct and table.size(p.list) == 1 end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test1"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-local task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Sub-task1"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test1"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+local task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
 task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context4) return context4.Done == false end))
-local task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task4.Name = "Sub-task2"
+local task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context5) return sb_htn.Tasks.ETaskStatus.Continue end))
 task4:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context6) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
@@ -210,14 +196,12 @@ This test demonstrates that task-level callbacks are properly invoked during the
 print("    > OnNewTask_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnNewTask = function(self, t1) test = t1.Name == "Sub-task" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context7) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -233,19 +217,15 @@ This test demonstrates that planning-level condition failure callbacks work corr
 print("    > OnNewTaskConditionFailed_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnNewTaskConditionFailed = function(self, t2, c1) test = t2.Name == "Sub-task1" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test1"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Sub-task1"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test1"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
 task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context8) return context8.Done == false end))
-task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task4.Name = "Sub-task2"
+task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context9) return sb_htn.Tasks.ETaskStatus.Success end))
 -- Note that one should not use AddEffect on types that's not part of WorldState unless you
 -- know what you're doing. Outside of the WorldState, we don't get automatic trimming of
@@ -274,14 +254,12 @@ This test demonstrates that operator lifecycle callbacks work correctly during t
 print("    > OnStartNewTask_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskStarted = function(self, t) test = t.Name == "Sub-task" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context12) return sb_htn.Tasks.ETaskStatus.Continue end, function(context13) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -297,14 +275,12 @@ This test demonstrates that task lifecycle callbacks properly reflect successful
 print("    > StartNewTaskCanCompleteTask_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskCompletedSuccessfully = function(self, t) test = t.Name == "Sub-task" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context14) return sb_htn.Tasks.ETaskStatus.Continue end, function(context15) return sb_htn.Tasks.ETaskStatus.Success end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -320,14 +296,12 @@ This test demonstrates that task lifecycle callbacks properly reflect failure in
 print("    > StartNewTaskCanFailTask_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskFailed = function(self, t) test = t.Name == "Sub-task" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context16) return sb_htn.Tasks.ETaskStatus.Continue end, function(context17) return sb_htn.Tasks.ETaskStatus.Failure end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -343,19 +317,15 @@ This test demonstrates that task stop callbacks work correctly during plan trans
 print("    > OnStopCurrentTask_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnStopCurrentTask = function(self, t3) test = t3.Name == "Sub-task2" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test1"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Sub-task1"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test1"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
 task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context12) return context12.Done == false end))
-task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task4.Name = "Sub-task2"
+task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context18) return sb_htn.Tasks.ETaskStatus.Continue end))
 task4:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context19) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
@@ -378,19 +348,15 @@ This test demonstrates that successful task completion callbacks work correctly 
 print("    > OnCurrentTaskCompletedSuccessfully_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskCompletedSuccessfully = function(self, t4) test = t4.Name == "Sub-task1" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test1"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Sub-task1"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test1"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
 task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context15) return context15.Done == false end))
-task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task4.Name = "Sub-task2"
+task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context20) return sb_htn.Tasks.ETaskStatus.Success end))
 task4:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context21) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
@@ -413,19 +379,15 @@ This test demonstrates that effect application callbacks work correctly when tas
 print("    > OnApplyEffect_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnApplyEffect = function(self, e) test = e.Name == "TestEffect" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test1"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Sub-task1"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test1"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
 task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context18) return not context18:HasState(TestContext.TestEnum.StateA) end))
-task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task4.Name = "Sub-task2"
+task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 task3:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context22) return sb_htn.Tasks.ETaskStatus.Success end))
 task3:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.PlanAndExecute,
                                                 function(context20, effectType) context20:SetState(TestContext.TestEnum.StateA, true, sb_htn.Tasks.ETaskStatus.Continue) end))
@@ -451,14 +413,12 @@ This test demonstrates that task failure callbacks work correctly during plan ex
 print("    > OnCurrentTaskFailed_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskFailed = function(self, t5) test = t5.Name == "Sub-task" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context24) return sb_htn.Tasks.ETaskStatus.Failure end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -474,14 +434,12 @@ This test demonstrates that task continuation callbacks work correctly during pl
 print("    > OnCurrentTaskContinues_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskContinues = function(self, t6) test = t6.Name == "Sub-task" end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context25) return sb_htn.Tasks.ETaskStatus.Continue end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -497,17 +455,15 @@ This test demonstrates that executing condition failure callbacks enable dynamic
 print("    > OnCurrentTaskExecutingConditionFailed_ExpectedBehavior")
 test = false
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 ctx.PlannerState.OnCurrentTaskExecutingConditionFailed = function(self, t7, c2)
     test = t7.Name == "Sub-task" and
         c2.Name == "TestCondition"
 end
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 task2:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, function(context26) return sb_htn.Tasks.ETaskStatus.Continue end))
 task2:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context25) return context25.Done end))
 domain:AddTask(domain.Root, task1)
@@ -523,18 +479,15 @@ This test demonstrates that replanning works correctly when conditions improve d
 ]]
 print("    > FindPlanIfConditionChangeAndOperatorIsContinuous_ExpectedBehavior")
 ctx = TestContext()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.Domain:new(TestContext, "Test")
-local select = sb_htn.Tasks.CompoundTasks.Selector:new()
-select.Name = "Test Select"
-local actionA = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-actionA.Name = "Test Action A"
+local select = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test Select"}
+local actionA = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test Action A"}
 actionA:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context27) return context27.Done == true end))
 actionA:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context28) return context28.Done == true end))
 actionA:SetOperator(TestOperator:new())
-local actionB = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-actionB.Name = "Test Action B"
+local actionB = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test Action B"}
 actionB:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context29) return context29.Done == false end))
 actionB:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context30) return context30.Done == false end))
 actionB:SetOperator(TestOperator:new())
@@ -568,17 +521,14 @@ This test demonstrates that replanning responds to world state changes while mai
 ]]
 print("    > FindPlanIfWorldStateChangeAndOperatorIsContinuous_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.Domain:new(TestContext, "Test")
-select = sb_htn.Tasks.CompoundTasks.Selector:new()
-select.Name = "Test Select"
-actionA = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-actionA.Name = "Test Action A"
+select = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test Select"}
+actionA = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test Action A"}
 actionA:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context31) return context31:GetState(TestContext.TestEnum.StateA) == 1 end))
 actionA:SetOperator(TestOperator:new())
-actionB = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-actionB.Name = "Test Action B"
+actionB = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test Action B"}
 actionB:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context32) return context32:GetState(TestContext.TestEnum.StateA) == 0 end))
 actionB:SetOperator(TestOperator:new())
 domain:AddTask(domain.Root, select)
@@ -611,18 +561,15 @@ This test demonstrates that replanning handles forced transitions to suboptimal 
 ]]
 print("    > FindPlanIfWorldStateChangeToWorseMRTAndOperatorIsContinuous_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.Domain:new(TestContext, "Test")
-select = sb_htn.Tasks.CompoundTasks.Selector:new()
-select.Name = "Test Select"
-actionA = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-actionA.Name = "Test Action A"
+select = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test Select"}
+actionA = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test Action A"}
 actionA:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context33) return context33:GetState(TestContext.TestEnum.StateA) == 0 end))
 actionA:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can choose A", function(context34) return context34:GetState(TestContext.TestEnum.StateA) == 0 end))
 actionA:SetOperator(TestOperator:new())
-actionB = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-actionB.Name = "Test Action B"
+actionB = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test Action B"}
 actionB:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context35) return context35:GetState(TestContext.TestEnum.StateA) == 1 end))
 actionB:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Can not choose A", function(context36) return context36:GetState(TestContext.TestEnum.StateA) == 1 end))
 actionB:SetOperator(TestOperator:new())
@@ -656,7 +603,7 @@ This test demonstrates the limitation of relying only on planning conditions and
 ]]
 print("    > ToggleBetweenTwoPlansWithOnlyPlannerConditionWontWork_ExpectedBehavior")
 local c = TestContext:new()
-c:init()
+c:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.DomainBuilder:new(TestContext, "Test")
     :Action("A")
@@ -689,7 +636,7 @@ This test demonstrates that executing conditions enable dynamic and responsive p
 ]]
 print("    > ToggleBetweenTwoPlansWithExecutingConditionWillWork_ExpectedBehavior")
 c = TestContext:new()
-c:init()
+c:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.DomainBuilder:new(TestContext, "Test")
     :Action("A")
@@ -727,7 +674,7 @@ This test demonstrates an alternative approach to plan switching where operators
 ]]
 print("    > ToggleBetweenTwoPlansWithConditionSuccessInOperatorWillWork_ExpectedBehavior")
 c = TestContext:new()
-c:init()
+c:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.DomainBuilder:new(TestContext, "Test")
     :Action("A")
@@ -771,7 +718,7 @@ Understanding these semantics is important for designing responsive replanning b
 ]]
 print("    > ToggleBetweenTwoPlansWithConditionFailureInOperatorWontWork_ExpectedBehavior")
 c = TestContext:new()
-c:init()
+c:Init()
 planner = sb_htn.Planners.Planner:new(TestContext)
 domain = sb_htn.DomainBuilder:new(TestContext, "Test")
     :Action("A")
@@ -828,7 +775,7 @@ This test serves as corner-case documentation to clarify expected behavior.
 ]]
 print("    > OperatorExecutedOnlyOnceWhenPlanCompletes_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ExecutionCount = 0; -- Track operator executions
 planner = sb_htn.Planners.Planner:new(TestContext)
 -- Build a simple domain: selector with one action that always succeeds

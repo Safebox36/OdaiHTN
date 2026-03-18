@@ -31,7 +31,7 @@ This test ensures that calling Apply on an effect with a null function pointer i
 ]]
 print("    > ApplyDoesNothingWithoutFunctionPtr_ExpectedBehavior")
 local ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 e = sb_htn.Effects.ActionEffect:new(TestContext, "Name", sb_htn.Effects.EEffectType.PlanOnly)
 e:Apply(ctx)
 
@@ -55,7 +55,7 @@ This test confirms that the effect mechanism properly executes the enclosed func
 ]]
 print("    > ApplyCallsInternalFunctionPtr_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 e = sb_htn.Effects.ActionEffect:new(TestContext, "Name", sb_htn.Effects.EEffectType.PlanOnly, function(c) c.Done = true end)
 e:Apply(ctx)
 assert(true == ctx.Done)

@@ -22,7 +22,7 @@ This test confirms Init creates the necessary collections while leaving debug lo
 ]]
 print("    > InitInitializeCollections_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 assert(table.size(ctx.WorldStateChangeStack) > 0)
 assert(table.size(TestContext.TestEnum) == table.size(ctx.WorldStateChangeStack))
 assert(false == ctx.DebugMTR)
@@ -38,7 +38,7 @@ This test confirms that debug contexts properly initialize all logging infrastru
 ]]
 print("    > InitInitializeDebugCollections_ExpectedBehavior")
 ctx = TestDebugContext:new()
-ctx:init()
+ctx:Init()
 assert(true == ctx.DebugMTR)
 assert(true == ctx.LogDecomposition)
 assert(ctx.MTRDebug)
@@ -52,7 +52,7 @@ This test demonstrates that HasState accurately reflects the current world state
 ]]
 print("    > HasState_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
 assert(false == ctx:HasState(TestContext.TestEnum.StateA))
 assert(true == ctx:HasState(TestContext.TestEnum.StateB))
@@ -65,7 +65,7 @@ This test confirms the critical planning behavior: state changes are tracked for
 ]]
 print("    > SetStatePlanningContext_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
 assert(true == ctx:HasState(TestContext.TestEnum.StateB))
@@ -83,7 +83,7 @@ This test confirms that execution properly applies effects to the actual world s
 ]]
 print("    > SetStateExecutingContext_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Executing
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
 assert(true == ctx:HasState(TestContext.TestEnum.StateB))
@@ -98,7 +98,7 @@ This test confirms that GetState properly implements the lookahead mechanism for
 ]]
 print("    > GetStatePlanningContext_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
 assert(0 == ctx:GetState(TestContext.TestEnum.StateA))
@@ -112,7 +112,7 @@ This test confirms that GetState provides accurate state information during task
 ]]
 print("    > GetStateExecutingContext_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Executing
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
 assert(0 == ctx:GetState(TestContext.TestEnum.StateA))
@@ -126,7 +126,7 @@ This test demonstrates the snapshot mechanism that enables the planner to backtr
 ]]
 print("    > GetWorldStateChangeDepth_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Executing
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
 local changeDepthExecuting = ctx:GetWorldStateChangeDepth(ctx.Factory)
@@ -148,7 +148,7 @@ This test demonstrates the critical transition from planning mode to execution m
 ]]
 print("    > TrimForExecution_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
 ctx:SetState(TestContext.TestEnum.StateA, true, sb_htn.Effects.EEffectType.PlanAndExecute)
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
@@ -166,7 +166,7 @@ This test ensures the context validates its state and fails fast rather than sil
 ]]
 print("    > TrimForExecutionThrowsExceptionIfWrongContextState_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Executing
 if (pcall(function() ctx:TrimForExecution() end)) then
     print("Exception not caught.")
@@ -180,7 +180,7 @@ This test demonstrates the backtracking mechanism that enables the planner to ex
 ]]
 print("    > TrimToStackDepth_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
 ctx:SetState(TestContext.TestEnum.StateA, true, sb_htn.Effects.EEffectType.PlanAndExecute)
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
@@ -202,7 +202,7 @@ This test ensures the context validates its state for all planning-specific oper
 ]]
 print("    > TrimToStackDepthThrowsExceptionIfWrongContextState_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Executing
 stackDepth = ctx:GetWorldStateChangeDepth(ctx.Factory)
 if (pcall(function() ctx:TrimToStackDepth(stackDepth) end)) then

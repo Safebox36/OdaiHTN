@@ -12,4 +12,10 @@ function TestOperator:Update(ctx)
     return sb_htn.Tasks.ETaskStatus.Continue
 end
 
+function TestOperator:Stop(ctx)
+end
+
+function TestOperator:Abort(ctx)
+end
+
 return TestOperator

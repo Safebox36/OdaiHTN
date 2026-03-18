@@ -23,10 +23,8 @@ This test confirms the foundational mechanism for constructing HTN task trees.
 ]]
 print("    > AddSubtaskToParent_ExpectedBehavior")
 domain = sb_htn.Domain:new(TestContext, "Test")
-local task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-local task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Test"
+local task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+local task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 domain:AddTask(task1, task2)
 assert(function()
     for _, value in ipairs(task1.Subtasks) do
@@ -74,7 +72,7 @@ This test demonstrates graceful handling of empty or invalid domain configuratio
 ]]
 print("    > FindPlanNoTasksThenNullPlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
@@ -89,7 +87,7 @@ This test ensures the domain validates critical planner state before attempting 
 ]]
 print("    > MTRNullThrowsException_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.MethodTraversalRecord = {}
 domain = sb_htn.Domain:new(TestContext, "Test")
 plan = Queue:new()
@@ -103,7 +101,7 @@ This test confirms the planning-to-execution state transition is properly manage
 ]]
 print("    > AfterFindPlanContextStateIsExecuting_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
 plan = Queue:new()
 status = domain:FindPlan(ctx, plan)
@@ -117,12 +115,10 @@ This test demonstrates the fundamental planning operation where a domain specifi
 ]]
 print("    > FindPlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"}
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
 plan = Queue:new()
@@ -140,18 +136,14 @@ This test demonstrates the effect handling during the transition from planning t
 ]]
 print("    > FindPlanTrimsNonPermanentStateChange_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task1"
+task1 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
 task2:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect1", sb_htn.Effects.EEffectType.PlanOnly, function(context1, effectType1) context1:SetState(TestContext.TestEnum.StateA, true, effectType1) end))
-local task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Sub-task2"
+local task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 task3:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect2", sb_htn.Effects.EEffectType.PlanAndExecute, function(context2, effectType2) context2:SetState(TestContext.TestEnum.StateB, true, effectType2) end))
-local task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task4.Name = "Sub-task3"
+local task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"}
 task4:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect3", sb_htn.Effects.EEffectType.Permanent, function(context3, effectType3) context3:SetState(TestContext.TestEnum.StateC, true, effectType3) end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -176,21 +168,16 @@ This test confirms the rollback mechanism that ensures planning failures don't l
 ]]
 print("    > FindPlanClearsStateChangeWhenPlanIsNull_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task1.Name = "Test"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Sub-task1"
+task1 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
 task2:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect1", sb_htn.Effects.EEffectType.PlanOnly, function(context4, effectType4) context4:SetState(TestContext.TestEnum.StateA, true, effectType4) end))
-task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Sub-task2"
+task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 task3:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect2", sb_htn.Effects.EEffectType.PlanAndExecute, function(context5, effectType5) context5:SetState(TestContext.TestEnum.StateB, true, effectType5) end))
-task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task4.Name = "Sub-task3"
+task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"}
 task4:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect3", sb_htn.Effects.EEffectType.Permanent, function(context6, effectType6) context6:SetState(TestContext.TestEnum.StateC, true, effectType6) end))
-local task5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task5.Name = "Sub-task4"
+local task5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"}
 task5:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context7) return context7.Done == true end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -216,24 +203,19 @@ This test demonstrates the MTR-based plan comparison mechanism that prevents rep
 ]]
 print("    > FindPlanIfMTRsAreEqualThenReturnNullPlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 table.insert(ctx.LastMTR, 2)
 table.insert(ctx.LastMTR, 1)
 -- Root is a Selector that branch off into task1 selector or task2 sequence.
 -- MTR only tracks decomposition of compound tasks, so our MTR is only 1 layer deep here,
 -- Since both compound tasks decompose into primitive tasks.
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task1.Name = "Test1"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Sub-task1"
+task1 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test1"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
 task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context8) return context8.Done == true end))
-task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task4.Name = "Sub-task1"
-task5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task5.Name = "Sub-task2"
+task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
+task5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 task5:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context9) return context9.Done == true end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(domain.Root, task2)
@@ -256,24 +238,19 @@ This test confirms that MTR-based equivalence takes precedence over literal task
 ]]
 print("    > FindPlanIfPlansAreDifferentButMTRsAreEqualThenReturnNullPlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 table.insert(ctx.LastMTR, 2)
 table.insert(ctx.LastMTR, 1)
 -- Root is a Selector that branch off into task1 selector or task2 sequence.
 -- MTR tracks decomposition of compound tasks and priary tasks that are subtasks of selectors,
 -- so our MTR is 2 layer deep.
 domain = sb_htn.Domain:new(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task1.Name = "Test1"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Sub-task1"
+task1 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test1"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
 task3:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context10) return context10.Done == true end))
-task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task4.Name = "Sub-task1"
-task5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task5.Name = "Sub-task2"
+task4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
+task5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 task5:AddCondition(sb_htn.Conditions.FuncCondition(TestContext, "TestCondition", function(context11) return context11.Done == true end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(domain.Root, task2)
@@ -296,7 +273,7 @@ This test demonstrates the replanning mechanism: state changes can invalidate th
 ]]
 print("    > FindPlanIfSelectorFindBetterPrimaryTaskMTRChangeSuccessfully_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 table.insert(ctx.LastMTR, 1)
 table.insert(ctx.LastMTR, 2)
 -- Root is a Selector that branch off into two primary tasks.
@@ -305,13 +282,10 @@ table.insert(ctx.LastMTR, 2)
 -- We then change the Done state to true before we do a replan,
 -- and now we intend task 2 (Test Action A) to be selected, since its MTR beast LastMTR score.
 domain = sb_htn.Domain(TestContext, "Test")
-task1 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task1.Name = "Test Select"
-task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task2.Name = "Test Action A"
+task1 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test Select"}
+task2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test Action A"}
 task2:AddCondition(sb_htn.Conditions.FuncCondition(TestContext, "Can choose A", function(context12) return context12.Done == true end))
-task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task3.Name = "Test Action B"
+task3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test Action B"}
 task3:AddCondition(sb_htn.Conditions.FuncCondition(TestContext, "Can not choose A", function(context13) return context13.Done == false end))
 domain:AddTask(domain.Root, task1)
 domain:AddTask(task1,       task2)
@@ -341,14 +315,11 @@ This test demonstrates partial planning where the plan is returned in incrementa
 ]]
 print("    > PausePlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
-local task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-local subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask1.Name = "Sub-task1"
-local subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask2.Name = "Sub-task2"
+local task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+local subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
+local subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 domain:AddTask(domain.Root, task)
 domain:AddTask(task,        subtask1)
 domain:AddTask(task,        sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
@@ -372,14 +343,11 @@ This test demonstrates continuation of partial plans and the completion of a pau
 ]]
 print("    > ContinuePausedPlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask1.Name = "Sub-task1"
-subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask2.Name = "Sub-task2"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
+subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
 domain:AddTask(domain.Root, task)
 domain:AddTask(task,        subtask1)
 domain:AddTask(task,        sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
@@ -408,22 +376,15 @@ This test demonstrates partial planning with nested task hierarchies and multipl
 ]]
 print("    > NestedPausePlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task3.Name = "Test3"
-subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask1.Name = "Sub-task1"
-subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask2.Name = "Sub-task2"
-local subtask3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask3.Name = "Sub-task3"
-local subtask4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask4.Name = "Sub-task4"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test3"}
+subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
+subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
+local subtask3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"}
+local subtask4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"}
 domain:AddTask(domain.Root, task)
 domain:AddTask(task,        task2)
 domain:AddTask(task,        subtask4)
@@ -454,22 +415,15 @@ This test demonstrates the full lifecycle of nested partial planning: pause, exe
 ]]
 print("    > ContinueNestedPausePlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task3.Name = "Test3"
-subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask1.Name = "Sub-task1"
-subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask2.Name = "Sub-task2"
-subtask3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask3.Name = "Sub-task3"
-subtask4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask4.Name = "Sub-task4"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test3"}
+subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
+subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
+subtask3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"}
+subtask4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"}
 domain:AddTask(domain.Root, task)
 domain:AddTask(task,        task2)
 domain:AddTask(task,        subtask4)
@@ -506,30 +460,19 @@ This test demonstrates that the planner correctly manages deep nesting scenarios
 ]]
 print("    > ContinueMultipleNestedPausePlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 domain = sb_htn.Domain:new(TestContext, "Test")
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task3.Name = "Test3"
-task4 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task4.Name = "Test4"
-subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask1.Name = "Sub-task1"
-subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask2.Name = "Sub-task2"
-subtask3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask3.Name = "Sub-task3"
-subtask4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask4.Name = "Sub-task4"
-local subtask5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask5.Name = "Sub-task5"
-local subtask6 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask6.Name = "Sub-task6"
-local subtask7 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-subtask7.Name = "Sub-task7"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test3"}
+task4 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test4"}
+subtask1 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
+subtask2 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
+subtask3 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"}
+subtask4 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"}
+local subtask5 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task5"}
+local subtask6 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task6"}
+local subtask7 = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task7"}
 domain:AddTask(domain.Root, task)
 domain:AddTask(task3,       subtask1)
 domain:AddTask(task3,       sb_htn.Tasks.CompoundTasks.PausePlanTask:new())

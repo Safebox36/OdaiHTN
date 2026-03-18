@@ -1,34 +1,17 @@
 local mc = require("sb_htn.Utils.middleclass")
 
 ---@class ITask
-local ITask = mc.class("ITask")
-
-function ITask:initialize()
-    --- Used for debugging and identification purposes
-    ---@type string
-    self.Name = ""
-
-    --- The parent of this task in the hierarchy
-    ---@type ICompoundTask
-    self.Parent = nil
-
-    --- The conditions that must be satisfied for this task to pass as valid.
-    ---@type table<ICondition>
-    self.Conditions = {}
-end
-
+--- Used for debugging and identification purposes
+---@field Name string
+--- The parent of this task in the hierarchy
+---@field Parent ICompoundTask
+--- The conditions that must be satisfied for this task to pass as valid.
+---@field Conditions ICondition[]
 --- Add a new condition to the task.
----@param condition ICondition
----@return ITask
-function ITask:AddCondition(condition) return {} end
-
+---@field AddCondition fun(self: ITask, condition: ICondition): ITask
 --- Check the task's preconditions, returns true if all preconditions are valid.
----@param ctx IContext
----@return boolean
-function ITask:IsValid(ctx) return false end
-
----@param ctx IContext
----@return EDecompositionStatus
-function ITask:OnIsValidFailed(ctx) return 0 end
+---@field IsValid fun(self: ITask, ctx: IContext): boolean
+---@field OnIsValidFailed fun(self: ITask, ctx: IContext): EDecompositionStatus
+local ITask = mc.class("ITask")
 
 return ITask

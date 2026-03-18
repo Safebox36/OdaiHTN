@@ -11,8 +11,7 @@ Conditions gate whether a sequence is applicable before decomposition begins, ev
 This test ensures the fluent builder pattern works correctly for sequences by confirming conditions are stored and the method returns the task instance.
 ]]
 print("    > AddCondition_ExpectedBehavior")
-local task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
+local task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
 local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition",
                                                                 function(context1) return context1.Done == false end))
 assert(t == task)
@@ -25,13 +24,8 @@ Unlike selectors which try alternatives until one succeeds, sequences must decom
 This test confirms the fluent builder pattern allows chaining subtask additions and that each subtask is properly stored.
 ]]
 print("    > AddSubtask_ExpectedBehavior")
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-t = task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+t = task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"})
 assert(t == task)
 assert(table.size(task.Subtasks) == 1)
 
@@ -43,8 +37,7 @@ This test ensures sequences properly validate their structure and reject empty s
 ]]
 print("    > IsValidFailsWithoutSubtasks_ExpectedBehavior")
 local ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
 assert(task:IsValid(ctx) == false)
 
 --[[
@@ -55,13 +48,8 @@ This test confirms that sequences with subtasks properly report validity, allowi
 ]]
 print("    > IsValid_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"})
 assert(task:IsValid(ctx))
 
 --[[
@@ -72,8 +60,7 @@ Without initialization, accessing context state structures fails, preventing dec
 ]]
 print("    > DecomposeRequiresContextInitFails_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
 local plan = Queue:new()
 if (pcall(function() task:Decompose(ctx, 1, plan) end)) then
     print("Exception not caught.")
@@ -87,9 +74,8 @@ This test confirms the sequence properly handles the edge case of an empty subta
 ]]
 print("    > DecomposeWithNoSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
 plan = Queue:new()
 local status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Failed)
@@ -103,19 +89,10 @@ This test demonstrates basic sequence decomposition behavior and confirms all su
 ]]
 print("    > DecomposeWithSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)())
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"})
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -130,36 +107,20 @@ This test demonstrates that sequences handle complex nesting and properly collec
 ]]
 print("    > DecomposeNestedSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-local task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-local task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task3.Name = "Test3"
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+local task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+local task3 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test3"}
 task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 task2:AddSubtask(task3)
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -175,18 +136,12 @@ This test demonstrates the strict sequencing requirement: even if some subtasks 
 ]]
 print("    > DecomposeWithSubtasksOneFail_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"})
 task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)())
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
@@ -203,20 +158,14 @@ This test demonstrates that sequences properly propagate failures from nested de
 ]]
 print("    > DecomposeWithSubtasksCompoundSubtaskFails_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
 task:AddSubtask((function()
-    local s = sb_htn.Tasks.CompoundTasks.Selector:new()
-    s.Name = "Sub-task1"
+    local s = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Sub-task1"}
     return s
 end)())
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Failed)
@@ -230,26 +179,22 @@ This test demonstrates rollback mechanism: despite effects being applied during 
 ]]
 print("    > DecomposeFailureReturnToPreviousWorldState_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
 ctx:SetState(TestContext.TestEnum.StateA, true, sb_htn.Effects.EEffectType.PlanAndExecute)
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
 ctx:SetState(TestContext.TestEnum.StateC, true, sb_htn.Effects.EEffectType.PlanOnly)
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
 task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
                                                 function(context2, effectType)
-                                                    context2:SetState(TestContext.TestEnum.StateA, false,
-                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                    context2:SetState(TestContext.TestEnum.StateA, false, sb_htn.Effects.EEffectType.PlanOnly)
                                                 end))
     return p
 end)())
 task:AddSubtask((function()
-    local s = sb_htn.Tasks.CompoundTasks.Selector:new()
-    s.Name = "Sub-task2"
+    local s = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Sub-task2"}
     return s
 end)())
 plan = Queue:new()
@@ -271,37 +216,21 @@ This test demonstrates MTR-based rejection in nested sequences: if a previously 
 ]]
 print("    > DecomposeNestedCompoundSubtaskLoseToMTR_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task3.Name = "Test3"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test3"}
 task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 task2:AddSubtask(task3)
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"})
 table.insert(ctx.LastMTR, 1)
 table.insert(ctx.LastMTR, 1)
 plan = Queue:new()
@@ -320,38 +249,25 @@ This test demonstrates that MTR rejection cascades through sequence decompositio
 ]]
 print("    > DecomposeNestedCompoundSubtaskLoseToMTR2_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task3.Name = "Test3"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test3"}
 task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"}
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
 task2:AddSubtask(task3)
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"})
 table.insert(ctx.LastMTR, 2)
 table.insert(ctx.LastMTR, 1)
 plan = Queue:new()
@@ -370,37 +286,24 @@ This test demonstrates that sequences properly handle MTR-constrained decomposit
 ]]
 print("    > DecomposeNestedCompoundSubtaskEqualToMTR_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task3.Name = "Test3"
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test3"}
 task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
 task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
 task2:AddSubtask(task3)
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"})
 table.insert(ctx.LastMTR, 2)
 table.insert(ctx.LastMTR, 2)
 plan = Queue:new()
@@ -421,62 +324,50 @@ This test demonstrates combined mechanics: MTR-based rejection coupled with stat
 ]]
 print("    > DecomposeNestedCompoundSubtaskLoseToMTRReturnToPreviousWorldState_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
 ctx:SetState(TestContext.TestEnum.StateA, true, sb_htn.Effects.EEffectType.PlanAndExecute)
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
 ctx:SetState(TestContext.TestEnum.StateC, true, sb_htn.Effects.EEffectType.PlanOnly)
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task3.Name = "Test3"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test3"}
 task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
 task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"}
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
                                                 function(context3, effectType)
-                                                    context3:SetState(TestContext.TestEnum.StateA, false,
-                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                    context3:SetState(TestContext.TestEnum.StateA, false, sb_htn.Effects.EEffectType.PlanOnly)
                                                 end))
     return p
 end)())
 task2:AddSubtask(task3)
 task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"}
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
                                                 function(context4, effectType)
-                                                    context4:SetState(TestContext.TestEnum.StateB, false,
-                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                    context4:SetState(TestContext.TestEnum.StateB, false, sb_htn.Effects.EEffectType.PlanOnly)
                                                 end))
     return p
 end)())
 task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
                                                 function(context5, effectType)
-                                                    context5:SetState(TestContext.TestEnum.StateA, false,
-                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                    context5:SetState(TestContext.TestEnum.StateA, false, sb_htn.Effects.EEffectType.PlanOnly)
                                                 end))
     return p
 end)())
 task:AddSubtask(task2)
 task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task5"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task5"}
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
                                                 function(context6, effectType)
-                                                    context6:SetState(TestContext.TestEnum.StateC, false,
-                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                    context6:SetState(TestContext.TestEnum.StateC, false, sb_htn.Effects.EEffectType.PlanOnly)
                                                 end))
     return p
 end)())
@@ -504,62 +395,50 @@ This test demonstrates comprehensive rollback: all effects applied during the en
 ]]
 print("    > DecomposeNestedCompoundSubtaskFailReturnToPreviousWorldState_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
+ctx:Init()
 ctx.ContextState = sb_htn.Contexts.IContext.EContextState.Planning
 ctx:SetState(TestContext.TestEnum.StateA, true, sb_htn.Effects.EEffectType.PlanAndExecute)
 ctx:SetState(TestContext.TestEnum.StateB, true, sb_htn.Effects.EEffectType.Permanent)
 ctx:SetState(TestContext.TestEnum.StateC, true, sb_htn.Effects.EEffectType.PlanOnly)
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task3.Name = "Test3"
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test3"}
 task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}
     p:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context) return context.Done == true end))
     return p
 end)())
 task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"}
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
                                                 function(context7, effectType)
-                                                    context7:SetState(TestContext.TestEnum.StateA, false,
-                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                    context7:SetState(TestContext.TestEnum.StateA, false, sb_htn.Effects.EEffectType.PlanOnly)
                                                 end))
     return p
 end)())
 task2:AddSubtask(task3)
 task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"}
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
                                                 function(context8, effectType)
-                                                    context8:SetState(TestContext.TestEnum.StateB, false,
-                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                    context8:SetState(TestContext.TestEnum.StateB, false, sb_htn.Effects.EEffectType.PlanOnly)
                                                 end))
     return p
 end)())
 task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
                                                 function(context9, effectType)
-                                                    context9:SetState(TestContext.TestEnum.StateA, false,
-                                                                      sb_htn.Effects.EEffectType.PlanOnly)
+                                                    context9:SetState(TestContext.TestEnum.StateA, false, sb_htn.Effects.EEffectType.PlanOnly)
                                                 end))
     return p
 end)())
 task:AddSubtask(task2)
 task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task5"
+    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task5"}
     p:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent,
                                                 function(context10, effectType)
-                                                    context10:SetState(TestContext.TestEnum.StateC, false,
-                                                                       sb_htn.Effects.EEffectType.PlanOnly)
+                                                    context10:SetState(TestContext.TestEnum.StateC, false, sb_htn.Effects.EEffectType.PlanOnly)
                                                 end))
     return p
 end)())
@@ -582,20 +461,11 @@ This test demonstrates partial planning: the planner can decompose incrementally
 ]]
 print("    > PausePlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)())
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"})
 task:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)
@@ -614,20 +484,11 @@ This test demonstrates the complete pause/resume cycle: pause to get Sub-task1, 
 ]]
 print("    > ContinuePausedPlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)())
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"})
 task:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)
@@ -660,36 +521,17 @@ This test demonstrates pause point stacking: pauses at different nesting levels 
 ]]
 print("    > NestedPausePlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task3.Name = "Test3"
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)())
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test3"}
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"})
 task3:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 task2:AddSubtask(task3)
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)
@@ -711,36 +553,17 @@ This test demonstrates complete nested pause/resume execution: pauses at multipl
 ]]
 print("    > ContinueNestedPausePlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task3.Name = "Test3"
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)())
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test3"}
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"})
 task3:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 task2:AddSubtask(task3)
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)
@@ -780,55 +603,23 @@ This test demonstrates multi-phase partial planning: pauses at different depths 
 ]]
 print("    > ContinueMultipleNestedPausePlan_ExpectedBehavior")
 ctx = TestContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task2.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task3.Name = "Test3"
-local task4 = sb_htn.Tasks.CompoundTasks.Sequence:new()
-task4.Name = "Test4"
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)())
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test3"}
+local task4 = sb_htn.Tasks.CompoundTasks.Sequence:new{Name = "Test4"}
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"})
 task3:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 task2:AddSubtask(task3)
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
-task4:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task5"
-    return p
-end)())
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
+task4:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task5"})
 task4:AddSubtask(sb_htn.Tasks.CompoundTasks.PausePlanTask:new())
-task4:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task6"
-    return p
-end)())
+task4:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task6"})
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"})
 task:AddSubtask(task4)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task7"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task7"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Partial)

@@ -2,24 +2,10 @@ local mc = require("sb_htn.Utils.middleclass")
 local ITask = require("sb_htn.Tasks.ITask")
 
 ---@class ICompoundTask : ITask
-local ICompoundTask = mc.class("ICompoundTask", ITask)
-
-function ICompoundTask:initialize()
-    ITask.initialize(self)
-
-    ---@type table<ITask>
-    self.Subtasks = nil
-end
-
----@param subtask ITask
----@return ICompoundTask
-function ICompoundTask:AddSubtask(subtask) return {} end
-
+---@field Subtasks ITask[]
+---@field AddSubtask fun(self: ICompoundTask, subtask: ITask): ICompoundTask
 --- Decompose the task onto the tasks to process queue, mind it's depth first
----@param ctx IContext
----@param startIndex integer
----@param result Queue<ITask> - out
----@return EDecompositionStatus
-function ICompoundTask:Decompose(ctx, startIndex, result) return 0 end
+---@field Decompose fun(self: ICompoundTask, ctx: IContext, startIndex: integer, result: Queue<ITask>): EDecompositionStatus
+local ICompoundTask = mc.class("ICompoundTask", ITask)
 
 return ICompoundTask

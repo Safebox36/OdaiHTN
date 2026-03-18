@@ -7,44 +7,41 @@ local Stack = require("sb_htn.Utils.Stack")
 ---@class BaseContext : IContext
 local BaseContext = mc.class("BaseContext", IContext)
 
-function BaseContext:initialize()
-    IContext.initialize(self)
+---@class BaseContextParams
+---@field IsDirty boolean?
+---@field ContextState EContextState?
+---@field CurrentDecompositionDepth integer?
+---@field PlannerState IPlannerState?
+---@field MethodTraversalRecord integer[]?
+---@field MTRDebug integer[]?
+---@field LastMTRDebug integer[]?
+---@field PartialPlanQueue Queue<PartialPlanEntry>?
+---@field HasPausedPartialPlan boolean?
+---@field WorldStateChangeStack Stack<table<EEffectType, number>>[]
 
-    ---@type boolean
+---@param params BaseContextParams?
+function BaseContext:initialize(params)
     self.IsInitialized = false
-    ---@type boolean
-    self.IsDirty = nil
-    ---@type EContextState
-    self.ContextState = IContext.EContextState.Executing
-    ---@type integer
-    self.CurrentDecompositionDepth = 0
-    ---@type IFactory
+    self.IsDirty = params and params.IsDirty or nil
+    self.ContextState = params and params.ContextState or IContext.EContextState.Executing
+    self.CurrentDecompositionDepth = params and params.CurrentDecompositionDepth or 0
     self.Factory = nil
-    ---@type IPlannerState
-    self.PlannerState = nil
-    ---@type table<integer>
-    self.MethodTraversalRecord = {}
-    ---@type table<integer>
+    self.PlannerState = params and params.PlannerState or nil
+    self.MethodTraversalRecord = params and params.MethodTraversalRecord or {}
     self.LastMTR = {}
-    ---@type table<integer>
-    self.MTRDebug = nil
-    ---@type table<integer>
-    self.LastMTRDebug = nil
-    ---@type boolean
+    self.MTRDebug = params and params.MTRDebug or nil
+    self.LastMTRDebug = params and params.LastMTRDebug or nil
     self.DebugMTR = false
-    ---@type Queue<PartialPlanEntry>
-    self.PartialPlanQueue = Queue:new()
-    ---@type boolean
-    self.HasPausedPartialPlan = false
+    self.LogDecomposition = false
+    self.PartialPlanQueue = params and params.PartialPlanQueue or Queue:new()
+    self.HasPausedPartialPlan = params and params.HasPausedPartialPlan ~= nil and params.HasPausedPartialPlan or false
 
-    ---@type number[]
     self.WorldState = nil
 
-    ---@type Stack<table<EEffectType, number>>[]
-    self.WorldStateChangeStack = nil
+    self.WorldStateChangeStack = params and params.WorldStateChangeStack or nil
 end
 
-function BaseContext:init()
+function BaseContext:Init()
     if (self.WorldStateChangeStack == nil) then
         self.WorldStateChangeStack = {}
         for i = 1, table.size(self.WorldState) do
@@ -80,7 +77,7 @@ end
 ---@param state any
 ---@param value integer
 ---@param setAsDirty boolean
----@param e EEffectType | nil
+---@param e EEffectType?
 function BaseContext:SetState(state, value, setAsDirty, e)
     if (self.ContextState == IContext.EContextState.Executing) then
         -- Prevent setting the world state dirty if we're not changing anything.

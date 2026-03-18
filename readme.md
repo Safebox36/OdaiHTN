@@ -70,6 +70,7 @@ function MyContext:initialize()
     self.LogDecomposition = false
 
     self.Factory          = sb_htn.Factory.DefaultFactory:new()
+    self.PlannerState     = sb_htn.Planners.DefaultPlannerState:new()
 
     for _, v in pairs(EMyWorldState) do
         self.WorldState[v] = 0
@@ -79,7 +80,7 @@ function MyContext:initialize()
 end
 
 function MyContext:Init()
-    sb_htn.Contexts.BaseContext.init(self)
+    sb_htn.Contexts.BaseContext.Init(self)
 end
 ```
 
@@ -87,7 +88,7 @@ For convenience, the context can be extended with state manipulation methods lik
 
 ```lua
 ---@param state EMyWorldState
----@param value boolean | nil
+---@param value boolean?
 function MyContext:HasState(state, value)
     if (value ~= nil) then
         return sb_htn.Contexts.BaseContext.HasState(self, state, (value and 1 or 0))

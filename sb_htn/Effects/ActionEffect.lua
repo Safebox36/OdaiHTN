@@ -4,19 +4,17 @@ local EEffectType = require("sb_htn.Effects.EEffectType")
 local GetKey = require("sb_htn.Utils.GetKey")
 
 ---@class ActionEffect<IContext> : IEffect
+---@field private _action fun(IContext, EEffectType)
 local ActionEffect = mc.class("ActionEffect", IEffect)
 
 ---@param name string
 ---@param effectType EEffectType
----@param func function<IContext>
+---@param action function<IContext>
 ---@param T IContext
-function ActionEffect:initialize(T, name, effectType, func)
-    IEffect.initialize(self)
-
+function ActionEffect:initialize(T, name, effectType, action)
     self.Name = name
     self.Type = effectType
-    ---@type function<IContext, EEffectType>
-    self.Func = func
+    self._action = action
     self.T = T
 end
 
@@ -26,7 +24,7 @@ function ActionEffect:Apply(ctx)
     if (ctx.LogDecomposition) then
         log("%i - ActionEffect.Apply:%s", ctx.CurrentDecompositionDepth, GetKey(self.Type, EEffectType))
     end
-    if (self.Func) then self.Func(ctx, self.Type) end
+    if (self._action) then self._action(ctx, self.Type) end
 end
 
 return ActionEffect

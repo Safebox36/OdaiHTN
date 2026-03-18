@@ -7,20 +7,18 @@ require("sb_htn.Utils.TableExt")
 ---@class PrimitiveTask : IPrimitiveTask
 local PrimitiveTask = mc.class("PrimitiveTask", IPrimitiveTask)
 
-function PrimitiveTask:initialize()
-    IPrimitiveTask.initialize(self)
+---@class PrimitiveTaskParams
+---@field Name string?
+---@field Parent ICompoundTask?
+---@field Operator IOperator?
 
-    ---@type string
-    self.Name = ""
-    ---@type ICompoundTask
-    self.Parent = nil
-    ---@type table<ICondition>
+---@param params PrimitiveTaskParams?
+function PrimitiveTask:initialize(params)
+    self.Name = params and params.Name or ""
+    self.Parent = params and params.Parent or nil
     self.Conditions = {}
-    ---@type table<ICondition>
     self.ExecutingConditions = {}
-    ---@type IOperator
-    self.Operator = nil
-    ---@type table<IEffect>
+    self.Operator = params and params.Operator or nil
     self.Effects = {}
 end
 

@@ -8,12 +8,15 @@ local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
 local GetKey = require("sb_htn.Utils.GetKey")
 
 ---@class Selector : CompoundTask
+---@field protected Plan Queue<ITask>
 local Selector = mc.class("Selector", CompoundTask)
 
-function Selector:initialize()
-    CompoundTask.initialize(self)
+---@class SelectorParams : CompoundTaskParams
 
-    ---@type Queue<ITask>
+---@param params SelectorParams?
+function Selector:initialize(params)
+    CompoundTask.initialize(self, params)
+
     self.Plan = Queue:new()
 end
 

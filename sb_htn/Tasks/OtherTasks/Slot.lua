@@ -3,20 +3,22 @@ local ITask = require("sb_htn.Tasks.ITask")
 local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
 
 ---@class Slot : ITask
+---@field SlotId integer
+---@field Subtask ICompoundTask
 local Slot = mc.class("Slot", ITask)
 
-function Slot:initialize()
-    ITask.initialize(self)
+---@class SlotParams
+---@field SlotId integer?
+---@field Name string?
+---@field Parent ICompoundTask?
+---@field Subtask ICompoundTask?
 
-    ---@type integer
-    self.SlotId = nil
-    ---@type string
-    self.Name = nil
-    ---@type ICompoundTask
-    self.Parent = nil
-    ---@type table<ICondition>
+---@param params SlotParams?
+function Slot:initialize(params)
+    self.SlotId = params and params.SlotId or nil
+    self.Name = params and params.Name or nil
+    self.Parent = params and params.Parent or nil
     self.Conditions = nil
-    ---@type ICompoundTask
     self.Subtask = nil
 end
 

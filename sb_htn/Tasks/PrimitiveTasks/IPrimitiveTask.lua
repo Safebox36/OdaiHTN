@@ -2,42 +2,20 @@ local mc = require("sb_htn.Utils.middleclass")
 local ITask = require("sb_htn.Tasks.ITask")
 
 ---@class IPrimitiveTask : ITask
-local IPrimitiveTask = mc.class("IPrimitiveTask", ITask)
-
-function IPrimitiveTask:initialize()
-    ITask.initialize(self)
-
-    --- Executing conditions are validated before every call to Operator.Update(...)
-    ---@type table<ICondition>
-    self.ExecutingConditions = {}
-    ---@type IOperator
-    self.Operator = nil
-    ---@type table<IEffect>
-    self.Effects = {}
-end
-
+--- Executing conditions are validated before every call to Operator.Update(...)
+---@field ExecutingConditions ICondition[]
+---@field Operator IOperator
+---@field Effects IEffect[]
 --- Add a new executing condition to the primitive task. This will be checked before
 --- every call to Operator.Update(...)
----@param condition ICondition
----@return IPrimitiveTask
-function IPrimitiveTask:AddExecutingCondition(condition) return {} end
-
----@param action IOperator
-function IPrimitiveTask:SetOperator(action) end
-
----@param effect IEffect
----@return IPrimitiveTask
-function IPrimitiveTask:AddEffect(effect) return {} end
-
----@param ctx IContext
-function IPrimitiveTask:ApplyEffects(ctx) end
-
+---@field AddExecutingCondition fun(self: IPrimitiveTask, condition: ICondition): IPrimitiveTask
+---@field SetOperator fun(self: IPrimitiveTask, action: IOperator)
+---@field AddEffect fun(self: IPrimitiveTask, effect: IEffect): IPrimitiveTask
+---@field ApplyEffects fun(self: IPrimitiveTask, ctx: IContext)
 --- Graceful end of task execution.
----@param ctx IContext
-function IPrimitiveTask:Stop(ctx) end
-
+---@field Stop fun(self: IPrimitiveTask, ctx: IContext)
 --- Forced termination of task execution.
----@param ctx IContext
-function IPrimitiveTask:Abort(ctx) end
+---@field Abort fun(self: IPrimitiveTask, ctx: IContext)
+local IPrimitiveTask = mc.class("IPrimitiveTask", ITask)
 
 return IPrimitiveTask

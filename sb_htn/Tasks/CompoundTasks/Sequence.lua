@@ -11,13 +11,16 @@ local IContext = require("sb_htn.Contexts.IContext")
 local GetKey = require("sb_htn.Utils.GetKey")
 
 ---@class Sequence : CompoundTask, IDecomposeAll
+---@field protected Plan Queue<ITask>
 local Sequence = mc.class("Sequence", CompoundTask)
 
-function Sequence:initialize()
-    CompoundTask.initialize(self)
+---@class SequenceParams : CompoundTaskParams
+
+---@param params SequenceParams?
+function Sequence:initialize(params)
+    CompoundTask.initialize(self, params)
     self.IDecomposeAll = IDecomposeAll:new()
 
-    ---@type Queue<ITask>
     self.Plan = Queue:new()
 end
 

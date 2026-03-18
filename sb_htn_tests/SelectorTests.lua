@@ -12,8 +12,7 @@ Conditions are evaluated before decomposition to determine whether a selector is
 This test ensures the fluent builder pattern works correctly for selectors by confirming conditions are stored and the method returns the task instance for continued chaining.
 ]]
 print("    > AddCondition_ExpectedBehavior")
-local task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
+local task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
 local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context1) return context1.Done == false end))
 assert(t == task)
 assert(table.size(task.Conditions) == 1)
@@ -25,13 +24,8 @@ The selector tries each subtask in order during decomposition until one successf
 This test confirms the fluent builder pattern allows chaining subtask additions and that each subtask is properly stored in the collection.
 ]]
 print("    > AddSubtask_ExpectedBehavior")
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-t = task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+t = task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"})
 assert(t == task)
 assert(table.size(task.Subtasks) == 1)
 
@@ -43,8 +37,7 @@ This test ensures selectors properly validate their structure and reject empty s
 ]]
 print("    > IsValidFailsWithoutSubtasks_ExpectedBehavior")
 local ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
 assert(task:IsValid(ctx) == false)
 
 --[[
@@ -55,13 +48,8 @@ This test confirms that selectors with subtasks properly report validity, allowi
 ]]
 print("    > IsValid_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task"})
 assert(task:IsValid(ctx))
 
 --[[
@@ -72,8 +60,7 @@ This test confirms the selector properly handles the edge case of an empty subta
 ]]
 print("    > DecomposeWithNoSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
 local plan = Queue:new()
 local status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Failed)
@@ -87,18 +74,9 @@ This test demonstrates the basic selector decomposition behavior and confirms th
 ]]
 print("    > DecomposeWithSubtasks_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)())
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"})
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -114,17 +92,11 @@ This test shows that selectors properly skip alternatives that cannot be decompo
 ]]
 print("    > DecomposeWithSubtasks2_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
 task:AddSubtask((function()
-    local s = sb_htn.Tasks.CompoundTasks.Selector:new()
-    s.Name = "Sub-task1"
+    local s = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Sub-task1"}
 end)())
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -140,18 +112,9 @@ This test demonstrates how conditions implement data-driven task selection, allo
 ]]
 print("    > DecomposeWithSubtasks3_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context2) return context2.Done == true end)))
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context2) return context2.Done == true end)))
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -167,18 +130,9 @@ This test demonstrates how the MTR mechanism prevents the planner from repeatedl
 ]]
 print("    > DecomposeMTRFails_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context3) return context3.Done == true end)))
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context3) return context3.Done == true end)))
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 table.insert(ctx.LastMTR, 1)
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
@@ -195,19 +149,10 @@ This test demonstrates how debug logging helps developers understand replanning 
 ]]
 print("    > DecomposeDebugMTRFails_ExpectedBehavior")
 ctx = TestDebugContext:new()
-ctx:init()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context4) return context4.Done == true end, TestDebugContext)))
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+ctx:Init()
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context4) return context4.Done == true end, TestDebugContext)))
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 table.insert(ctx.LastMTR, 1)
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
@@ -225,18 +170,9 @@ This test demonstrates how the MTR mechanism enables the planner to reuse previo
 ]]
 print("    > DecomposeMTRSucceedsWhenEqual_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context5) return context5.Done == true end)))
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context5) return context5.Done == true end)))
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 table.insert(ctx.LastMTR, 2)
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
@@ -254,26 +190,12 @@ This test demonstrates multi-level decomposition and MTR tracking, showing how t
 ]]
 print("    > DecomposeCompoundSubtaskSucceeds_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-local task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test2"
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context6) return context6.Done == true end)))
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+local task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context6) return context6.Done == true end)))
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -292,26 +214,12 @@ This test demonstrates backtracking behavior across nesting levels: the planner 
 ]]
 print("    > DecomposeCompoundSubtaskFails_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test2"
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context7) return context7.Done == true end)))
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context8) return context8.Done == true end)))
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context7) return context7.Done == true end)))
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context8) return context8.Done == true end)))
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -329,34 +237,15 @@ This test demonstrates deep backtracking: failures at any nesting level trigger 
 ]]
 print("    > DecomposeNestedCompoundSubtaskFails_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test2"
-local task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test3"
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context9) return context9.Done == true end)))
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context10) return context10.Done == true end)))
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+local task3 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test3"}
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context9) return context9.Done == true end)))
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context10) return context10.Done == true end)))
 task2:AddSubtask(task3)
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context11) return context11.Done == true end)))
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context11) return context11.Done == true end)))
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task4"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task4"})
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
 assert(status == sb_htn.Tasks.CompoundTasks.EDecompositionStatus.Succeeded)
@@ -374,26 +263,12 @@ This test demonstrates MTR-based replanning: the planner can find superior alter
 ]]
 print("    > DecomposeCompoundSubtaskBeatsLastMTR_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test2"
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context12) return context12.Done == true end)))
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context12) return context12.Done == true end)))
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
 table.insert(ctx.LastMTR, 2)
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
@@ -413,26 +288,12 @@ This test demonstrates MTR equality handling when decomposition paths extend or 
 ]]
 print("    > DecomposeCompoundSubtaskEqualToLastMTR_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test2"
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context13) return context13.Done == true end)))
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context13) return context13.Done == true end)))
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
 task:AddSubtask(task2)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3"
-    return p
-end)())
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3"})
 table.insert(ctx.LastMTR, 1)
 plan = Queue:new()
 status = task:Decompose(ctx, 1, plan)
@@ -452,25 +313,11 @@ This test demonstrates the MTR mechanism's role in enforcing progress: the plann
 ]]
 print("    > DecomposeCompoundSubtaskLoseToLastMTR_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test2"
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context14) return context14.Done == true end)))
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2"
-    return p
-end)())
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context15) return context15.Done == true end)))
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context14) return context14.Done == true end)))
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2"})
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context15) return context15.Done == true end)))
 task:AddSubtask(task2)
 table.insert(ctx.LastMTR, 1)
 plan = Queue:new()
@@ -488,41 +335,17 @@ This test demonstrates sophisticated MTR comparison logic: the planner compares 
 ]]
 print("    > DecomposeCompoundSubtaskWinOverLastMTR_ExpectedBehavior")
 ctx = TestContext:new()
-local rootTask = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Root"
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test1"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test2"
-task3 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test3"
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3-1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context16) return context16.Done == true end)))
-task3:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task3-2"
-    return p
-end)())
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2-1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context17) return context17.Done == true end)))
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2-2"
-    return p
-end)())
+local rootTask = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Root"}
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test1"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task3 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test3"}
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3-1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context16) return context16.Done == true end)))
+task3:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task3-2"})
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2-1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context17) return context17.Done == true end)))
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2-2"})
 task:AddSubtask(task2)
 task:AddSubtask(task3)
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1-1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == false", function(context18) return context18.Done == false end)))
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1-1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == false", function(context18) return context18.Done == false end)))
 rootTask:AddSubtask(task)
 table.insert(ctx.LastMTR, 1)
 table.insert(ctx.LastMTR, 2)
@@ -540,27 +363,12 @@ This test demonstrates the strictness of MTR ordering: even partial agreement wi
 ]]
 print("    > DecomposeCompoundSubtaskLoseToLastMTR2_ExpectedBehavior")
 ctx = TestContext:new()
-rootTask = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Root"
-task = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test1"
-task2 = sb_htn.Tasks.CompoundTasks.Selector:new()
-task.Name = "Test2"
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2-1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context19) return context19.Done == true end)))
-task2:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task2-1"
-    return p
-end)())
-task:AddSubtask((function()
-    local p = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-    p.Name = "Sub-task1-1"
-    return p
-end)():AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context20) return context20.Done == true end)))
+rootTask = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Root"}
+task = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test1"}
+task2 = sb_htn.Tasks.CompoundTasks.Selector:new{Name = "Test2"}
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2-1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context19) return context19.Done == true end)))
+task2:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task2-1"})
+task:AddSubtask(sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Sub-task1-1"}:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context20) return context20.Done == true end)))
 task:AddSubtask(task2)
 rootTask:AddSubtask(task)
 table.insert(ctx.LastMTR, 1)

@@ -184,7 +184,7 @@ local function TryTickPrimitiveTaskOperator(self, domain, ctx, task, allowImmedi
 end
 
 ---@param ctx IContext
----@return Queue<PartialPlanEntry> | nil
+---@return Queue<PartialPlanEntry>?
 local function CacheLastPartialPlan(ctx)
     if (ctx.HasPausedPartialPlan == false) then
         return nil
@@ -224,7 +224,7 @@ end
 --- right now, but rather see whether the world state changed to a degree where
 --- we should pursue a better plan.
 ---@param ctx IContext
----@return Queue | nil
+---@return Queue?
 local function PrepareDirtyWorldStateForReplan(ctx)
     if (ctx.IsDirty == false) then
         return nil
@@ -434,7 +434,7 @@ end
 --- This planner can also be used as a blueprint for writing a custom planner.
 ---@param domain Domain
 ---@param ctx IContext
----@param allowImmediateReplanAndExecute boolean | nil
+---@param allowImmediateReplanAndExecute boolean?
 function Planner:Tick(domain, ctx, allowImmediateReplanAndExecute)
     assert(ctx.IsInitialized == true, "Context was not initialized!")
 

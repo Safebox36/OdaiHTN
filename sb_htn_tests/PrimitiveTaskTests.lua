@@ -10,8 +10,7 @@ Planning conditions gate whether a task can be selected and included in the plan
 This test ensures the fluent builder pattern works correctly by confirming the method returns the task instance and the condition is stored.
 ]]
 print("    > AddCondition_ExpectedBehavior")
-local task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task.Name = "Test"
+local task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 local t = task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context1) return context1.Done == false end))
 assert(t == task)
 assert(table.size(task.Conditions) == 1)
@@ -23,8 +22,7 @@ Unlike planning conditions which gate task selection, executing conditions can i
 This test ensures executing conditions are properly stored and that the fluent API pattern returns the task for continued builder usage.
 ]]
 print("    > AddExecutingCondition_ExpectedBehavior")
-task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task.Name = "Test"
+task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 t = task:AddExecutingCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "TestCondition", function(context2) return context2.Done == false end))
 assert(t == task)
 assert(table.size(task.ExecutingConditions) == 1)
@@ -36,8 +34,7 @@ Effects can be PlanOnly (applied during planning for lookahead), PlanAndExecute 
 This test ensures effects are properly collected and that the fluent builder pattern allows chained configuration of effects.
 ]]
 print("    > AddEffect_ExpectedBehavior")
-task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task.Name = "Test"
+task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 t = task:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent, function(context3, effectType) context3.Done = true end))
 assert(t == task)
 assert(table.size(task.Effects) == 1)
@@ -49,8 +46,7 @@ Operators manage the task lifecycle (Start for initialization, Update for execut
 This test ensures the task properly retains the operator for later invocation during plan execution.
 ]]
 print("    > SetOperator_ExpectedBehavior")
-task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task.Name = "Test"
+task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 task:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext))
 assert(task.Operator)
 
@@ -61,8 +57,7 @@ Allowing operator replacement could silently introduce bugs where a task's imple
 This test ensures tasks enforce single-operator semantics by rejecting attempts to set a second operator with a clear exception.
 ]]
 print("    > SetOperatorThrowsExceptionIfAlreadySet_ExpectedBehavior")
-task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task.Name = "Test"
+task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 task:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext))
 if (pcall(function() task:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext)) end)) then
     print("Exception not caught.")
@@ -76,8 +71,7 @@ This test confirms that the task properly iterates through its effects collectio
 ]]
 print("    > ApplyEffects_ExpectedBehavior")
 local ctx = TestContext:new()
-task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task.Name = "Test"
+task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 t = task:AddEffect(sb_htn.Effects.ActionEffect:new(TestContext, "TestEffect", sb_htn.Effects.EEffectType.Permanent, function(context4, effectType) context4.Done = true end))
 task:ApplyEffects(ctx)
 assert(true == ctx.Done)
@@ -90,8 +84,7 @@ This test confirms that the task delegates to its operator's Stop method and tha
 ]]
 print("    > StopWithValidOperator_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task.Name = "Test"
+task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 task:SetOperator(sb_htn.Operators.FuncOperator:new(TestContext, nil, nil, function(context5) context5.Done = true end))
 task:Stop(ctx)
 assert(task.Operator)
@@ -105,8 +98,7 @@ This test ensures tasks are defensive about missing operators and do not fail ca
 ]]
 print("    > StopWithNullOperator_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task.Name = "Test"
+task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 if (pcall(function() task:Stop(ctx) end)) then
     print("Exception not caught.")
 end
@@ -119,8 +111,7 @@ This test demonstrates the AND semantics of multiple conditions and shows how ad
 ]]
 print("    > IsValid_ExpectedBehavior")
 ctx = TestContext:new()
-task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new()
-task.Name = "Test"
+task = sb_htn.Tasks.PrimitiveTasks.PrimitiveTask:new{Name = "Test"}
 task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == false", function(context6) return context6.Done == false end))
 local expectTrue = task:IsValid(ctx)
 task:AddCondition(sb_htn.Conditions.FuncCondition:new(TestContext, "Done == true", function(context7) return context7.Done == true end))

@@ -1,22 +1,12 @@
 local mc = require("sb_htn.Utils.middleclass")
 
 ---@class IOperator
-local IOperator = mc.class("IOperator")
-
----@param ctx IContext
----@return ETaskStatus
-function IOperator:Start(ctx) return 0 end
-
----@param ctx IContext
----@return ETaskStatus
-function IOperator:Update(ctx) return 0 end
-
+---@field Start fun(self: IOperator, ctx: IContext): ETaskStatus
+---@field Update fun(self: IOperator, ctx: IContext): ETaskStatus
 --- Graceful end of task execution.
----@param ctx IContext
-function IOperator:Stop(ctx) end
-
+---@field Stop fun(self: IOperator, ctx: IContext)
 --- Forced termination of task execution.
----@param ctx IContext
-function IOperator:Abort(ctx) end
+---@field Abort fun(self: IOperator, ctx: IContext)
+local IOperator = mc.class("IOperator")
 
 return IOperator

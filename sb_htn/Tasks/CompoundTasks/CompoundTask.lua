@@ -5,16 +5,15 @@ local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionS
 ---@class CompoundTask : ICompoundTask
 local CompoundTask = mc.class("CompoundTask", ICompoundTask)
 
-function CompoundTask:initialize()
-    ICompoundTask.initialize(self)
+---@class CompoundTaskParams
+---@field Name string?
+---@field Parent ICompoundTask?
 
-    ---@type string
-    self.Name = ""
-    ---@type ICompoundTask
-    self.Parent = nil
-    ---@type table<ICondition>
+---@param params CompoundTaskParams?
+function CompoundTask:initialize(params)
+    self.Name = params and params.Name or ""
+    self.Parent = params and params.Parent or nil
     self.Conditions = {}
-    ---@type table<ITask>
     self.Subtasks = {}
 end
 

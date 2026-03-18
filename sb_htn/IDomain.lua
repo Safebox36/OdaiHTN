@@ -1,19 +1,9 @@
 local mc = require("sb_htn.Utils.middleclass")
 
 ---@class IDomain
+---@field Root TaskRoot
+---@field AddSubtask fun(self: IDomain, parent: ICompoundTask, subtask: ITask): ICompoundTask
+---@field AddSlot fun(self: IDomain, parent: ICompoundTask, slot: Slot): ICompoundTask
 local IDomain = mc.class("IDomain")
-
-function IDomain:initialize()
-    ---@type TaskRoot
-    self.Root = nil
-end
-
----@param parent ICompoundTask
----@param subtask ITask
-function IDomain:AddSubtask(parent, subtask) end
-
----@param parent ICompoundTask
----@param slot Slot
-function IDomain:AddSlot(parent, slot) end
 
 return IDomain

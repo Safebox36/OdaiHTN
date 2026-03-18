@@ -5,10 +5,16 @@ local IPlannerState = require("sb_htn.Planners.IPlannerState")
 ---@class DefaultPlannerState : IPlannerState
 local DefaultPlannerState = mc.class("DefaultPlannerState", IPlannerState)
 
-function DefaultPlannerState:initialize()
-	self.CurrentTask = nil
-	self.Plan = Queue:new()
-	self.LastStatus = 1
+---@class DefaultPlannerStateParams
+---@field CurrentTask ITask?
+---@field Plan Queue<ITask>?
+---@field LastStatus integer?
+
+---@param params DefaultPlannerStateParams?
+function DefaultPlannerState:initialize(params)
+	self.CurrentTask = params and params.CurrentTask or nil
+	self.Plan = params and params.Plan or Queue:new()
+	self.LastStatus = params and params.LastStatus or nil
 end
 
 function DefaultPlannerState:OnNewPlan() end

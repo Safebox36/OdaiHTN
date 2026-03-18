@@ -7,7 +7,7 @@ local DefaultFactory = mc.class("DefaultFactory", IFactory)
 
 ---@param T type
 ---@param length integer
----@return table<any>
+---@return any[]
 function DefaultFactory:CreateArray(T, length)
     local array = table.new(length, length)
     for i = 1, length do
@@ -17,7 +17,7 @@ function DefaultFactory:CreateArray(T, length)
 end
 
 ---@param T type
----@return table<any>
+---@return any[]
 function DefaultFactory:CreateList(T)
     return {}
 end
@@ -29,7 +29,7 @@ function DefaultFactory:CreateQueue(T)
 end
 
 ---@param T type
----@param array table<any>
+---@param array any[]
 ---@return boolean
 function DefaultFactory:FreeArray(T, array)
     for _, value in ipairs(array) do
@@ -39,7 +39,7 @@ function DefaultFactory:FreeArray(T, array)
 end
 
 ---@param T type
----@param list table<any>
+---@param list any[]
 ---@return boolean
 function DefaultFactory:FreeList(T, list)
     for _, value in ipairs(list) do

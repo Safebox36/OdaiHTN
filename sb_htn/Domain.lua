@@ -6,19 +6,13 @@ local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionS
 local Queue = require("sb_htn.Utils.Queue")
 
 ---@class Domain<IContext> : IDomain
+---@field private _slots table<integer, Slot>
 local Domain = mc.class("Domain", IDomain)
 
 ---@param name string
 ---@param T IContext
 function Domain:initialize(T, name)
-    IDomain.initialize(self)
-
-    ---@type table<integer, Slot>
-    self._slots = nil
-
-    self.Root = TaskRoot:new()
-    self.Root.Name = name
-    self.Root.Parent = nil
+    self.Root = TaskRoot:new{Name = name, Parent = nil}
     self.T = T
 end
 
@@ -122,7 +116,7 @@ end
 --- This is useful when we want to perform a replan, but don't know yet if it will
 --- win over the current plan.
 ---@param ctx IContext
----@return Queue | nil
+---@return Queue?
 local function CacheLastPartialPlan(ctx)
     if (ctx.HasPausedPartialPlan == false) then
         return nil
@@ -141,7 +135,7 @@ end
 --- If we failed to find a new plan, we have to restore the old plan,
 --- if it was a partial plan.
 ---@param ctx IContext
----@param lastPartialPlanQueue Queue<PartialPlanEntry> | nil
+---@param lastPartialPlanQueue Queue<PartialPlanEntry>?
 ---@param status EDecompositionStatus
 local function RestoreLastPartialPlan(ctx, lastPartialPlanQueue, status)
     if (lastPartialPlanQueue == nil) then

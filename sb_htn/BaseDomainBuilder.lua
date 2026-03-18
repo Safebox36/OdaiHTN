@@ -12,6 +12,9 @@ local ActionEffect = require("sb_htn.Effects.ActionEffect")
 local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
 
 ---@class BaseDomainBuilder<BaseDomainBuilder, IContext>
+---@field protected _domain Domain
+---@field protected _pointers ITask[]
+---@field protected _factory IFactory
 local BaseDomainBuilder = mc.class("BaseDomainBuilder")
 
 ---@param domainName string
@@ -19,18 +22,15 @@ local BaseDomainBuilder = mc.class("BaseDomainBuilder")
 ---@param DB BaseDomainBuilder
 ---@param T IContext
 function BaseDomainBuilder:initialize(T, domainName, factory, DB)
-    ---@type IFactory
     self._factory = factory
-    ---@type Domain
     self._domain = Domain:new(T, domainName)
-    ---@type table<ITask>
     self._pointers = self._factory:CreateList()
     table.insert(self._pointers, self._domain.Root)
     self.DB = DB
     self.T = T
 end
 
----@return ITask | nil
+---@return ITask?
 function BaseDomainBuilder:Pointer()
     if (table.size(self._pointers) == 0) then return nil end
     return self._pointers[table.size(self._pointers)]
@@ -86,8 +86,7 @@ end
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:PrimitiveTask(name, P)
     assert(self:Pointer():isInstanceOf(ICompoundTask), "Pointer is not a compound task type. Did you forget an End() after a Primitive Task Action was defined?")
-    local parent = P:new()
-    parent.Name = name
+    local parent = P:new{Name = name}
     self._domain:AddTask(self:Pointer(), parent)
     table.insert(self._pointers, parent)
 
@@ -104,8 +103,7 @@ end
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:PausePlanTask()
     assert(self:Pointer().IDecomposeAll, "Pointer is not a decompose-all compound task type, like a Sequence. Maybe you tried to Pause Plan a Selector, or forget an End() after a Primitive Task Action was defined?")
-    local parent = PausePlanTask:new()
-    parent.Name = "Pause Plan"
+    local parent = PausePlanTask:new{Name = "Pause Plan"}
     self._domain:AddTask(self:Pointer(), parent)
 
     return self
@@ -167,8 +165,8 @@ end
 
 --- The operator of an Action / primitive task.
 ---@param action function<IContext>
----@param start function<IContext>
----@param forceStopAction function<IContext>
+---@param start function<IContext>?
+---@param forceStopAction function<IContext>?
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Do(action, start, forceStopAction)
     assert(self:Pointer():isInstanceOf(IPrimitiveTask), "Tried to add an Operator, but the Pointer is not a Primitive Task!")
@@ -218,9 +216,7 @@ end
 ---@return BaseDomainBuilder
 function BaseDomainBuilder:Slot(slotId)
     assert(self:Pointer():isInstanceOf(ICompoundTask), "Pointer is not a compound task type. Did you forget an End()?")
-    local slot = Slot:new()
-    slot.SlotId = slotId
-    slot.Name = string.format("Slot %i", slotId)
+    local slot = Slot:new{SlotId = slotId, Name = string.format("Slot %i", slotId)}
     self._domain:AddSlot(self:Pointer(), slot)
 
     return self
