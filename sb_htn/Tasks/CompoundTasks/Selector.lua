@@ -2,9 +2,6 @@ local mc = require("sb_htn.Utils.middleclass")
 local CompoundTask = require("sb_htn.Tasks.CompoundTasks.CompoundTask")
 local Queue = require("sb_htn.Utils.Queue")
 local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
-local ICompoundTask = require("sb_htn.Tasks.CompoundTasks.ICompoundTask")
-local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
-local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
 local GetKey = require("sb_htn.Utils.GetKey")
 
 ---@class Selector : CompoundTask
@@ -134,15 +131,15 @@ function Selector:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
         return task:OnIsValidFailed(ctx)
     end
 
-    if (task:isInstanceOf(ICompoundTask)) then
+    if (task._taskType == "compound") then
         return self:OnDecomposeCompoundTask(ctx, task, taskIndex, nil, result)
     end
 
-    if (task:isInstanceOf(IPrimitiveTask)) then
+    if (task._taskType == "primitive") then
         self:OnDecomposePrimitiveTask(ctx, task, taskIndex, nil, result)
     end
 
-    if (task:isInstanceOf(Slot)) then
+    if (task._taskType == "slot") then
         return self:OnDecomposeSlot(ctx, task, taskIndex, nil, result)
     end
 

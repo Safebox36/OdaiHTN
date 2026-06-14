@@ -17,7 +17,6 @@ end
 ---@param ctx IContext
 ---@return boolean
 function FuncCondition:IsValid(ctx)
-    assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
     local result = self._func and self._func(ctx) or false
     if (ctx.LogDecomposition) then
         log("%i - FuncCondition.IsValid:%s", ctx.CurrentDecompositionDepth + 1, result and "True" or "False")

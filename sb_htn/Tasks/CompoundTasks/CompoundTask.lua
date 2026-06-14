@@ -15,6 +15,7 @@ function CompoundTask:initialize(params)
     self.Parent = params and params.Parent or nil
     self.Conditions = {}
     self.Subtasks = {}
+    self._taskType = "compound"
 end
 
 function CompoundTask:OnIsValidFailed(ctx)

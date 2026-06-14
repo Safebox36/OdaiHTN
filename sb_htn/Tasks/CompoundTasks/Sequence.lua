@@ -3,10 +3,6 @@ local CompoundTask = require("sb_htn.Tasks.CompoundTasks.CompoundTask")
 local Queue = require("sb_htn.Utils.Queue")
 local IDecomposeAll = require("sb_htn.Tasks.CompoundTasks.IDecomposeAll")
 local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
-local ICompoundTask = require("sb_htn.Tasks.CompoundTasks.ICompoundTask")
-local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
-local PausePlanTask = require("sb_htn.Tasks.CompoundTasks.PausePlanTask")
-local Slot = require("sb_htn.Tasks.OtherTasks.Slot")
 local IContext = require("sb_htn.Contexts.IContext")
 local GetKey = require("sb_htn.Utils.GetKey")
 
@@ -96,11 +92,11 @@ function Sequence:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
         return task:OnIsValidFailed(ctx)
     end
 
-    if (task:isInstanceOf(ICompoundTask)) then
+    if (task._taskType == "compound") then
         return self:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, result)
-    elseif (task:isInstanceOf(IPrimitiveTask)) then
+    elseif (task._taskType == "primitive") then
         self:OnDecomposePrimitiveTask(ctx, task, taskIndex, oldStackDepth, result)
-    elseif (task:isInstanceOf(PausePlanTask)) then
+    elseif (task._taskType == "pause") then
         if (ctx.LogDecomposition) then
             log("%i - Sequence.OnDecomposeTask:Return partial plan at index %i!", ctx.CurrentDecompositionDepth, taskIndex)
         end
@@ -114,7 +110,7 @@ function Sequence:OnDecomposeTask(ctx, task, taskIndex, oldStackDepth, result)
 
         result:copy(self.Plan)
         return EDecompositionStatus.Partial
-    elseif (task:isInstanceOf(Slot)) then
+    elseif (task._taskType == "slot") then
         return self:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     end
 

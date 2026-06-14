@@ -16,6 +16,7 @@ function PausePlanTask:initialize(params)
     self.Parent = params and params.Parent or nil
     self.Conditions = {}
     self.Effects = {}
+    self._taskType = "pause"
 end
 
 ---@param ctx IContext
