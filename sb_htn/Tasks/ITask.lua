@@ -1,6 +1,9 @@
 local mc = require("sb_htn.Utils.middleclass")
 
 ---@class ITask
+--- Discriminator tag set by each concrete task type ("compound"/"primitive"/"slot"/"pause").
+--- Used for fast type dispatch during decomposition instead of middleclass isInstanceOf.
+---@field _taskType string
 --- Used for debugging and identification purposes
 ---@field Name string
 --- The parent of this task in the hierarchy

@@ -3,7 +3,6 @@ local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionS
 local ETaskStatus = require("sb_htn.Tasks.ETaskStatus")
 local EEffectType = require("sb_htn.Effects.EEffectType")
 local IContext = require("sb_htn.Contexts.IContext")
-local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
 
 --- A planner is a responsible for handling the management of finding plans in a domain, replan when the state of the
 --- running plan demands it, or look for a new potential plan if the world state gets dirty.
@@ -267,7 +266,7 @@ local function OnFoundNewPlan(ctx, newPlan)
     end
 
     -- If a task was running from the previous plan, we stop it.
-    if (ctx.PlannerState.CurrentTask and ctx.PlannerState.CurrentTask:isInstanceOf(IPrimitiveTask)) then
+    if (ctx.PlannerState.CurrentTask and ctx.PlannerState.CurrentTask._taskType == "primitive") then
         if (ctx.PlannerState.OnStopCurrentTask) then
             ctx.PlannerState:OnStopCurrentTask(ctx.PlannerState.CurrentTask)
         end
@@ -454,7 +453,7 @@ function Planner:Tick(domain, ctx, allowImmediateReplanAndExecute)
             return
         end
 
-        if (ctx.PlannerState.CurrentTask:isInstanceOf(IPrimitiveTask)) then
+        if (ctx.PlannerState.CurrentTask._taskType == "primitive") then
             if (TryStartPrimitiveTaskOperator(self, domain, ctx, ctx.PlannerState.CurrentTask, allowImmediateReplanAndExecute == nil or allowImmediateReplanAndExecute) == false) then
                 return
             end
@@ -462,7 +461,7 @@ function Planner:Tick(domain, ctx, allowImmediateReplanAndExecute)
     end
 
     -- If the current task is a primitive task, we try to tick its operator.
-    if (ctx.PlannerState.CurrentTask and ctx.PlannerState.CurrentTask:isInstanceOf(IPrimitiveTask)) then
+    if (ctx.PlannerState.CurrentTask and ctx.PlannerState.CurrentTask._taskType == "primitive") then
         if (TryTickPrimitiveTaskOperator(self, domain, ctx, ctx.PlannerState.CurrentTask, allowImmediateReplanAndExecute == nil or allowImmediateReplanAndExecute) == false) then
             return
         end
@@ -478,7 +477,7 @@ end
 function Planner:Reset(ctx)
     ctx.PlannerState.Plan:clear()
 
-    if (ctx.PlannerState.CurrentTask and ctx.PlannerState.CurrentTask:isInstanceOf(IPrimitiveTask)) then
+    if (ctx.PlannerState.CurrentTask and ctx.PlannerState.CurrentTask._taskType == "primitive") then
         ctx.PlannerState.CurrentTask:Stop(ctx)
     end
 

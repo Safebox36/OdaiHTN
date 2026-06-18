@@ -20,6 +20,7 @@ function Slot:initialize(params)
     self.Parent = params and params.Parent or nil
     self.Conditions = nil
     self.Subtask = nil
+    self._taskType = "slot"
 end
 
 ---@param ctx IContext

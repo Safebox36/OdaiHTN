@@ -19,6 +19,7 @@ function PrimitiveTask:initialize(params)
     self.ExecutingConditions = {}
     self.Operator = params and params.Operator or nil
     self.Effects = {}
+    self._taskType = "primitive"
 end
 
 ---@param ctx IContext

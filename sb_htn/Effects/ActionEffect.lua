@@ -20,7 +20,6 @@ end
 
 ---@param ctx IContext
 function ActionEffect:Apply(ctx)
-    assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
     if (ctx.LogDecomposition) then
         log("%i - ActionEffect.Apply:%s", ctx.CurrentDecompositionDepth, GetKey(self.Type, EEffectType))
     end
