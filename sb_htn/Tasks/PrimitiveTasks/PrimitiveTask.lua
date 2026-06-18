@@ -2,7 +2,6 @@ local mc = require("sb_htn.Utils.middleclass")
 local IPrimitiveTask = require("sb_htn.Tasks.PrimitiveTasks.IPrimitiveTask")
 local IContext = require("sb_htn.Contexts.IContext")
 local EDecompositionStatus = require("sb_htn.Tasks.CompoundTasks.EDecompositionStatus")
-require("sb_htn.Utils.TableExt")
 
 ---@class PrimitiveTask : IPrimitiveTask
 local PrimitiveTask = mc.class("PrimitiveTask", IPrimitiveTask)
