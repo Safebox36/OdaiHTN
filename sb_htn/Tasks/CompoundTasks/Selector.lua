@@ -23,7 +23,7 @@ end
 ---@param ctx IContext
 ---@return boolean
 function Selector:IsValid(ctx)
-    -- Check that our preconditions are valid first.
+    --- Check that our preconditions are valid first.
     if (CompoundTask.IsValid(self, ctx) == false) then
         if (ctx.LogDecomposition) then
             log("%i - Selector.IsValid:Failed:Preconditions not met!", ctx.CurrentDecompositionDepth)
@@ -31,7 +31,7 @@ function Selector:IsValid(ctx)
         return false
     end
 
-    -- Selector requires there to be at least one sub-task to successfully select from.
+    --- Selector requires there to be at least one sub-task to successfully select from.
     if (table.size(self.Subtasks) == 0) then
         if (ctx.LogDecomposition) then
             log("%i - Selector.IsValid:Failed:No sub-tasks!", ctx.CurrentDecompositionDepth)
@@ -48,20 +48,20 @@ end
 ---@param currentDecompositionIndex integer
 ---@return boolean
 function Selector.BeatsLastMTR(ctx, taskIndex, currentDecompositionIndex)
-    -- If the last plan's traversal record for this decomposition layer
-    -- has a smaller index than the current task index we're about to
-    -- decompose, then the new decomposition can't possibly beat the
-    -- running plan, so we cancel finding a new plan.
+    --- If the last plan's traversal record for this decomposition layer
+    --- has a smaller index than the current task index we're about to
+    --- decompose, then the new decomposition can't possibly beat the
+    --- running plan, so we cancel finding a new plan.
     if (ctx.LastMTR[currentDecompositionIndex] < taskIndex) then
-        -- But, if any of the earlier records beat the record in LastMTR, we're still good, as we're on a higher priority branch.
-        -- This ensures that [0,0,1] can beat [0,1,0]
+        --- But, if any of the earlier records beat the record in LastMTR, we're still good, as we're on a higher priority branch.
+        --- This ensures that [0,0,1] can beat [0,1,0]
         for i = 1, table.size(ctx.MethodTraversalRecord) do
             local diff = ctx.MethodTraversalRecord[i] - ctx.LastMTR[i]
             if (diff < 0) then
                 return true
             end
             if (diff > 0) then
-                -- We should never really be able to get here, but just in case.
+                --- We should never really be able to get here, but just in case.
                 return false
             end
         end
@@ -85,8 +85,8 @@ function Selector:OnDecompose(ctx, startIndex, result)
         if (ctx.LogDecomposition) then
             log("%i - Selector.OnDecompose:Task index: %i: %s", ctx.CurrentDecompositionDepth, taskIndex, self.Subtasks[taskIndex].Name)
         end
-        -- If the last plan is still running, we need to check whether the
-        -- new decomposition can possibly beat it.
+        --- If the last plan is still running, we need to check whether the
+        --- new decomposition can possibly beat it.
         if (ctx.LastMTR and table.size(ctx.LastMTR) > 0) then
             if (table.size(ctx.MethodTraversalRecord) < table.size(ctx.LastMTR)) then
                 local currentDecompositionIndex = table.size(ctx.MethodTraversalRecord) + 1
@@ -119,6 +119,8 @@ function Selector:OnDecompose(ctx, startIndex, result)
     return table.size(result.list) == 0 and EDecompositionStatus.Failed or EDecompositionStatus.Succeeded
 end
 
+--- Selector passes `nil` for `oldStackDepth`: each subtask alternative is independent,
+--- so there are no accumulated world state effects to roll back between attempts.
 ---@param ctx IContext
 ---@param task ITask
 ---@param taskIndex integer
@@ -161,8 +163,8 @@ end
 ---@param oldStackDepth integer[]
 ---@param result Queue<ITask>
 function Selector:OnDecomposePrimitiveTask(ctx, task, taskIndex, oldStackDepth, result)
-    -- We need to record the task index before we decompose the task,
-    -- so that the traversal record is set up in the right order.
+    --- We need to record the task index before we decompose the task,
+    --- so that the traversal record is set up in the right order.
     table.insert(ctx.MethodTraversalRecord, taskIndex)
     if (ctx.DebugMTR) then table.insert(ctx.MTRDebug, task.Name) end
 
@@ -181,15 +183,15 @@ end
 ---@param result Queue<ITask>
 ---@return EDecompositionStatus
 function Selector:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, result)
-    -- We need to record the task index before we decompose the task,
-    -- so that the traversal record is set up in the right order.
+    --- We need to record the task index before we decompose the task,
+    --- so that the traversal record is set up in the right order.
     table.insert(ctx.MethodTraversalRecord, taskIndex)
     if (ctx.DebugMTR) then table.insert(ctx.MTRDebug, task.Name) end
 
     local subPlan = Queue:new()
     local status = task:Decompose(ctx, 1, subPlan)
 
-    -- If status is rejected, that means the entire planning procedure should cancel.
+    --- If status is rejected, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then
             log("%i - Selector.OnDecomposeCompoundTask:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)
@@ -198,9 +200,9 @@ function Selector:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
         return EDecompositionStatus.Rejected
     end
 
-    -- If the decomposition failed
+    --- If the decomposition failed
     if (status == EDecompositionStatus.Failed) then
-        -- Remove the taskIndex if it failed to decompose.
+        --- Remove the taskIndex if it failed to decompose.
         ctx.MethodTraversalRecord[table.size(ctx.MethodTraversalRecord)] = nil
         if (ctx.DebugMTR) then ctx.MTRDebug[table.size(ctx.MTRDebug)] = nil end
 
@@ -242,15 +244,15 @@ end
 ---@param result Queue<ITask>
 ---@return EDecompositionStatus
 function Selector:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
-    -- We need to record the task index before we decompose the task,
-    -- so that the traversal record is set up in the right order.
+    --- We need to record the task index before we decompose the task,
+    --- so that the traversal record is set up in the right order.
     table.insert(ctx.MethodTraversalRecord, taskIndex)
     if (ctx.DebugMTR) then table.insert(ctx.MTRDebug, task.Name) end
 
     local subPlan = Queue:new()
     local status = task:Decompose(ctx, 1, subPlan)
 
-    -- If status is rejected, that means the entire planning procedure should cancel.
+    --- If status is rejected, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then
             log("%i - Selector.OnDecomposeSlot:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)
@@ -259,9 +261,9 @@ function Selector:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
         return EDecompositionStatus.Rejected
     end
 
-    -- If the decomposition failed
+    --- If the decomposition failed
     if (status == EDecompositionStatus.Failed) then
-        -- Remove the taskIndex if it failed to decompose.
+        --- Remove the taskIndex if it failed to decompose.
         ctx.MethodTraversalRecord[table.size(ctx.MethodTraversalRecord)] = nil
         if (ctx.DebugMTR) then ctx.MTRDebug[table.size(ctx.MTRDebug)] = nil end
 

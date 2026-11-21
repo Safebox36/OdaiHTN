@@ -27,7 +27,7 @@ end
 ---@param ctx IContext
 ---@return boolean
 function Sequence:IsValid(ctx)
-    -- Check that our preconditions are valid first.
+    --- Check that our preconditions are valid first.
     if (CompoundTask.IsValid(self, ctx) == false) then
         if (ctx.LogDecomposition) then
             log("%i - Sequence.IsValid:Failed:Preconditions not met!", ctx.CurrentDecompositionDepth)
@@ -35,7 +35,7 @@ function Sequence:IsValid(ctx)
         return false
     end
 
-    -- Selector requires there to be subtasks to successfully select from.
+    --- Selector requires there to be subtasks to successfully select from.
     if (table.size(self.Subtasks) == 0) then
         if (ctx.LogDecomposition) then
             log("%i - Sequence.IsValid:Failed:No sub-tasks!", ctx.CurrentDecompositionDepth)
@@ -58,6 +58,11 @@ end
 function Sequence:OnDecompose(ctx, startIndex, result)
     self.Plan:clear()
 
+    --- Snapshot the current world state change stack depths before we begin decomposing
+    --- subtasks. Because a Sequence must succeed as a whole, any world state effects applied
+    --- during a failed subtask decomposition must be rolled back. We capture this snapshot
+    --- here, outside the subtask loop, so that `TrimToStackDepth` can undo all accumulated
+    --- changes across every subtask attempted so far.
     local oldStackDepth = ctx:GetWorldStateChangeDepth(ctx.Factory)
 
     for taskIndex = startIndex, table.size(self.Subtasks) do
@@ -132,7 +137,10 @@ end
 ---@param oldStackDepth integer[]
 ---@param result Queue<ITask>
 function Sequence:OnDecomposePrimitiveTask(ctx, task, taskIndex, oldStackDepth, result)
-    -- We don't add MTR tracking on sequences for primary sub-tasks, since they will always be included, so they're irrelevant to MTR tracking.
+    --- `oldStackDepth` is not used here; rollback of primitive task effects is handled
+    --- at the Sequence level (in `OnDecomposeTask` / `OnDecomposeCompoundTask`) via `TrimToStackDepth`.
+
+    --- We don't add MTR tracking on sequences for primary sub-tasks, since they will always be included, so they're irrelevant to MTR tracking.
 
     if (ctx.LogDecomposition) then
         log("%i - Sequence.OnDecomposeTask:Pushed %s to plan!", ctx.CurrentDecompositionDepth, task.Name)
@@ -151,7 +159,7 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
     local subPlan = Queue:new()
     local status = task:Decompose(ctx, 1, subPlan)
 
-    -- If result is null, that means the entire planning procedure should cancel.
+    --- If result is null, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then
             log("%i - Sequence.OnDecomposeCompoundTask:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)
@@ -164,7 +172,7 @@ function Sequence:OnDecomposeCompoundTask(ctx, task, taskIndex, oldStackDepth, r
         return EDecompositionStatus.Rejected
     end
 
-    -- If the decomposition failed
+    --- If the decomposition failed
     if (status == EDecompositionStatus.Failed) then
         if (ctx.LogDecomposition) then
             log("%i - Sequence.OnDecomposeCompoundTask:%s: Decomposing %s failed.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)
@@ -218,7 +226,7 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
     local subPlan = Queue:new()
     local status = task:Decompose(ctx, 1, subPlan)
 
-    -- If result is null, that means the entire planning procedure should cancel.
+    --- If result is null, that means the entire planning procedure should cancel.
     if (status == EDecompositionStatus.Rejected) then
         if (ctx.LogDecomposition) then
             log("%i - Sequence.OnDecomposeSlot:%s: Decomposing %s was rejected.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)
@@ -231,7 +239,7 @@ function Sequence:OnDecomposeSlot(ctx, task, taskIndex, oldStackDepth, result)
         return EDecompositionStatus.Rejected
     end
 
-    -- If the decomposition failed
+    --- If the decomposition failed
     if (status == EDecompositionStatus.Failed) then
         if (ctx.LogDecomposition) then
             log("%i - Sequence.OnDecomposeSlot:%s: Decomposing %s failed.", ctx.CurrentDecompositionDepth, GetKey(status, EDecompositionStatus), task.Name)

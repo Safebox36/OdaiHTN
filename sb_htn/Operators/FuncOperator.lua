@@ -25,7 +25,7 @@ end
 ---@param ctx IContext
 function FuncOperator:Start(ctx)
     assert(ctx:isInstanceOf(self.T), "Unexpected context type!")
-    if (self._start) then return self._start(ctx) else return ETaskStatus.Continue end -- Start is not required, so report back Continue if we have no Start func.
+    if (self._start) then return self._start(ctx) else return ETaskStatus.Continue end --- Start is not required, so report back Continue if we have no Start func.
 end
 
 ---@param ctx IContext

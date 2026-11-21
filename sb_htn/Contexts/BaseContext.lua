@@ -80,14 +80,14 @@ end
 ---@param e EEffectType?
 function BaseContext:SetState(state, value, setAsDirty, e)
     if (self.ContextState == IContext.EContextState.Executing) then
-        -- Prevent setting the world state dirty if we're not changing anything.
+        --- Prevent setting the world state dirty if we're not changing anything.
         if (self.WorldState[state] == value) then
             return
         end
 
         self.WorldState[state] = value
         if (setAsDirty) then
-            self.IsDirty = true -- When a state change during execution, we need to mark the context dirty for replanning!
+            self.IsDirty = true --- When a state change during execution, we need to mark the context dirty for replanning!
         end
     else
         self.WorldStateChangeStack[state]:push{e or EEffectType.Permanent, value}

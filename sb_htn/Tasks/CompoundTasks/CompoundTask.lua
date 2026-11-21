@@ -44,6 +44,10 @@ end
 ---@return EDecompositionStatus
 function CompoundTask:OnDecompose(ctx, startIndex, result) return 0 end
 
+--- `oldStackDepth` is a snapshot of world state change stack depths taken before the
+--- decomposition loop began (see `Sequence.OnDecompose`). It is threaded through every
+--- helper so that a Sequence can roll back all accumulated world state changes on failure.
+--- Selector always passes null here because it never accumulates effects across alternatives.
 ---@param ctx IContext
 ---@param task ITask
 ---@param taskIndex integer

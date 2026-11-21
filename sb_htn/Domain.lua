@@ -94,15 +94,15 @@ local function OnPausedPartialPlan(self, ctx, plan, status)
             end
         end
 
-        -- While continuing a partial plan, we might encounter
-        -- a new pause.
+        --- While continuing a partial plan, we might encounter
+        --- a new pause.
         if (ctx.HasPausedPartialPlan) then
             break
         end
     end
 
-    -- If we failed to continue the paused partial plan,
-    -- then we have to start planning from the root.
+    --- If we failed to continue the paused partial plan,
+    --- then we have to start planning from the root.
     if (HasDecompositionFailed(status)) then
         ClearMethodTraversalRecord(ctx)
 
@@ -171,7 +171,7 @@ local function OnReplanDuringPartialPlanning(self, ctx, plan, status)
 
     ClearMethodTraversalRecord(ctx)
 
-    -- Replan through decomposition of the hierarchy
+    --- Replan through decomposition of the hierarchy
     status = self.Root:Decompose(ctx, 1, plan)
 
     if (HasDecompositionFailed(status)) then
@@ -205,11 +205,11 @@ end
 --- Apply permanent world state changes to the actual world state used during plan execution.
 ---@param ctx IContext
 local function ApplyPermanentWorldStateStackChanges(ctx)
-    -- Trim away any plan-only or plan&execute effects from the world state change stack, that only
-    -- permanent effects on the world state remains now that the planning is done.
+    --- Trim away any plan-only or plan&execute effects from the world state change stack, that only
+    --- permanent effects on the world state remains now that the planning is done.
     ctx:TrimForExecution()
 
-    -- Apply permanent world state changes to the actual world state used during plan execution.
+    --- Apply permanent world state changes to the actual world state used during plan execution.
     for i = 1, table.size(ctx.WorldStateChangeStack) do
         local stack = ctx.WorldStateChangeStack[i]
         if (stack and table.size(stack.list) > 0) then
@@ -242,35 +242,35 @@ function Domain:FindPlan(ctx, plan)
     plan:clear()
     local status = EDecompositionStatus.Rejected
 
-    -- We first check whether we have a stored start task. This is true
-    -- if we had a partial plan pause somewhere in our plan, and we now
-    -- want to continue where we left off.
-    -- If this is the case, we don't erase the MTR, but continue building it.
-    -- However, if we have a partial plan, but LastMTR is not 0, that means
-    -- that the partial plan is still running, but something triggered a replan.
-    -- When this happens, we have to plan from the domain root (we're not
-    -- continuing the current plan), so that we're open for other plans to replace
-    -- the running partial plan.
+    --- We first check whether we have a stored start task. This is true
+    --- if we had a partial plan pause somewhere in our plan, and we now
+    --- want to continue where we left off.
+    --- If this is the case, we don't erase the MTR, but continue building it.
+    --- However, if we have a partial plan, but LastMTR is not 0, that means
+    --- that the partial plan is still running, but something triggered a replan.
+    --- When this happens, we have to plan from the domain root (we're not
+    --- continuing the current plan), so that we're open for other plans to replace
+    --- the running partial plan.
     if (ctx.HasPausedPartialPlan and table.size(ctx.LastMTR) == 0) then
         status = OnPausedPartialPlan(self, ctx, plan, status)
     else
         status = OnReplanDuringPartialPlanning(self, ctx, plan, status)
     end
 
-    -- If this MTR equals the last MTR, then we need to double-check whether we ended up
-    -- just finding the exact same plan. During decomposition each compound task can't check
-    -- for equality, only for less than, so this case needs to be treated after the fact.
+    --- If this MTR equals the last MTR, then we need to double-check whether we ended up
+    --- just finding the exact same plan. During decomposition each compound task can't check
+    --- for equality, only for less than, so this case needs to be treated after the fact.
     if (HasFoundSamePlan(ctx)) then
         plan:clear()
         status = EDecompositionStatus.Rejected
     end
 
     if (HasDecompositionSucceeded(status)) then
-        -- Apply permanent world state changes to the actual world state used during plan execution.
+        --- Apply permanent world state changes to the actual world state used during plan execution.
         ApplyPermanentWorldStateStackChanges(ctx)
     else
-        -- Clear away any changes that might have been applied to the stack
-        -- No changes should be made or tracked further when the plan failed.
+        --- Clear away any changes that might have been applied to the stack
+        --- No changes should be made or tracked further when the plan failed.
         ClearWorldStateStackChanges(ctx)
     end
 
