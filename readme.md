@@ -138,7 +138,7 @@ local EMyWorldState =
 local MyContext = sb_htn.Contexts.BaseContext:extend("MyContext")
 
 function MyContext:init()
-    sb_htn.Contexts.BaseContext.super.init(self)
+    MyContext.super.init(self)
 
     self.WorldState       = {}
     self.MTRDebug         = nil
